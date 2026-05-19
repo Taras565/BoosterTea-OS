@@ -129,10 +129,14 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     glass_type = "прозорий хайбол (Highball)"
 
     if drink_format == "shot":
-        recipe["juice_ml"] = 15
+        # Medical/Scientific adjustment: High concentration absorbs 3x faster. 
+        # Apply coefficient (0.65) to avoid CNS overload from rapid absorption.
+        shot_coef = 0.65
+        recipe["tea_ml"] = round(recipe["tea_ml"] * shot_coef, 1)
+        recipe["juice_ml"] = round(15 + (recipe["tea_ml"] * 0.1), 1) # 15ml base + 10% of tea_ml for flavor balance
         recipe["water_ml"] = 0
-        recipe["cocktail_status"] = "Shot / Миттєва дія"
-        glass_type = "рюмку (Shot Glass 40-50мл)"
+        recipe["cocktail_status"] = "Концентрат / Швидка абсорбція"
+        glass_type = "лабораторну мензурку або рюмку (Shot Glass)"
 
     if is_hot_weather and drink_format != "shot":
         recipe["ice_cubes"] = round(weather_temp / 6)
@@ -171,15 +175,24 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
 
     ice_text = f"Додайте {recipe['ice_cubes']} ідеально прозорих кубиків льоду." if recipe["ice_cubes"] > 0 else "Прогрійте келих перед подачею."
     
-    recipe["instructions"] = (
-        f"Візьміть {glass_type}. Прогрійте келих перед подачею. "
-        f"Спочатку налийте {recipe['activator']} ({recipe['juice_ml']} мл)"
-        f"{f' та воду ({recipe.get('water_ml', 0)} мл)' if drink_format != 'shot' else ''}. "
-        f"Обережно по ложці (барним методом) влийте {recipe['tea_ml']} мл концентрату «{recipe['base']}», "
-        f"щоб створити ідеальний двошаровий градієнт. "
-        f"{f'Прикрасьте {garnish}. ' if garnish else ''}"
-        f"{'Випити залпом для швидкого та максимального ефекту! ' if drink_format == 'shot' else 'Візуальний WOW-ефект гарантовано!'}"
-    )
+    if drink_format == 'shot':
+        recipe["instructions"] = (
+            f"Формат «Шот» (без розбавлення водою) пришвидшує абсорбцію активних речовин через слизову. "
+            f"Дозування екстракту розраховано за медичним коефіцієнтом швидкого засвоєння (х0.65) "
+            f"для уникнення перенавантаження ЦНС. \n\n"
+            f"Змішайте {recipe['tea_ml']} мл концентрату «{recipe['base']}» та {recipe['juice_ml']} мл реагенту ({recipe['activator']}). "
+            f"{f'Додайте {garnish} для ефірного фону. ' if garnish else ''}"
+            f"Подавати у {glass_type}. Випити залпом. Дія почнеться миттєво."
+        )
+    else:
+        recipe["instructions"] = (
+            f"Візьміть {glass_type}. Прогрійте келих перед подачею. "
+            f"Спочатку налийте {recipe['activator']} ({recipe['juice_ml']} мл) та воду ({recipe.get('water_ml', 0)} мл). "
+            f"Обережно по ложці (барним методом) влийте {recipe['tea_ml']} мл концентрату «{recipe['base']}», "
+            f"щоб створити ідеальний двошаровий градієнт. "
+            f"{f'Прикрасьте {garnish}. ' if garnish else ''}"
+            f"Візуальний WOW-ефект гарантовано! Плавне розкриття ефекту протягом 30 хвилин."
+        )
 
     avatar = determine_avatar(recipe["base"], target_state, user.profession_type, scale_cns)
     

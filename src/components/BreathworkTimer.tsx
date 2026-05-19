@@ -73,7 +73,7 @@ export default function BreathworkTimer({ protocol, onDone }: { protocol: string
     } else if (protocol === 'fire') {
       const runFire = () => {
         let secondsPassed = 0;
-        setPhase('Видих (Вогню)');
+        setPhase('Видих!');
         
         cleanup = setInterval(() => {
           secondsPassed++;
@@ -110,10 +110,12 @@ export default function BreathworkTimer({ protocol, onDone }: { protocol: string
     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 overflow-hidden">
       <div className="absolute top-12 text-center w-full">
         <p className="text-gray-400 text-sm uppercase tracking-widest mb-1">{protocol === 'square' ? 'Квадратне Дихання' : 'Дихання Вогню'}</p>
-        <p className="text-primary font-bold text-xl">0:{totalTime < 10 ? `0${totalTime}` : totalTime}</p>
+        <p className="text-primary font-bold text-xl">
+          {Math.floor(totalTime / 60)}:{(totalTime % 60).toString().padStart(2, '0')}
+        </p>
       </div>
 
-      <div className="relative w-48 h-48 flex items-center justify-center">
+      <div className="relative w-48 h-48 flex items-center justify-center mb-8">
         <motion.div 
           animate={{ scale: scale }} 
           transition={{ duration: protocol === 'square' ? 4 : 0.2, ease: "easeInOut" }}
@@ -124,10 +126,18 @@ export default function BreathworkTimer({ protocol, onDone }: { protocol: string
           transition={{ duration: protocol === 'square' ? 4 : 0.2, ease: "easeInOut", delay: 0.1 }}
           className="absolute inset-4 rounded-full border border-primary/30"
         />
-        <h2 className="relative z-10 text-2xl font-bold text-white uppercase tracking-widest drop-shadow-md">{phase}</h2>
+        <h2 className="relative z-10 text-2xl font-bold text-white uppercase tracking-widest drop-shadow-md text-center">{phase}</h2>
       </div>
       
-      <button onClick={() => { triggerHaptic(); onDone(); }} className="absolute bottom-12 text-xs text-gray-500 uppercase tracking-widest border border-gray-800 rounded-lg px-4 py-2 bg-black/50">
+      <div className="text-center px-8 mb-4 h-16">
+        <p className="text-gray-300 text-sm leading-relaxed">
+          {protocol === 'square' 
+            ? 'Дихайте синхронно з колом. Вдих (4 сек) — Затримка (4 сек) — Видих (4 сек).' 
+            : 'Робіть різкі, активні видихи носом при кожному стисненні кола. Вдих відбувається пасивно.'}
+        </p>
+      </div>
+      
+      <button onClick={() => { triggerHaptic(); onDone(); }} className="absolute bottom-12 text-xs text-gray-500 uppercase tracking-widest border border-gray-800 rounded-lg px-4 py-2 bg-black/50 hover:bg-gray-900 transition-colors">
         Перервати
       </button>
     </motion.div>
