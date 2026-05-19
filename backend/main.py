@@ -6,10 +6,11 @@ from typing import Optional
 from datetime import date, datetime
 import asyncio
 import httpx
+import os
 
-from . import models_v2 as models
-from . import database
-from .engine import calculate_syutsay, determine_recipe, get_k_ns
+import models_v2 as models
+import database
+from engine import calculate_syutsay, determine_recipe, get_k_ns
 
 models.Base.metadata.create_all(bind=database.engine)
 
