@@ -12,15 +12,7 @@ import models_v2 as models
 import database
 from engine import calculate_syutsay, determine_recipe, get_k_ns
 
-from sqlalchemy import text
 models.Base.metadata.create_all(bind=database.engine)
-try:
-    with database.engine.begin() as conn:
-        if database.engine.name == 'postgresql':
-            conn.execute(text("ALTER TABLE users ALTER COLUMN telegram_id TYPE BIGINT"))
-            conn.execute(text("ALTER TABLE state_logs ALTER COLUMN telegram_id TYPE BIGINT"))
-except Exception as e:
-    print(f"Auto-migration skipped: {e}")
 
 app = FastAPI(title="Bio-Adaptive Tea Sommelier")
 
@@ -31,6 +23,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/api/reset_db")
+def reset_db():
+    try:
+        models.Base.metadata.drop_all(bind=database.engine)
+        models.Base.metadata.create_all(bind=database.engine)
+        return {"status": "Database successfully reset with new schema!"}
+    except Exception as e:
+        return {"status": "Error", "message": str(e)}
 
 class RegistrationRequest(BaseModel):
     telegram_id: int
