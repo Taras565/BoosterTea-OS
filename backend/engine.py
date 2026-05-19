@@ -50,6 +50,15 @@ def determine_avatar(base: str, target: str, profession: str, stress: int):
         "stats": { "focus": 25, "energy": 25, "calm": 25 }
     }
 
+ACTIVITY_MULTIPLIERS = {
+    "coding":   {"psych": 9, "phys": 1},  # Високий ментальний фокус
+    "study":    {"psych": 8, "phys": 2},  # Навчання, запам'ятовування
+    "business": {"psych": 9, "phys": 3},  # Стрес, комунікація
+    "creative": {"psych": 7, "phys": 2},  # Креатив, пошук ідей
+    "sport":    {"psych": 4, "phys": 9},  # Максимальний фіз. тонус
+    "routine":  {"psych": 5, "phys": 5}   # Збалансований щоденний рутинум
+}
+
 def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_caffeine: bool, specific_activity_id: str, weather_temp: int, user):
     k_ns = get_k_ns(user.hd_type)
     weight = user.weight or 70
@@ -83,18 +92,12 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     }
 
     sub = specific_activity_id
-    if sub == 'Студент': recipe["base"] = "GABA"
-    elif sub == 'Розробник / QA / DS': recipe["base"] = "М'яка GABA"
-    elif sub == 'Трейдер / Фінансист': recipe["base"] = "GABA + Да Хун Пао"
-    elif sub == 'Креатор / Дизайнер': recipe["base"] = "Да Хун Пао"
-    elif sub == 'Письменник / Копірайтер': recipe["base"] = "Шен Пуер"
-    elif sub == 'Спікер / Лектор': recipe["base"] = "GABA"
-    elif sub == 'Sales / Менеджер': recipe["base"] = "Да Хун Пао"; recipe["activator"] = "Лимонний фреш"
-    elif sub == 'Кардіо / Вода': recipe["base"] = "Да Хун Пао"
-    elif sub == 'Силовий тренінг': recipe["base"] = "Шу Пуер"
-    elif sub == 'Навчання': recipe["base"] = "М'яка GABA"
-    elif sub == 'Побутові задачі': recipe["base"] = "Шу Пуер"
-    elif sub == 'Пенсіонер / Відновлення': recipe["base"] = "Чиста Преміум GABA"
+    if sub == 'coding': recipe["base"] = "М'яка GABA"
+    elif sub == 'study': recipe["base"] = "GABA"
+    elif sub == 'business': recipe["base"] = "GABA + Да Хун Пао"; recipe["activator"] = "Лимонний фреш"
+    elif sub == 'creative': recipe["base"] = "Да Хун Пао"
+    elif sub == 'sport': recipe["base"] = "Шу Пуер"
+    elif sub == 'routine': recipe["base"] = "Чиста Преміум GABA"
 
     # Stress Overrides (CNS)
     if scale_cns >= 7 and ("Шу Пуер" in recipe["base"] or "Саган" in recipe["base"]):

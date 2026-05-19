@@ -42,12 +42,13 @@ type Recipe = {
 const PREMIUM_ACTIVE = 'bg-primary/10 text-white border-primary shadow-[0_0_12px_rgba(0,255,204,0.3)] ring-1 ring-primary/50';
 const PREMIUM_IDLE = 'bg-black/40 text-gray-500 border-gray-800 hover:bg-gray-800 hover:text-gray-300';
 
-const META_TILES = [
-  { id: 'COGNITIVE', label: 'Аналітика / Код', icon: '🧠', subs: ['Студент', 'Розробник / QA / DS', 'Трейдер / Фінансист'] },
-  { id: 'CREATIVE', label: 'Творчість', icon: '🎨', subs: ['Креатор / Дизайнер', 'Письменник / Копірайтер'] },
-  { id: 'COMMUNICATION', label: 'Комунікація', icon: '🗣', subs: ['Спікер / Лектор', 'Sales / Менеджер'] },
-  { id: 'PHYSICAL', label: 'Спорт & Активність', icon: '⚡', subs: ['Кардіо / Вода', 'Силовий тренінг'] },
-  { id: 'ROUTINE', label: 'Життєвий тонус', icon: '🔄', subs: ['Навчання', 'Побутові задачі', 'Пенсіонер / Відновлення'] }
+const activityOptions = [
+  { id: 'coding', label: '💻 Працюю за монітором', sub: 'IT, дизайн, офіс, аналітика' },
+  { id: 'study', label: '📚 Навчання / Іспити', sub: 'Студенти, курси, підготовка' },
+  { id: 'business', label: '🤝 Бізнес / Переговори', sub: 'Менеджмент, продажі, зустрічі' },
+  { id: 'creative', label: '🎨 Творчість / Креатив', sub: 'Контент, дизайн, блог, музика' },
+  { id: 'sport', label: '⚡ Спорт & Активність', sub: 'Тренування, рух, важка праця' },
+  { id: 'routine', label: '🔄 Побут / Відновлення', sub: 'Рутина, декрет, тонус, відпочинок' }
 ];
 
 const triggerHaptic = () => { 
@@ -77,7 +78,7 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
 
   const handleNext = async () => {
     triggerHaptic();
-    if (step === 2 && !data.sub_profession) { alert("Будь ласка, оберіть вашу точну діяльність."); return; }
+    if (step === 2 && !data.profession) { alert("Будь ласка, оберіть ваш режим."); return; }
     if (step < 3) setStep(step + 1);
     else {
       setLoading(true);
@@ -155,39 +156,17 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
 
       {step === 2 && (
         <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4 flex flex-col h-full">
-          <h3 className="text-lg font-bold text-white mb-2">Мета-профіль Діяльності</h3>
+          <h3 className="text-lg font-bold text-white mb-2">Твій основний режим:</h3>
           <div className="grid grid-cols-1 gap-2 flex-1 overflow-y-auto">
-            {META_TILES.map(tile => (
-              <div key={tile.id} className="space-y-2">
-                <button 
-                  onClick={() => { setData({...data, profession: tile.id, sub_profession: ''}); triggerHaptic(); }} 
-                  className={`w-full p-4 rounded-xl border flex items-center gap-3 transition-all ${data.profession === tile.id ? 'border-primary bg-primary/20 text-primary shadow-[0_0_10px_rgba(0,255,204,0.3)]' : 'border-gray-700 bg-black/30 text-gray-300'}`}
-                >
-                  <span className="text-2xl">{tile.icon}</span>
-                  <span className="font-bold">{tile.label}</span>
-                </button>
-                
-                <AnimatePresence>
-                  {data.profession === tile.id && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="pl-4 pr-2 overflow-hidden">
-                      <div className="bg-black/50 border border-primary/30 p-3 rounded-lg mt-1">
-                        <label className="block text-xs text-primary mb-3 uppercase tracking-widest">Деталізуйте:</label>
-                        <div className="flex flex-col gap-2">
-                          {tile.subs.map(s => (
-                            <button 
-                              key={s}
-                              onClick={() => { setData({...data, sub_profession: s}); triggerHaptic(); }}
-                              className={`w-full p-3 rounded-lg border text-sm font-bold transition-all text-left ${data.sub_profession === s ? 'border-primary bg-primary/20 text-white shadow-[0_0_8px_rgba(0,255,204,0.2)]' : 'border-gray-700 bg-black/40 text-gray-400 hover:bg-gray-800 hover:text-gray-200'}`}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+            {activityOptions.map(tile => (
+              <button 
+                key={tile.id}
+                onClick={() => { setData({...data, profession: tile.id, sub_profession: ''}); triggerHaptic(); }} 
+                className={`w-full p-4 rounded-xl border flex flex-col items-start transition-all ${data.profession === tile.id ? 'border-primary bg-primary/20 shadow-[0_0_10px_rgba(0,255,204,0.3)]' : 'border-gray-700 bg-black/30'}`}
+              >
+                <span className={`font-bold text-lg mb-1 ${data.profession === tile.id ? 'text-white' : 'text-gray-300'}`}>{tile.label}</span>
+                <span className={`text-xs ${data.profession === tile.id ? 'text-primary' : 'text-gray-400'}`}>{tile.sub}</span>
+              </button>
             ))}
           </div>
         </motion.div>
@@ -307,7 +286,7 @@ function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, on
         },
         body: JSON.stringify({
           telegram_id: telegramId,
-          specific_activity_id: profile.sub_profession,
+          specific_activity_id: profile.profession,
           scale_cns: scaleCns,
           scale_energy: scaleEnergy,
           scale_mental: scaleMental,
