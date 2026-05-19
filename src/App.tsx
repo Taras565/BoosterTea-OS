@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Activity, Droplet, Thermometer, Wind, CheckCircle2, ChevronRight, FlaskConical, Target, Zap, Coffee, MessageCircle, Leaf } from 'lucide-react'
 
 import BreathworkTimer from './components/BreathworkTimer'
+import WelcomeManifest from './components/WelcomeManifest'
 import './App.css'
 
 const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname.includes('localhost') ? 'http://localhost:8000/api' : 'https://boostertea-os-backend.onrender.com/api');
@@ -523,13 +524,18 @@ function ResultScreen({ recipe, weatherTemp, weatherCond, onDone }: { recipe: Re
 
 function AppContent() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [hasReadManifest, setHasReadManifest] = useState<boolean | null>(null);
   const [recipeResult, setRecipeResult] = useState<{ recipe: Recipe, temp: number, cond: string } | null>(null);
   const [showBreathwork, setShowBreathwork] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('bio_profile');
     if (saved) setProfile(JSON.parse(saved));
+    const manifest = localStorage.getItem('has_read_manifest');
+    setHasReadManifest(manifest === 'true');
   }, []);
+
+  if (hasReadManifest === null) return null; // Avoid flicker on load
 
   return (
     <div className="app-container p-4">
@@ -537,9 +543,10 @@ function AppContent() {
       <div className="bg-orb-2" />
       <div className="z-10 relative flex-1 flex flex-col justify-center h-full max-w-md mx-auto">
         <AnimatePresence mode="wait">
-          {!profile && <Onboarding key="onboarding" onComplete={setProfile} />}
-          {profile && !recipeResult && <DailyCheckIn key="checkin" profile={profile} onResult={(r,t,c) => setRecipeResult({recipe: r, temp: t, cond: c})} onReset={() => setProfile(null)} />}
-          {profile && recipeResult && !showBreathwork && <ResultScreen key="result" recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} onDone={() => setShowBreathwork(true)} />}
+          {!hasReadManifest && <WelcomeManifest key="manifest" onComplete={() => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); }} />}
+          {hasReadManifest && !profile && <Onboarding key="onboarding" onComplete={setProfile} />}
+          {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" profile={profile} onResult={(r,t,c) => setRecipeResult({recipe: r, temp: t, cond: c})} onReset={() => setProfile(null)} />}
+          {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} onDone={() => setShowBreathwork(true)} />}
           {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" protocol={recipeResult.recipe.breathwork_protocol} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
         </AnimatePresence>
       </div>
