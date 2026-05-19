@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Activity, Droplet, Thermometer, Wind, CheckCircle2, ChevronRight, FlaskConical, Target, Zap, Coffee, MessageCircle, Leaf } from 'lucide-react'
-import { useInitData } from '@telegram-apps/sdk-react'
+
 import BreathworkTimer from './components/BreathworkTimer'
 import './App.css'
 
@@ -56,7 +56,7 @@ const triggerHaptic = () => {
 };
 
 function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void }) {
-  const initData = useInitData();
+  const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({ 
@@ -207,7 +207,7 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
 }
 
 function DailyCheckIn({ profile, onResult }: { profile: UserProfile, onResult: (r: Recipe, t: number, c: string) => void }) {
-  const initData = useInitData();
+  const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
   const [scaleCns, setScaleCns] = useState(5);
   const [scaleEnergy, setScaleEnergy] = useState(5);
   const [scaleMental, setScaleMental] = useState(5);
