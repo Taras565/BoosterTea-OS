@@ -122,9 +122,20 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
             else:
                 recipe["activator"] = "Чорничний"
     else:
+        # Cold weather logic: warm activator with high taste variety
         recipe["ice_cubes"] = 0
         recipe["cocktail_status"] = "Підігрітий"
-        recipe["activator"] = "Підігрітий яблучно-імбирний"
+        
+        # Super-personalization based on taste preferences even for hot drinks
+        if (user.taste_sweet_pref or 5) >= 7 and (user.taste_acid_pref or 5) < 7:
+            recipe["activator"] = "Підігрітий Обліпихово-медовий"
+        elif (user.taste_acid_pref or 5) >= 7 and (user.taste_sweet_pref or 5) < 7:
+            recipe["activator"] = "Підігрітий Журавлинно-апельсиновий"
+        elif (user.taste_bitter_pref or 5) >= 7:
+            recipe["activator"] = "Підігрітий Грейпфрутово-пряний"
+        else:
+            recipe["activator"] = "Підігрітий яблучно-імбирний"
+            
         recipe["juice_ml"] = 120
         recipe["water_ml"] = 30
 
@@ -145,7 +156,10 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     recipe["stats"] = avatar["stats"]
 
     explanation_parts = []
-    explanation_parts.append(f"База ({recipe['base']}) підібрана спеціально під твою діяльність ({sub}).")
+    
+    hd = user.hd_type if user.hd_type else "Генератор"
+    explanation_parts.append(f"🧬 Твій генетичний профіль ({hd}) та мета-профіль «{sub}» формують унікальну потребу.")
+    explanation_parts.append(f"База {recipe['base']} ({recipe['tea_ml']} мл) ідеально балансує твою нервову систему в цьому стані.")
     
     if scale_cns >= 7:
         explanation_parts.append(f"Через високий рівень стресу ({scale_cns}/10) ми додали компоненти для релаксації ЦНС.")
