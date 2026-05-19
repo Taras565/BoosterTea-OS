@@ -1,0 +1,104 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap');
+
+@theme {
+  --font-sans: 'Outfit', sans-serif;
+  --color-primary: #00F0FF; /* Premium Electric Cyan */
+  --color-accent: #7000FF;  /* Deep Purple Accent */
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: #0a0a0c;
+  background-image: 
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6)),
+    url('https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?q=80&w=1600&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #e0e0e0;
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Premium Main Button */
+.premium-btn {
+  background: linear-gradient(135deg, #00F0FF 0%, #0088FF 100%);
+  color: white !important;
+  box-shadow: 0 8px 24px rgba(0, 240, 255, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+  transform: skewX(-20deg);
+  animation: shine 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  15% { left: 200%; }
+  100% { left: 200%; }
+}
+
+.glass-panel {
+  /* True iOS-style Liquid Glass */
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px) saturate(250%) contrast(110%);
+  -webkit-backdrop-filter: blur(40px) saturate(250%) contrast(110%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 32px;
+  box-shadow: 
+    0 30px 60px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Enhancing inputs and sub-panels with the same liquid look */
+.glass-panel input, .glass-panel select, .glass-panel button.bg-black\/30, .glass-panel .bg-black\/40, .glass-panel .bg-gray-900\/50 {
+  background: rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 16px !important;
+}
+* {
+  box-sizing: border-box;
+}
+
+h1, h2, h3 {
+  margin: 0;
+  color: #fff;
+  font-weight: 600;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), filter 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+  transform: scale(0.94);
+  filter: brightness(1.1);
+}
+
+input[type="range"] {
+  transition: transform 0.15s ease;
+}
+input[type="range"]:active {
+  transform: scale(0.98);
+}
