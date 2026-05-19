@@ -206,7 +206,7 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
   );
 }
 
-function DailyCheckIn({ profile, onResult }: { profile: UserProfile, onResult: (r: Recipe, t: number, c: string) => void }) {
+function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, onResult: (r: Recipe, t: number, c: string) => void, onReset: () => void }) {
   const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
   const [scaleCns, setScaleCns] = useState(5);
   const [scaleEnergy, setScaleEnergy] = useState(5);
@@ -217,6 +217,7 @@ function DailyCheckIn({ profile, onResult }: { profile: UserProfile, onResult: (
   const [currentTemp, setCurrentTemp] = useState<number | null>(null);
   const [lat, setLat] = useState<number | null>(null);
   const [lon, setLon] = useState<number | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -243,6 +244,7 @@ function DailyCheckIn({ profile, onResult }: { profile: UserProfile, onResult: (
   const handleCalculate = async () => {
     triggerHaptic(); 
     setLoading(true);
+    setErrorMsg(null);
     try {
       const telegramId = initData?.user?.id || 123456789;
       
@@ -267,7 +269,7 @@ function DailyCheckIn({ profile, onResult }: { profile: UserProfile, onResult: (
       onResult(data.recipe, data.weather.temp, data.weather.condition);
     } catch (err) {
       console.error(err);
-      alert("Не вдалося розрахувати рецепт. Спробуйте пізніше.");
+      setErrorMsg("Не вдалося знайти профіль або розрахувати рецепт. Будь ласка, натисніть 'Скинути' і зареєструйтесь знову.");
     } finally {
       setLoading(false);
     }
@@ -277,7 +279,7 @@ function DailyCheckIn({ profile, onResult }: { profile: UserProfile, onResult: (
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel p-6 flex flex-col h-full overflow-y-auto max-h-[90vh]">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-white">Стан на сьогодні</h2>
-        <button onClick={() => { localStorage.removeItem('bio_profile'); window.location.reload(); }} className="text-xs text-red-400 border border-red-900/50 bg-red-900/20 px-2 py-1 rounded hover:bg-red-900/40 transition-colors">Скинути</button>
+        <button onClick={() => { triggerHaptic(); localStorage.removeItem('bio_profile'); onReset(); }} className="text-xs text-red-400 border border-red-900/50 bg-red-900/20 px-2 py-1 rounded hover:bg-red-900/40 transition-colors">Скинути</button>
       </div>
       
       <div className="bg-black/40 p-3 rounded-xl border border-primary/20 mb-6 flex justify-between items-center">
@@ -310,6 +312,12 @@ function DailyCheckIn({ profile, onResult }: { profile: UserProfile, onResult: (
           {hadCaffeine && <CheckCircle2 size={16} />}
         </div>
       </div>
+
+      {errorMsg && (
+        <div className="mb-4 p-3 bg-red-900/30 border border-red-500/50 rounded-xl text-center">
+          <p className="text-xs text-red-400 leading-tight">{errorMsg}</p>
+        </div>
+      )}
 
       {loading ? (
         <div className="w-full py-4 flex justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
@@ -383,7 +391,7 @@ function AppContent() {
       <div className="z-10 relative flex-1 flex flex-col justify-center h-full max-w-md mx-auto">
         <AnimatePresence mode="wait">
           {!profile && <Onboarding key="onboarding" onComplete={setProfile} />}
-          {profile && !recipeResult && <DailyCheckIn key="checkin" profile={profile} onResult={(r,t,c) => setRecipeResult({recipe: r, temp: t, cond: c})} />}
+          {profile && !recipeResult && <DailyCheckIn key="checkin" profile={profile} onResult={(r,t,c) => setRecipeResult({recipe: r, temp: t, cond: c})} onReset={() => setProfile(null)} />}
           {profile && recipeResult && !showBreathwork && <ResultScreen key="result" recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} onDone={() => setShowBreathwork(true)} />}
           {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" protocol={recipeResult.recipe.breathwork_protocol} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
         </AnimatePresence>
