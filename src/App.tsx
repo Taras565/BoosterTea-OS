@@ -461,9 +461,16 @@ function ResultScreen({ recipe, weatherTemp, weatherCond, onDone }: { recipe: Re
                   <span className="text-sm font-bold text-white leading-tight">{recipe.ice_cubes > 0 ? `${recipe.ice_cubes} куб.` : 'Без льоду'}</span>
                 </div>
               </div>
-            </div>
           </div>
         </div>
+
+        {/* Mixology Instructions Block */}
+        {recipe.instructions && (
+          <div className="bg-gradient-to-br from-gray-900 to-black p-4 rounded-xl border border-gray-700 shadow-inner mt-4">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Leaf size={14} className="text-primary"/> Рішення Бармена</h3>
+            <p className="text-sm text-gray-300 leading-relaxed font-medium">{recipe.instructions}</p>
+          </div>
+        )}
       </div>
       <div className="p-4 grid grid-cols-2 gap-3 mt-auto">
         <button onClick={() => { triggerHaptic(); alert("Відкриття Telegram Stories Share..."); }} className="py-3 rounded-xl border border-primary/50 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors uppercase tracking-wider">Поділитися</button>

@@ -112,40 +112,62 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     else:
         recipe["breathwork_protocol"] = "square"
 
-    # Weather Integration
-    if weather_temp > 22:
+    # Weather Integration & Premium Mixology Activators
+    is_hot_weather = weather_temp > 22
+    t_sweet = user.taste_sweet_pref or 5
+    t_acid = user.taste_acid_pref or 5
+    t_bitter = user.taste_bitter_pref or 5
+
+    # Base water/juice
+    recipe["juice_ml"] = 120
+    recipe["water_ml"] = 30
+
+    garnish = ""
+    glass_type = ""
+
+    if is_hot_weather:
         recipe["ice_cubes"] = round(weather_temp / 6)
-        recipe["cocktail_status"] = "Охолоджений"
-        if recipe["activator"] != "Лимонний фреш":
-            if (user.taste_acid_pref or 5) >= 6: 
-                recipe["activator"] = "Грейпфрутовий/Гранатовий"
-            else:
-                recipe["activator"] = "Чорничний"
-    else:
-        # Cold weather logic: warm activator with high taste variety
-        recipe["ice_cubes"] = 0
-        recipe["cocktail_status"] = "Підігрітий"
+        recipe["cocktail_status"] = "Ice / Охолоджений"
+        glass_type = "прозорий хайбол (Highball)"
         
-        # Super-personalization based on taste preferences even for hot drinks
-        if (user.taste_sweet_pref or 5) >= 7 and (user.taste_acid_pref or 5) < 7:
-            recipe["activator"] = "Підігрітий Обліпихово-медовий"
-        elif (user.taste_acid_pref or 5) >= 7 and (user.taste_sweet_pref or 5) < 7:
-            recipe["activator"] = "Підігрітий Журавлинно-апельсиновий"
-        elif (user.taste_bitter_pref or 5) >= 7:
-            recipe["activator"] = "Підігрітий Грейпфрутово-пряний"
+        if t_acid >= 7 and t_sweet < 7:
+            recipe["activator"] = "Рубіновий грейпфрутовий фреш"
+            garnish = "гілочкою розмарину та слайсом червоного грейпфрута"
+        elif t_sweet >= 7 and t_acid < 7:
+            recipe["activator"] = "Ожиново-лавандовий кордіал"
+            garnish = "свіжими ягодами лохини на кризі"
+        elif t_bitter >= 7:
+            recipe["activator"] = "Тонік (Espresso-style)"
+            garnish = "цедрою лимона (ефірні олії на край келиха)"
         else:
-            recipe["activator"] = "Підігрітий яблучно-імбирний"
-            
-        recipe["juice_ml"] = 120
-        recipe["water_ml"] = 30
+            recipe["activator"] = "Крафтовий лимонад з лаймом"
+            garnish = "свіжою м'ятою та шматочком лайма"
+    else:
+        recipe["ice_cubes"] = 0
+        recipe["cocktail_status"] = "Hot / Зігріваючий"
+        glass_type = "двостінний прозорий келих (Double Glass)"
+        
+        if t_sweet >= 7 and t_acid < 7:
+            recipe["activator"] = "Обліпиховий настій з медом"
+            garnish = "паличкою кориці та зірочкою бадьяну"
+        elif t_acid >= 7 and t_sweet < 7:
+            recipe["activator"] = "Теплий настій дикої журавлини"
+            garnish = "слайсом дегідрованого апельсина"
+        elif t_bitter >= 7:
+            recipe["activator"] = "Пряний імбирний шот з куркумою"
+            garnish = "щіпкою свіжозмеленого чорного перцю"
+        else:
+            recipe["activator"] = "Класичний яблучний фреш"
+            garnish = "тонким слайсом свіжого яблука"
 
-    # Override for specific taste if sweet is high and hot
-    if weather_temp > 22 and recipe["activator"] not in ["Лимонний фреш", "Грейпфрутовий/Гранатовий"]:
-        if (user.taste_sweet_pref or 5) >= 7:
-            recipe["activator"] = "Вишневий"
-
-    ice_text = f"{recipe['ice_cubes']} кубиків льоду" if recipe["ice_cubes"] > 0 else "без льоду"
-    recipe["instructions"] = f'Змішай {recipe["tea_ml"]} мл концентрату ({recipe["base"]}), {recipe["juice_ml"]} мл соку ({recipe["activator"]}) та {recipe["water_ml"]} мл води. Подавати {ice_text}.'
+    ice_text = f"Додайте {recipe['ice_cubes']} ідеально прозорих кубиків льоду." if recipe["ice_cubes"] > 0 else "Прогрійте келих перед подачею."
+    
+    recipe["instructions"] = (
+        f"Візьміть {glass_type}. {ice_text} "
+        f"Спочатку налийте {recipe['activator']} ({recipe['juice_ml']} мл) та воду ({recipe['water_ml']} мл). "
+        f"Обережно по ложці (барним методом) влийте {recipe['tea_ml']} мл концентрату «{recipe['base']}», щоб створити ідеальний двошаровий градієнт. "
+        f"Прикрасьте {garnish}. Візуальний WOW-ефект гарантовано!"
+    )
 
     avatar = determine_avatar(recipe["base"], target_state, user.profession_type, scale_cns)
     
