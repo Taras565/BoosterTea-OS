@@ -39,6 +39,9 @@ type Recipe = {
 };
 
 // --- Constants ---
+const PREMIUM_ACTIVE = 'bg-primary/10 text-white border-primary shadow-[0_0_12px_rgba(0,255,204,0.3)] ring-1 ring-primary/50';
+const PREMIUM_IDLE = 'bg-black/40 text-gray-500 border-gray-800 hover:bg-gray-800 hover:text-gray-300';
+
 const META_TILES = [
   { id: 'COGNITIVE', label: 'Аналітика / Код', icon: '🧠', subs: ['Студент', 'Розробник / QA / DS', 'Трейдер / Фінансист'] },
   { id: 'CREATIVE', label: 'Творчість', icon: '🎨', subs: ['Креатор / Дизайнер', 'Письменник / Копірайтер'] },
