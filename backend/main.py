@@ -92,6 +92,7 @@ class StateRequest(BaseModel):
     scale_energy: int
     scale_mental: int
     had_caffeine_recently: bool
+    drink_format: str = "long"
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
@@ -175,6 +176,7 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
         scale_mental=req.scale_mental,
         had_caffeine=req.had_caffeine_recently,
         specific_activity_id=req.specific_activity_id,
+        drink_format=req.drink_format,
         weather_temp=weather_temp,
         user=user
     )

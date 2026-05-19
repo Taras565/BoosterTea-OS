@@ -251,6 +251,7 @@ function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, on
   const [scaleEnergy, setScaleEnergy] = useState(5);
   const [scaleMental, setScaleMental] = useState(5);
   const [hadCaffeine, setHadCaffeine] = useState(false);
+  const [drinkFormat, setDrinkFormat] = useState('long');
   
   const [loading, setLoading] = useState(false);
   const [currentTemp, setCurrentTemp] = useState<number | null>(null);
@@ -298,6 +299,7 @@ function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, on
         body: JSON.stringify({
           telegram_id: telegramId,
           specific_activity_id: profile.profession,
+          drink_format: drinkFormat,
           scale_cns: scaleCns,
           scale_energy: scaleEnergy,
           scale_mental: scaleMental,
@@ -372,6 +374,24 @@ function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, on
         </div>
         <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${hadCaffeine ? 'bg-primary border-primary text-black' : 'border-gray-600'}`}>
           {hadCaffeine && <CheckCircle2 size={16} />}
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Формат напою</h3>
+        <div className="flex gap-2 p-1 bg-black/40 border border-gray-800 rounded-xl">
+          <button 
+            onClick={() => { triggerHaptic(); setDrinkFormat('long'); }} 
+            className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'long' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
+          >
+            Лонг (Баланс)
+          </button>
+          <button 
+            onClick={() => { triggerHaptic(); setDrinkFormat('shot'); }} 
+            className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'shot' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
+          >
+            Шот (Миттєва Дія)
+          </button>
         </div>
       </div>
 

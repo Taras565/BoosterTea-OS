@@ -59,7 +59,7 @@ ACTIVITY_MULTIPLIERS = {
     "routine":  {"psych": 5, "phys": 5}   # Збалансований щоденний рутинум
 }
 
-def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_caffeine: bool, specific_activity_id: str, weather_temp: int, user):
+def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_caffeine: bool, specific_activity_id: str, drink_format: str, weather_temp: int, user):
     k_ns = get_k_ns(user.hd_type)
     weight = user.weight or 70
     
@@ -126,9 +126,15 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     recipe["water_ml"] = 30
 
     garnish = ""
-    glass_type = ""
+    glass_type = "прозорий хайбол (Highball)"
 
-    if is_hot_weather:
+    if drink_format == "shot":
+        recipe["juice_ml"] = 15
+        recipe["water_ml"] = 0
+        recipe["cocktail_status"] = "Shot / Миттєва дія"
+        glass_type = "рюмку (Shot Glass 40-50мл)"
+
+    if is_hot_weather and drink_format != "shot":
         recipe["ice_cubes"] = round(weather_temp / 6)
         recipe["cocktail_status"] = "Ice / Охолоджений"
         glass_type = "прозорий хайбол (Highball)"
@@ -166,10 +172,13 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     ice_text = f"Додайте {recipe['ice_cubes']} ідеально прозорих кубиків льоду." if recipe["ice_cubes"] > 0 else "Прогрійте келих перед подачею."
     
     recipe["instructions"] = (
-        f"Візьміть {glass_type}. {ice_text} "
-        f"Спочатку налийте {recipe['activator']} ({recipe['juice_ml']} мл) та воду ({recipe['water_ml']} мл). "
-        f"Обережно по ложці (барним методом) влийте {recipe['tea_ml']} мл концентрату «{recipe['base']}», щоб створити ідеальний двошаровий градієнт. "
-        f"Прикрасьте {garnish}. Візуальний WOW-ефект гарантовано!"
+        f"Візьміть {glass_type}. Прогрійте келих перед подачею. "
+        f"Спочатку налийте {recipe['activator']} ({recipe['juice_ml']} мл)"
+        f"{f' та воду ({recipe.get('water_ml', 0)} мл)' if drink_format != 'shot' else ''}. "
+        f"Обережно по ложці (барним методом) влийте {recipe['tea_ml']} мл концентрату «{recipe['base']}», "
+        f"щоб створити ідеальний двошаровий градієнт. "
+        f"{f'Прикрасьте {garnish}. ' if garnish else ''}"
+        f"{'Випити залпом для швидкого та максимального ефекту! ' if drink_format == 'shot' else 'Візуальний WOW-ефект гарантовано!'}"
     )
 
     avatar = determine_avatar(recipe["base"], target_state, user.profession_type, scale_cns)
