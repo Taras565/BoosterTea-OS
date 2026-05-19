@@ -5,7 +5,7 @@ import { Activity, Droplet, Thermometer, Wind, CheckCircle2, ChevronRight, Flask
 import BreathworkTimer from './components/BreathworkTimer'
 import './App.css'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname.includes('localhost') ? 'http://localhost:8000/api' : 'https://boostertea-os-backend.onrender.com/api');
 
 // --- Types ---
 type UserProfile = {
@@ -78,7 +78,14 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
 
   const handleNext = async () => {
     triggerHaptic();
-    if (step === 2 && !data.profession) { alert("Будь ласка, оберіть ваш режим."); return; }
+    if (step === 2 && !data.profession) { 
+      if ((window as any).Telegram?.WebApp?.showAlert) {
+        (window as any).Telegram.WebApp.showAlert("Будь ласка, оберіть ваш режим.");
+      } else {
+        alert("Будь ласка, оберіть ваш режим.");
+      }
+      return; 
+    }
     if (step < 3) setStep(step + 1);
     else {
       setLoading(true);
@@ -114,7 +121,11 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
         onComplete(profile);
       } catch (err) {
         console.error(err);
-        alert("Помилка реєстрації. Спробуйте пізніше.");
+        if ((window as any).Telegram?.WebApp?.showAlert) {
+          (window as any).Telegram.WebApp.showAlert("Помилка підключення до сервера (Можливо, невірний підпис Telegram). Спробуйте перезапустити додаток.");
+        } else {
+          alert("Помилка реєстрації. Спробуйте пізніше.");
+        }
       } finally {
         setLoading(false);
       }
@@ -322,7 +333,7 @@ function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, on
       </div>
       
       <div className="bg-black/40 p-3 rounded-xl border border-primary/20 mb-6 flex justify-between items-center">
-        <div><p className="text-xs text-gray-500 uppercase">Активність</p><p className="text-sm font-bold text-primary">{profile.sub_profession}</p></div>
+        <div><p className="text-xs text-gray-500 uppercase">Активність</p><p className="text-sm font-bold text-primary">{profile.profession}</p></div>
       </div>
       
       <div className="space-y-4 mb-6">
@@ -466,7 +477,24 @@ function ResultScreen({ recipe, weatherTemp, weatherCond, onDone }: { recipe: Re
         )}
       </div>
       <div className="p-4 grid grid-cols-2 gap-3 mt-auto">
-        <button onClick={() => { triggerHaptic(); alert("Відкриття Telegram Stories Share..."); }} className="py-3 rounded-xl border border-primary/50 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors uppercase tracking-wider">Поділитися</button>
+        <button onClick={() => { 
+          triggerHaptic(); 
+          const webApp = (window as any).Telegram?.WebApp;
+          if (webApp && webApp.shareToStory) {
+            const host = window.location.origin.includes('localhost') ? 'https://boostertea-app.onrender.com' : window.location.origin;
+            const mediaUrl = `${host}${recipe.avatar_image || '/bg-tea.png'}`;
+            webApp.shareToStory(mediaUrl, {
+              text: `Мій стан: ${recipe.avatar_name}! 🍵\nБаза: ${recipe.base}\n\nЗгенеруй свій чайний стан в BoosterTea OS:`,
+              widget_link: {
+                url: "https://t.me/boostertea_os_bot/app",
+                name: "Відкрити BoosterTea OS"
+              }
+            });
+          } else {
+            if (webApp && webApp.showAlert) webApp.showAlert("Ваша версія Telegram не підтримує Stories. Будь ласка, оновіть додаток.");
+            else alert("Stories не підтримуються на вашому пристрої.");
+          }
+        }} className="py-3 rounded-xl border border-primary/50 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors uppercase tracking-wider">Поділитися</button>
         <button onClick={() => { triggerHaptic(); onDone(); }} className="premium-btn font-bold py-3 rounded-xl text-sm uppercase tracking-wider">Заварив!</button>
       </div>
     </motion.div>
