@@ -188,9 +188,25 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
           {[
             {k:'taste_acid', label:'Кисле'}, {k:'taste_bitter', label:'Гірке'}, {k:'taste_sweet', label:'Солодке'}
           ].map(t => (
-            <div key={t.k}>
-              <label className="block text-gray-400 text-sm mb-1">{t.label}: {(data as any)[t.k]}/10</label>
-              <input type="range" min="1" max="10" value={(data as any)[t.k]} onChange={e => setData({...data, [t.k]: parseInt(e.target.value)})} className="w-full accent-primary" />
+            <div key={t.k} className="bg-black/30 p-4 rounded-xl border border-gray-800">
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-sm font-bold text-white uppercase tracking-wider">{t.label}</label>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: 'Мінімум', value: 2 },
+                  { label: 'Баланс', value: 5 },
+                  { label: 'Максимум', value: 8 }
+                ].map(lvl => {
+                  const isActive = (data as any)[t.k] === lvl.value;
+                  const btnClass = isActive ? PREMIUM_ACTIVE : PREMIUM_IDLE;
+                  return (
+                    <button key={lvl.label} onClick={() => { setData({...data, [t.k]: lvl.value}); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-xs font-bold uppercase rounded-lg border transition-all duration-300 ${btnClass}`}>
+                      {lvl.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </motion.div>
@@ -206,9 +222,6 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
     </motion.div>
   );
 }
-
-const PREMIUM_ACTIVE = 'bg-primary/10 text-white border-primary shadow-[0_0_12px_rgba(0,255,204,0.3)] ring-1 ring-primary/50';
-const PREMIUM_IDLE = 'bg-black/40 text-gray-500 border-gray-800 hover:bg-gray-800 hover:text-gray-300';
 
 const STRESS_LEVELS = [
   { label: 'Спокій', value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
