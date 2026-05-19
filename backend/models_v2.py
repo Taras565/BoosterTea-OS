@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, Time, ForeignKey, DateTime, Boolean
+from sqlalchemy import Column, Integer, BigInteger, String, Float, Date, Time, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
@@ -10,7 +10,7 @@ def generate_uuid():
 class User(Base):
     __tablename__ = "users"
 
-    telegram_id = Column(Integer, primary_key=True)
+    telegram_id = Column(BigInteger, primary_key=True, autoincrement=False)
     username = Column(String(100), nullable=True)
     weight = Column(Integer, nullable=False)
     gender = Column(String(10), nullable=False)
@@ -42,7 +42,7 @@ class StateLog(Base):
     __tablename__ = "state_logs"
 
     log_id = Column(String(36), primary_key=True, default=generate_uuid)
-    telegram_id = Column(Integer, ForeignKey("users.telegram_id"))
+    telegram_id = Column(BigInteger, ForeignKey("users.telegram_id"))
     stress_level = Column(Integer, nullable=True) # deprecated
     target_state = Column(String(50), nullable=True) # deprecated
     scale_cns = Column(Integer, nullable=True)
