@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException
+from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -7,6 +7,9 @@ from datetime import date, datetime
 import asyncio
 import httpx
 import os
+import hmac
+import hashlib
+from urllib.parse import parse_qsl
 
 import models_v2 as models
 import database
@@ -16,13 +19,49 @@ models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(title="Bio-Adaptive Tea Sommelier")
 
+# Secure CORS Policy
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://boostertea-app.onrender.com", "http://localhost:5173", "http://localhost:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Telegram WebApp Auth
+BOT_TOKEN = os.getenv("BOT_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN", "")
+
+def verify_telegram_data(init_data: str) -> bool:
+    if not BOT_TOKEN:
+        print("WARNING: BOT_TOKEN is not set. Skipping Telegram auth validation.")
+        return True # Fail open if no token is set so MVP doesn't break, but print warning
+        
+    try:
+        parsed_data = dict(parse_qsl(init_data))
+        if "hash" not in parsed_data:
+            return False
+            
+        hash_val = parsed_data.pop("hash")
+        data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(parsed_data.items()))
+        secret_key = hmac.new(b"WebAppData", BOT_TOKEN.encode(), hashlib.sha256).digest()
+        calculated_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+        
+        return calculated_hash == hash_val
+    except Exception:
+        return False
+
+def get_current_user_tg(x_telegram_init_data: Optional[str] = Header(None)):
+    # Localhost bypass or when token missing
+    if not BOT_TOKEN:
+        return True
+        
+    if not x_telegram_init_data:
+        raise HTTPException(status_code=401, detail="Missing Telegram Auth Data")
+        
+    if not verify_telegram_data(x_telegram_init_data):
+        raise HTTPException(status_code=403, detail="Invalid Telegram Signature")
+    
+    return True
 
 @app.get("/api/reset_db")
 def reset_db():
@@ -63,7 +102,7 @@ def mock_hd_type(birth_date: date) -> str:
     return types[idx]
 
 @app.post("/api/register")
-def register_user(req: RegistrationRequest, db: Session = Depends(database.get_db)):
+def register_user(req: RegistrationRequest, db: Session = Depends(database.get_db), tg_user: bool = Depends(get_current_user_tg)):
     user = db.query(models.User).filter(models.User.telegram_id == req.telegram_id).first()
     
     hd = mock_hd_type(req.birth_date)
@@ -110,7 +149,7 @@ async def schedule_feedback(user_id: int, log_id: str):
         print(f"[PUSH] Telegram ID {user_id}: {message}")
 
 @app.post("/api/calculate")
-async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, db: Session = Depends(database.get_db)):
+async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, db: Session = Depends(database.get_db), tg_user: bool = Depends(get_current_user_tg)):
     user = db.query(models.User).filter(models.User.telegram_id == req.telegram_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found. Please complete onboarding.")
@@ -165,3 +204,24 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
         "weather": {"temp": weather_temp, "condition": weather_condition},
         "log_id": log.log_id
     }
+
+@app.get("/api/export_data")
+def export_data(token: str, db: Session = Depends(database.get_db)):
+    if not BOT_TOKEN or token != BOT_TOKEN:
+        raise HTTPException(status_code=403, detail="Forbidden: Invalid Export Token")
+        
+    from fastapi.responses import StreamingResponse
+    import io
+    import csv
+    
+    users = db.query(models.User).all()
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["telegram_id", "username", "gender", "weight", "birth_date", "profession_type", "hd_type", "k_ns", "created_at"])
+    
+    for u in users:
+        writer.writerow([u.telegram_id, u.username, u.gender, u.weight, u.birth_date, u.profession_type, u.hd_type, get_k_ns(u.hd_type or ""), u.created_at])
+        
+    output.seek(0)
+    return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=liquid_os_users.csv"})

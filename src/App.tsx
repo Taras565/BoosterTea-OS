@@ -85,9 +85,14 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
         const telegramId = initData?.user?.id || 123456789; // fallback for testing
         const username = initData?.user?.username || '';
         
+        const rawInitData = (window as any).Telegram?.WebApp?.initData || '';
+        
         const res = await fetch(`${API_URL}/register`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Telegram-Init-Data': rawInitData
+          },
           body: JSON.stringify({
             telegram_id: telegramId,
             username: username,
@@ -292,9 +297,14 @@ function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, on
     try {
       const telegramId = initData?.user?.id || 123456789;
       
+      const rawInitData = (window as any).Telegram?.WebApp?.initData || '';
+      
       const res = await fetch(`${API_URL}/calculate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Telegram-Init-Data': rawInitData
+        },
         body: JSON.stringify({
           telegram_id: telegramId,
           specific_activity_id: profile.sub_profession,
