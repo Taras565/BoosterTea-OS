@@ -188,7 +188,7 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
         <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4">
           <h3 className="text-lg font-bold text-white mb-4">Смакова карта</h3>
           {[
-            {k:'taste_acid', label:'Кисле'}, {k:'taste_bitter', label:'Гірке'}, {k:'taste_sweet', label:'Солодке'}
+            {k:'taste_acid', label: t('acid')}, {k:'taste_bitter', label: t('bitter')}, {k:'taste_sweet', label: t('sweet')}
           ].map(t => (
             <div key={t.k} className="bg-black/30 p-4 rounded-xl border border-gray-800">
               <div className="flex justify-between items-center mb-3">
@@ -197,7 +197,7 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { label: 'Мінімум', value: 2 },
-                  { label: 'Баланс', value: 5 },
+                  { label: t('cns2'), value: 5 },
                   { label: 'Максимум', value: 8 }
                 ].map(lvl => {
                   const isActive = (data as any)[t.k] === lvl.value;
@@ -226,24 +226,24 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
 }
 
 const STRESS_LEVELS = [
-  { label: 'Спокій', value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: 'Баланс', value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: 'Напруга', value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: 'Стрес', value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
+  { label: t('cns1'), value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: t('cns2'), value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: t('cns3'), value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: t('cns4'), value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
 ];
 
 const ENERGY_LEVELS = [
-  { label: 'Спад', value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: 'Норма', value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: 'Заряд', value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: 'Пік', value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
+  { label: t('en1'), value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: t('en2'), value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: t('en3'), value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: t('en4'), value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
 ];
 
 const MENTAL_LEVELS = [
-  { label: 'Туман', value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: 'Норма', value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: 'Фокус', value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: 'Лазер', value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
+  { label: t('mn1'), value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: t('en2'), value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: t('mn3'), value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: t('mn4'), value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
 ];
 
 function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, onResult: (r: Recipe, t: number, c: string) => void, onReset: () => void }) {

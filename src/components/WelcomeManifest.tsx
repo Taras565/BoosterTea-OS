@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ShieldCheck, Droplet, Sparkles, Activity } from 'lucide-react';
+import { Language, getTranslation } from '../i18n';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const triggerHaptic = () => {
   try {
@@ -10,115 +12,6 @@ const triggerHaptic = () => {
   } catch (e) {}
 };
 
-const slides = [
-  {
-    id: 1,
-    title: "BoosterTea OS",
-    subtitle: "Рідка Операційна Система",
-    icon: <Droplet size={64} className="text-primary mb-6 mx-auto drop-shadow-[0_0_15px_rgba(0,255,204,0.5)]" />,
-    content: (
-      <div className="space-y-4 px-2">
-        <p className="text-[15px] text-gray-300 leading-relaxed font-medium">
-          Це перший у світі <span className="text-white font-bold">Health-Tech помічник</span>, який розраховує персональний біо-коктейль під поточний стан твоєї нервової системи. 
-        </p>
-        <p className="text-[15px] text-gray-300 leading-relaxed font-medium">
-          Ми оптимізуємо роботу твоїх клітин через природну біохімію без цукру та хімії.
-        </p>
-        <div className="bg-primary/10 border border-primary/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(0,255,204,0.1)]">
-          <h4 className="text-xs font-black text-primary uppercase tracking-widest mb-2 flex items-center justify-center gap-2"><TargetIcon /> Наша Місія</h4>
-          <p className="text-xs text-gray-300 leading-relaxed font-medium">Повернути контроль над твоїм фокусом, ресурсом та рівнем стресу без відкатів.</p>
-        </div>
-      </div>
-    )
-  },
-  {
-    id: 2,
-    title: "Органічна витяжка",
-    subtitle: "Нуль хімії. 100% користі",
-    icon: <Sparkles size={64} className="text-blue-400 mb-6 mx-auto drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />,
-    content: (
-      <div className="space-y-4 px-1">
-        <p className="text-sm text-gray-300 leading-relaxed font-medium mb-6">
-          Високотехнологічний концентрат чистого чайного екстракту та натуральних соків-провідників.
-        </p>
-        <div className="space-y-3 text-left">
-          <div className="bg-black/40 border border-green-500/30 p-3 rounded-xl flex items-start gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500 mt-1 shrink-0 shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-            <div>
-              <p className="text-[13px] font-black text-green-400 uppercase tracking-wider mb-1">GABA-екстракт</p>
-              <p className="text-[11px] text-gray-400 font-medium leading-snug">Природне заземлення, фокус без тривоги, насичення мозку киснем.</p>
-            </div>
-          </div>
-          <div className="bg-black/40 border border-red-500/30 p-3 rounded-xl flex items-start gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-500 mt-1 shrink-0 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-            <div>
-              <p className="text-[13px] font-black text-red-400 uppercase tracking-wider mb-1">Шу Пуер</p>
-              <p className="text-[11px] text-gray-400 font-medium leading-snug">М'який драйв для тіла та спорту, прискорення метаболізму.</p>
-            </div>
-          </div>
-          <div className="bg-black/40 border border-blue-500/30 p-3 rounded-xl flex items-start gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1 shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-            <div>
-              <p className="text-[13px] font-black text-blue-400 uppercase tracking-wider mb-1">Да Хун Пао</p>
-              <p className="text-[11px] text-gray-400 font-medium leading-snug">Когнітивний буст для творчості, бізнесу та довгих переговорів.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  },
-  {
-    id: 3,
-    title: "Стандарти майбутнього",
-    subtitle: "Безпека та Сертифікація",
-    icon: <ShieldCheck size={64} className="text-green-400 mb-6 mx-auto drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]" />,
-    content: (
-      <div className="space-y-4 px-1">
-        <ul className="space-y-3 text-left">
-          <li className="bg-black/40 border border-gray-800 p-4 rounded-xl flex flex-col gap-1">
-            <h4 className="text-[13px] font-black text-white flex items-center gap-2"><span className="text-green-400">🌿</span> Лише натуральна сировина</h4>
-            <p className="text-[11px] text-gray-400 font-medium">Без цукру, штучних барвників чи синтетичного кофеїну. Тільки цільні листи.</p>
-          </li>
-          <li className="bg-black/40 border border-gray-800 p-4 rounded-xl flex flex-col gap-1">
-            <h4 className="text-[13px] font-black text-white flex items-center gap-2"><span className="text-blue-400">🛡️</span> Контроль якості</h4>
-            <p className="text-[11px] text-gray-400 font-medium">Сертифіковане виробництво та офіційна сертифікація безпеки в Україні.</p>
-          </li>
-          <li className="bg-black/40 border border-gray-800 p-4 rounded-xl flex flex-col gap-1">
-            <h4 className="text-[13px] font-black text-white flex items-center gap-2"><span className="text-red-400">❤️</span> Захист серця</h4>
-            <p className="text-[11px] text-gray-400 font-medium">Алгоритм прораховує безпечне дозування під твою вагу, виключаючи ризик тахікардії.</p>
-          </li>
-        </ul>
-      </div>
-    )
-  },
-  {
-    id: 4,
-    title: "Твій щоденний ритуал",
-    subtitle: "Як це працює?",
-    icon: <Activity size={64} className="text-yellow-400 mb-6 mx-auto drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />,
-    content: (
-      <div className="space-y-4 px-1">
-        <div className="bg-black/40 border border-primary/20 p-5 rounded-xl space-y-5 text-left relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2" />
-          
-          <div className="flex gap-4 items-center">
-            <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">1</div>
-            <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white">Забий свій стан:</strong> Розкажи додатку, як ти почуваєшся прямо зараз.</p>
-          </div>
-          <div className="flex gap-4 items-center">
-            <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">2</div>
-            <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white">Отримай формулу:</strong> Алгоритм видасть точні мілілітри бази.</p>
-          </div>
-          <div className="flex gap-4 items-center">
-            <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">3</div>
-            <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white">Дихай:</strong> Натисни «Заварив!» та пройди Liquid-тренажер для засвоєння.</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-];
-
 function TargetIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -127,15 +20,121 @@ function TargetIcon() {
   )
 }
 
-export default function WelcomeManifest({ onComplete }: { onComplete: () => void }) {
+export default function WelcomeManifest({ onComplete }: { onComplete: (lang: Language) => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [lang, setLang] = useState<Language>('uk');
+
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
+
+  const slides = [
+    {
+      id: 1,
+      title: "BoosterTea OS",
+      subtitle: t('osSubtitle'),
+      icon: <Droplet size={64} className="text-primary mb-6 mx-auto drop-shadow-[0_0_15px_rgba(0,255,204,0.5)]" />,
+      content: (
+        <div className="space-y-4 px-2">
+          <p className="text-[15px] text-gray-300 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: t('osDesc1').replace('Health-Tech помічник', '<span class="text-white font-bold">Health-Tech помічник</span>').replace('Health-Tech assistant', '<span class="text-white font-bold">Health-Tech assistant</span>').replace('Health-Tech ассистент', '<span class="text-white font-bold">Health-Tech ассистент</span>') }} />
+          <p className="text-[15px] text-gray-300 leading-relaxed font-medium">{t('osDesc2')}</p>
+          <div className="bg-primary/10 border border-primary/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(0,255,204,0.1)]">
+            <h4 className="text-xs font-black text-primary uppercase tracking-widest mb-2 flex items-center justify-center gap-2"><TargetIcon /> {t('mission')}</h4>
+            <p className="text-xs text-gray-300 leading-relaxed font-medium">{t('missionDesc')}</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 2,
+      title: t('orgTitle'),
+      subtitle: t('orgSubtitle'),
+      icon: <Sparkles size={64} className="text-blue-400 mb-6 mx-auto drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />,
+      content: (
+        <div className="space-y-4 px-1">
+          <p className="text-sm text-gray-300 leading-relaxed font-medium mb-6">{t('orgDesc')}</p>
+          <div className="space-y-3 text-left">
+            <div className="bg-black/40 border border-green-500/30 p-3 rounded-xl flex items-start gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500 mt-1 shrink-0 shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              <div>
+                <p className="text-[13px] font-black text-green-400 uppercase tracking-wider mb-1">GABA</p>
+                <p className="text-[11px] text-gray-400 font-medium leading-snug">{t('gabaDesc')}</p>
+              </div>
+            </div>
+            <div className="bg-black/40 border border-red-500/30 p-3 rounded-xl flex items-start gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500 mt-1 shrink-0 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+              <div>
+                <p className="text-[13px] font-black text-red-400 uppercase tracking-wider mb-1">Puer</p>
+                <p className="text-[11px] text-gray-400 font-medium leading-snug">{t('puerDesc')}</p>
+              </div>
+            </div>
+            <div className="bg-black/40 border border-blue-500/30 p-3 rounded-xl flex items-start gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1 shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+              <div>
+                <p className="text-[13px] font-black text-blue-400 uppercase tracking-wider mb-1">Da Hong Pao</p>
+                <p className="text-[11px] text-gray-400 font-medium leading-snug">{t('dahongDesc')}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 3,
+      title: t('stdTitle'),
+      subtitle: t('stdSubtitle'),
+      icon: <ShieldCheck size={64} className="text-green-400 mb-6 mx-auto drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]" />,
+      content: (
+        <div className="space-y-4 px-1">
+          <ul className="space-y-3 text-left">
+            <li className="bg-black/40 border border-gray-800 p-4 rounded-xl flex flex-col gap-1">
+              <h4 className="text-[13px] font-black text-white flex items-center gap-2"><span className="text-green-400">🌿</span> {t('std1')}</h4>
+              <p className="text-[11px] text-gray-400 font-medium">{t('std1Desc')}</p>
+            </li>
+            <li className="bg-black/40 border border-gray-800 p-4 rounded-xl flex flex-col gap-1">
+              <h4 className="text-[13px] font-black text-white flex items-center gap-2"><span className="text-blue-400">🛡️</span> {t('std2')}</h4>
+              <p className="text-[11px] text-gray-400 font-medium">{t('std2Desc')}</p>
+            </li>
+            <li className="bg-black/40 border border-gray-800 p-4 rounded-xl flex flex-col gap-1">
+              <h4 className="text-[13px] font-black text-white flex items-center gap-2"><span className="text-red-400">❤️</span> {t('std3')}</h4>
+              <p className="text-[11px] text-gray-400 font-medium">{t('std3Desc')}</p>
+            </li>
+          </ul>
+        </div>
+      )
+    },
+    {
+      id: 4,
+      title: t('ritTitle'),
+      subtitle: t('ritSubtitle'),
+      icon: <Activity size={64} className="text-yellow-400 mb-6 mx-auto drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />,
+      content: (
+        <div className="space-y-4 px-1">
+          <div className="bg-black/40 border border-primary/20 p-5 rounded-xl space-y-5 text-left relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2" />
+            
+            <div className="flex gap-4 items-center">
+              <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">1</div>
+              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white">{t('rit1')}</strong> {t('rit1Desc')}</p>
+            </div>
+            <div className="flex gap-4 items-center">
+              <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">2</div>
+              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white">{t('rit2')}</strong> {t('rit2Desc')}</p>
+            </div>
+            <div className="flex gap-4 items-center">
+              <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">3</div>
+              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white">{t('rit3')}</strong> {t('rit3Desc')}</p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+  ];
 
   const nextSlide = () => {
     triggerHaptic();
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(prev => prev + 1);
     } else {
-      onComplete();
+      onComplete(lang);
     }
   };
 
@@ -148,9 +147,10 @@ export default function WelcomeManifest({ onComplete }: { onComplete: () => void
       exit={{ opacity: 0, scale: 0.95 }}
       className="glass-panel flex flex-col h-full max-h-[95vh] overflow-hidden p-0 border-primary/30 relative"
     >
+      <LanguageSwitcher currentLang={lang} onSelect={setLang} />
       
       {/* Progress Indicators */}
-      <div className="flex gap-2 p-6 pb-2 z-20">
+      <div className="flex gap-2 p-6 pb-2 z-20 mt-4">
         {slides.map((s, i) => (
           <div key={s.id} className="h-1 flex-1 rounded-full bg-gray-800 overflow-hidden relative">
             <motion.div 
@@ -189,7 +189,7 @@ export default function WelcomeManifest({ onComplete }: { onComplete: () => void
           onClick={nextSlide} 
           className="premium-btn w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 uppercase tracking-widest text-sm"
         >
-          {currentSlide === slides.length - 1 ? 'Розпочати ініціалізацію OS' : 'Далі'}
+          {currentSlide === slides.length - 1 ? t('btnStart') : t('btnNext')}
           <ChevronRight size={18} />
         </button>
       </div>

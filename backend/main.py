@@ -95,6 +95,7 @@ class StateRequest(BaseModel):
     drink_format: str = "long"
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    language: str = "uk"
 
 # Mock HD generator
 def mock_hd_type(birth_date: date) -> str:
@@ -178,7 +179,8 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
         specific_activity_id=req.specific_activity_id,
         drink_format=req.drink_format,
         weather_temp=weather_temp,
-        user=user
+        user=user,
+        language=req.language
     )
 
     # Save Log
