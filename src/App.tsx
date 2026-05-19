@@ -263,13 +263,19 @@ function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, on
         })
       });
 
+      if (res.status === 404) {
+        localStorage.removeItem('bio_profile');
+        onReset();
+        return;
+      }
+
       if (!res.ok) throw new Error("Calculation failed");
       const data = await res.json();
       
       onResult(data.recipe, data.weather.temp, data.weather.condition);
     } catch (err) {
       console.error(err);
-      setErrorMsg("Не вдалося знайти профіль або розрахувати рецепт. Будь ласка, натисніть 'Скинути' і зареєструйтесь знову.");
+      setErrorMsg("Втрачено зв'язок із сервером. Перевірте інтернет.");
     } finally {
       setLoading(false);
     }
