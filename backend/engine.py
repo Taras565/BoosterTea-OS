@@ -144,4 +144,24 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     recipe["avatar_image"] = avatar["image"]
     recipe["stats"] = avatar["stats"]
 
+    explanation_parts = []
+    explanation_parts.append(f"База ({recipe['base']}) підібрана спеціально під твою діяльність ({sub}).")
+    
+    if scale_cns >= 7:
+        explanation_parts.append(f"Через високий рівень стресу ({scale_cns}/10) ми додали компоненти для релаксації ЦНС.")
+    elif scale_energy < 5 and not had_caffeine:
+        explanation_parts.append(f"Враховуючи низький заряд ({scale_energy}/10), формула налаштована на плавний підйом енергії.")
+    elif scale_mental < 6:
+        explanation_parts.append(f"Щоб пробити ментальний туман, акцент зроблено на концентрацію та ясний розум.")
+        
+    if weather_temp > 22:
+        explanation_parts.append(f"Надворі спекотно ({weather_temp}°C), тому коктейль подається охолодженим на основі фрешу.")
+    else:
+        explanation_parts.append(f"Прохолодна погода ({weather_temp}°C) потребує зігрівання — подаємо теплий напій.")
+        
+    if had_caffeine:
+        explanation_parts.append("Оскільки ти вже пив каву, дозу чайного екстракту знижено для захисту серцево-судинної системи.")
+        
+    recipe["explanation"] = " ".join(explanation_parts)
+
     return recipe
