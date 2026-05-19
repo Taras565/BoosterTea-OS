@@ -123,7 +123,7 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
                 recipe["activator"] = "Чорничний"
     else:
         recipe["ice_cubes"] = 0
-        recipe["cocktail_status"] = "Підігрітий яблучно-імбирний"
+        recipe["cocktail_status"] = "Підігрітий"
         recipe["activator"] = "Підігрітий яблучно-імбирний"
         recipe["juice_ml"] = 120
         recipe["water_ml"] = 30

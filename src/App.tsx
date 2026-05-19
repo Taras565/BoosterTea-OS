@@ -340,21 +340,21 @@ function ResultScreen({ recipe, weatherTemp, weatherCond, onDone }: { recipe: Re
       <div className="p-6 space-y-4 flex-1">
         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Формула Змішування</h3>
         <div className="space-y-3">
-          <div className="flex justify-between items-center bg-gray-900/50 p-3 rounded-lg border border-gray-800">
-            <span className="text-gray-300 flex items-center gap-2"><FlaskConical size={16} className="text-primary"/> {recipe.base}</span>
-            <span className="font-bold text-white">{recipe.tea_ml} мл</span>
+          <div className="flex justify-between items-start bg-gray-900/50 p-3 rounded-lg border border-gray-800 gap-3">
+            <span className="text-gray-300 flex items-start gap-2 flex-1"><FlaskConical size={16} className="text-primary shrink-0 mt-0.5"/> <span className="leading-tight break-words">{recipe.base}</span></span>
+            <span className="font-bold text-white shrink-0 text-right">{recipe.tea_ml} мл</span>
           </div>
-          <div className="flex justify-between items-center bg-gray-900/50 p-3 rounded-lg border border-gray-800">
-            <span className="text-gray-300 flex items-center gap-2"><Droplet size={16} className="text-blue-400"/> {recipe.activator}</span>
-            <span className="font-bold text-white">{recipe.juice_ml} мл</span>
+          <div className="flex justify-between items-start bg-gray-900/50 p-3 rounded-lg border border-gray-800 gap-3">
+            <span className="text-gray-300 flex items-start gap-2 flex-1"><Droplet size={16} className="text-blue-400 shrink-0 mt-0.5"/> <span className="leading-tight break-words">{recipe.activator}</span></span>
+            <span className="font-bold text-white shrink-0 text-right">{recipe.juice_ml} мл</span>
           </div>
-          <div className="flex justify-between items-center bg-gray-900/50 p-3 rounded-lg border border-gray-800">
-            <span className="text-gray-300 flex items-center gap-2"><Thermometer size={16} className="text-red-400"/> Статус</span>
-            <span className="font-bold text-white text-xs">{recipe.cocktail_status}</span>
+          <div className="flex justify-between items-start bg-gray-900/50 p-3 rounded-lg border border-gray-800 gap-3">
+            <span className="text-gray-300 flex items-start gap-2 flex-1"><Thermometer size={16} className="text-red-400 shrink-0 mt-0.5"/> <span className="leading-tight break-words">Статус</span></span>
+            <span className="font-bold text-white text-sm shrink-0 text-right">{recipe.cocktail_status}</span>
           </div>
-          <div className="flex justify-between items-center bg-gray-900/50 p-3 rounded-lg border border-gray-800">
-            <span className="text-gray-300 flex items-center gap-2"><Wind size={16} className="text-cyan-400"/> Лід</span>
-            <span className="font-bold text-white text-sm">{recipe.ice_cubes > 0 ? `${recipe.ice_cubes} куб.` : 'Без льоду'}</span>
+          <div className="flex justify-between items-start bg-gray-900/50 p-3 rounded-lg border border-gray-800 gap-3">
+            <span className="text-gray-300 flex items-start gap-2 flex-1"><Wind size={16} className="text-cyan-400 shrink-0 mt-0.5"/> <span className="leading-tight break-words">Лід</span></span>
+            <span className="font-bold text-white text-sm shrink-0 text-right">{recipe.ice_cubes > 0 ? `${recipe.ice_cubes} куб.` : 'Без льоду'}</span>
           </div>
         </div>
       </div>
