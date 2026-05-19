@@ -95,7 +95,7 @@ export default function BreathworkTimer({ protocol, onDone }: { protocol: string
 
   if (isFinished) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-6 text-center">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-6 text-center">
         <Target size={48} className="text-primary mb-4" />
         <h2 className="text-2xl font-bold text-white mb-2">Систему активовану на 100%</h2>
         <p className="text-gray-400 mb-8">Твій стан завантажено.</p>
@@ -107,8 +107,8 @@ export default function BreathworkTimer({ protocol, onDone }: { protocol: string
   }
 
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 overflow-hidden">
-      <div className="absolute top-8 text-center w-full">
+    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 overflow-hidden">
+      <div className="absolute top-12 text-center w-full">
         <p className="text-gray-400 text-sm uppercase tracking-widest mb-1">{protocol === 'square' ? 'Квадратне Дихання' : 'Дихання Вогню'}</p>
         <p className="text-primary font-bold text-xl">0:{totalTime < 10 ? `0${totalTime}` : totalTime}</p>
       </div>
