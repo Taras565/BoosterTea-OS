@@ -466,6 +466,7 @@ function ResultScreen({ recipe, weatherTemp, weatherCond, onDone }: { recipe: Re
               </div>
           </div>
         </div>
+        </div>
 
         {/* Mixology Instructions Block */}
         {recipe.instructions && (
