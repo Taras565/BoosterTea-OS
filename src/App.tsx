@@ -207,25 +207,28 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
   );
 }
 
+const PREMIUM_ACTIVE = 'bg-primary/10 text-white border-primary shadow-[0_0_12px_rgba(0,255,204,0.3)] ring-1 ring-primary/50';
+const PREMIUM_IDLE = 'bg-black/40 text-gray-500 border-gray-800 hover:bg-gray-800 hover:text-gray-300';
+
 const STRESS_LEVELS = [
-  { label: 'Дзен', value: 2, active: 'bg-green-500 text-black border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]', idle: 'text-green-400 border-green-900/50 bg-black/40' },
-  { label: 'Норма', value: 5, active: 'bg-yellow-500 text-black border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]', idle: 'text-yellow-400 border-yellow-900/50 bg-black/40' },
-  { label: 'Напруга', value: 8, active: 'bg-orange-500 text-black border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]', idle: 'text-orange-400 border-orange-900/50 bg-black/40' },
-  { label: 'Перегорів', value: 10, active: 'bg-red-500 text-black border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]', idle: 'text-red-400 border-red-900/50 bg-black/40' }
+  { label: 'Спокій', value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: 'Баланс', value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: 'Напруга', value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: 'Стрес', value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
 ];
 
 const ENERGY_LEVELS = [
-  { label: 'Сів', value: 2, active: 'bg-red-500 text-black border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]', idle: 'text-red-400 border-red-900/50 bg-black/40' },
-  { label: 'Мало', value: 5, active: 'bg-orange-500 text-black border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]', idle: 'text-orange-400 border-orange-900/50 bg-black/40' },
-  { label: 'Норма', value: 8, active: 'bg-yellow-500 text-black border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]', idle: 'text-yellow-400 border-yellow-900/50 bg-black/40' },
-  { label: 'Заряд', value: 10, active: 'bg-green-500 text-black border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]', idle: 'text-green-400 border-green-900/50 bg-black/40' }
+  { label: 'Спад', value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: 'Норма', value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: 'Заряд', value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: 'Пік', value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
 ];
 
 const MENTAL_LEVELS = [
-  { label: 'Туман', value: 2, active: 'bg-gray-400 text-black border-gray-400 shadow-[0_0_10px_rgba(156,163,175,0.5)]', idle: 'text-gray-400 border-gray-800 bg-black/40' },
-  { label: 'Блукає', value: 5, active: 'bg-blue-400 text-black border-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.5)]', idle: 'text-blue-400 border-blue-900/50 bg-black/40' },
-  { label: 'Чіткий', value: 8, active: 'bg-cyan-400 text-black border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]', idle: 'text-cyan-400 border-cyan-900/50 bg-black/40' },
-  { label: 'Лазер', value: 10, active: 'bg-primary text-black border-primary shadow-[0_0_10px_rgba(0,255,204,0.5)]', idle: 'text-primary border-primary/50 bg-black/40' }
+  { label: 'Туман', value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: 'Норма', value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: 'Фокус', value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+  { label: 'Лазер', value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
 ];
 
 function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, onResult: (r: Recipe, t: number, c: string) => void, onReset: () => void }) {
