@@ -166,15 +166,18 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
                   {data.profession === tile.id && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="pl-4 pr-2 overflow-hidden">
                       <div className="bg-black/50 border border-primary/30 p-3 rounded-lg mt-1">
-                        <label className="block text-xs text-primary mb-2 uppercase tracking-widest">Я займаюся:</label>
-                        <select 
-                          value={data.sub_profession} 
-                          onChange={e => { setData({...data, sub_profession: e.target.value}); triggerHaptic(); }} 
-                          className="w-full bg-transparent text-white border-b border-gray-600 pb-1 outline-none text-sm"
-                        >
-                          <option value="" disabled>Оберіть напрямок...</option>
-                          {tile.subs.map(s => <option key={s} value={s} className="bg-gray-900">{s}</option>)}
-                        </select>
+                        <label className="block text-xs text-primary mb-3 uppercase tracking-widest">Деталізуйте:</label>
+                        <div className="flex flex-col gap-2">
+                          {tile.subs.map(s => (
+                            <button 
+                              key={s}
+                              onClick={() => { setData({...data, sub_profession: s}); triggerHaptic(); }}
+                              className={`w-full p-3 rounded-lg border text-sm font-bold transition-all text-left ${data.sub_profession === s ? 'border-primary bg-primary/20 text-white shadow-[0_0_8px_rgba(0,255,204,0.2)]' : 'border-gray-700 bg-black/40 text-gray-400 hover:bg-gray-800 hover:text-gray-200'}`}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </motion.div>
                   )}
