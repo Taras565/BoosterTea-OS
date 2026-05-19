@@ -122,7 +122,7 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-panel p-6 h-full flex flex-col justify-center">
-      <h2 className="text-2xl font-bold text-primary text-center mb-2">Liquid OS Ініціалізація</h2>
+      <h2 className="text-2xl font-bold text-primary text-center mb-2">BoosterTea OS Ініціалізація</h2>
       <div className="flex justify-center space-x-2 mb-8">
         {[1,2,3].map(i => <div key={i} className={`h-1 w-10 rounded ${step >= i ? 'bg-primary' : 'bg-gray-700'}`} />)}
       </div>

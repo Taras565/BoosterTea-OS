@@ -11,8 +11,8 @@ body {
   font-family: 'Outfit', sans-serif;
   background-color: #0a0a0c;
   background-image: 
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6)),
-    url('https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?q=80&w=1600&auto=format&fit=crop');
+    linear-gradient(to bottom, rgba(5, 5, 10, 0.6), rgba(0, 0, 0, 0.9)),
+    url('/bg-tea.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -24,11 +24,12 @@ body {
 
 /* Premium Main Button */
 .premium-btn {
-  background: linear-gradient(135deg, #00F0FF 0%, #0088FF 100%);
-  color: white !important;
-  box-shadow: 0 8px 24px rgba(0, 240, 255, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.5);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(20,20,25,0.8) 0%, rgba(5,5,10,0.9) 100%);
+  backdrop-filter: blur(20px);
+  color: #00F0FF !important;
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 0 8px rgba(0,240,255,0.3);
   position: relative;
   overflow: hidden;
 }
