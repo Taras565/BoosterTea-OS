@@ -192,10 +192,10 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
           <h3 className="text-lg font-bold text-white mb-4">Смакова карта</h3>
           {[
             {k:'taste_acid', label: t('acid')}, {k:'taste_bitter', label: t('bitter')}, {k:'taste_sweet', label: t('sweet')}
-          ].map(t => (
-            <div key={t.k} className="bg-black/30 p-4 rounded-xl border border-gray-800">
+          ].map(tasteItem => (
+            <div key={tasteItem.k} className="bg-black/30 p-4 rounded-xl border border-gray-800">
               <div className="flex justify-between items-center mb-3">
-                <label className="text-sm font-bold text-white uppercase tracking-wider">{t.label}</label>
+                <label className="text-sm font-bold text-white uppercase tracking-wider">{tasteItem.label}</label>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -203,10 +203,10 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
                   { label: t('cns2'), value: 5 },
                   { label: 'Максимум', value: 8 }
                 ].map(lvl => {
-                  const isActive = (data as any)[t.k] === lvl.value;
+                  const isActive = (data as any)[tasteItem.k] === lvl.value;
                   const btnClass = isActive ? PREMIUM_ACTIVE : PREMIUM_IDLE;
                   return (
-                    <button key={lvl.label} onClick={() => { setData({...data, [t.k]: lvl.value}); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-xs font-bold uppercase rounded-lg border transition-all duration-300 ${btnClass}`}>
+                    <button key={lvl.label} onClick={() => { setData({...data, [tasteItem.k]: lvl.value}); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-xs font-bold uppercase rounded-lg border transition-all duration-300 ${btnClass}`}>
                       {lvl.label}
                     </button>
                   );
