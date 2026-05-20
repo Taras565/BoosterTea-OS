@@ -206,16 +206,16 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     
     inst = {
         "shot": {
-            "uk": f"Формат «Шот». Змішайте {recipe['tea_ml']} мл концентрату «{recipe['base']}» та {recipe['juice_ml']} мл реагенту ({recipe['activator']}). Подавати у {gl_str}. Випити залпом.",
-            "en": f"Shot format. Mix {recipe['tea_ml']} ml of '{recipe['base']}' concentrate with {recipe['juice_ml']} ml of reagent ({recipe['activator']}). Serve in {gl_str}. Drink in one gulp.",
-            "ru": f"Формат «Шот». Смешайте {recipe['tea_ml']} мл концентрата «{recipe['base']}» и {recipe['juice_ml']} мл реагента ({recipe['activator']}). Подавать в {gl_str}. Выпить залпом.",
-            "es": f"Formato Shot. Mezcla {recipe['tea_ml']} ml de concentrado '{recipe['base']}' con {recipe['juice_ml']} ml de reactivo ({recipe['activator']}). Servir en {gl_str}. Beber de un trago."
+            "uk": f"Формат «Шот». Змішайте {recipe['tea_ml']} мл нашого концентрату «{recipe['base']}» та {recipe['juice_ml']} мл реагенту ({recipe['activator']}), який ви купуєте окремо. Подавати у {gl_str}. Випити залпом.",
+            "en": f"Shot format. Mix {recipe['tea_ml']} ml of our '{recipe['base']}' concentrate with {recipe['juice_ml']} ml of reagent ({recipe['activator']}) purchased separately. Serve in {gl_str}. Drink in one gulp.",
+            "ru": f"Формат «Шот». Смешайте {recipe['tea_ml']} мл нашего концентрата «{recipe['base']}» и {recipe['juice_ml']} мл реагента ({recipe['activator']}), который вы покупаете отдельно. Подавать в {gl_str}. Выпить залпом.",
+            "es": f"Formato Shot. Mezcla {recipe['tea_ml']} ml de nuestro concentrado '{recipe['base']}' con {recipe['juice_ml']} ml de reactivo ({recipe['activator']}) comprado por separado. Servir en {gl_str}. Beber de un trago."
         },
         "long": {
-            "uk": f"Візьміть {gl_str}. Налийте {recipe['activator']} ({recipe['juice_ml']} мл) та воду ({recipe['water_ml']} мл). Влийте {recipe['tea_ml']} мл концентрату «{recipe['base']}». Прикрасьте {g_str}.",
-            "en": f"Take {gl_str}. Pour {recipe['activator']} ({recipe['juice_ml']} ml) and water ({recipe['water_ml']} ml). Add {recipe['tea_ml']} ml of '{recipe['base']}' concentrate. Garnish with {g_str}.",
-            "ru": f"Возьмите {gl_str}. Налейте {recipe['activator']} ({recipe['juice_ml']} мл) и воду ({recipe['water_ml']} мл). Влейте {recipe['tea_ml']} мл концентрата «{recipe['base']}». Украсьте {g_str}.",
-            "es": f"Toma {gl_str}. Vierte {recipe['activator']} ({recipe['juice_ml']} ml) y agua ({recipe['water_ml']} ml). Añade {recipe['tea_ml']} ml de concentrado '{recipe['base']}'. Adorna con {g_str}."
+            "uk": f"Візьміть {gl_str}. Налийте {recipe['activator']} ({recipe['juice_ml']} мл, купується окремо) та воду ({recipe['water_ml']} мл). Влийте {recipe['tea_ml']} мл нашого концентрату «{recipe['base']}». Прикрасьте {g_str}.",
+            "en": f"Take {gl_str}. Pour {recipe['activator']} ({recipe['juice_ml']} ml, bought separately) and water ({recipe['water_ml']} ml). Add {recipe['tea_ml']} ml of our '{recipe['base']}' concentrate. Garnish with {g_str}.",
+            "ru": f"Возьмите {gl_str}. Налейте {recipe['activator']} ({recipe['juice_ml']} мл, покупается отдельно) и воду ({recipe['water_ml']} мл). Влейте {recipe['tea_ml']} мл нашего концентрата «{recipe['base']}». Украсьте {g_str}.",
+            "es": f"Toma {gl_str}. Vierte {recipe['activator']} ({recipe['juice_ml']} ml, comprado por separado) y agua ({recipe['water_ml']} ml). Añade {recipe['tea_ml']} ml de nuestro concentrado '{recipe['base']}'. Adorna con {g_str}."
         }
     }
     
