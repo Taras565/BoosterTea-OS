@@ -339,7 +339,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel p-6 flex flex-col h-full overflow-y-auto max-h-[90vh]">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-white">Стан на сьогодні</h2>
-        <button onClick={() => { triggerHaptic(); localStorage.removeItem('bio_profile'); onReset(); }} className="text-xs text-red-400 border border-red-900/50 bg-red-900/20 px-2 py-1 rounded hover:bg-red-900/40 transition-colors">Скинути</button>
+        <button onClick={() => { triggerHaptic(); localStorage.removeItem('bio_profile'); localStorage.removeItem('has_read_manifest'); onReset(); }} className="text-xs text-red-400 border border-red-900/50 bg-red-900/20 px-2 py-1 rounded hover:bg-red-900/40 transition-colors">Скинути</button>
       </div>
       
       <div className="bg-black/40 p-3 rounded-xl border border-primary/20 mb-6 flex justify-between items-center">
@@ -562,7 +562,7 @@ function AppContent() {
         <AnimatePresence mode="wait">
           {!hasReadManifest && <WelcomeManifest key="manifest" onComplete={(l) => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); handleLangChange(l); }} />}
           {hasReadManifest && !profile && <Onboarding key="onboarding" lang={lang} onComplete={setProfile} />}
-          {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t,c) => setRecipeResult({recipe: r, temp: t, cond: c})} onReset={() => setProfile(null)} />}
+          {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t,c) => setRecipeResult({recipe: r, temp: t, cond: c})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
           {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} onDone={() => setShowBreathwork(true)} />}
           {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" lang={lang} protocol={recipeResult.recipe.breathwork_protocol} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
         </AnimatePresence>
