@@ -4,6 +4,8 @@ import { Activity, Droplet, Thermometer, Wind, CheckCircle2, ChevronRight, Flask
 
 import BreathworkTimer from './components/BreathworkTimer'
 import WelcomeManifest from './components/WelcomeManifest'
+import LanguageSwitcher from './components/LanguageSwitcher'
+import { Language, getTranslation } from './i18n'
 import './App.css'
 
 const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname.includes('localhost') ? 'http://localhost:8000/api' : 'https://boostertea-os-backend.onrender.com/api');
@@ -61,7 +63,8 @@ const triggerHaptic = () => {
   } catch (e) {} 
 };
 
-function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void }) {
+function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) => void, lang: Language }) {
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -225,29 +228,32 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
   );
 }
 
-const STRESS_LEVELS = [
-  { label: t('cns1'), value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: t('cns2'), value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: t('cns3'), value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: t('cns4'), value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
-];
+// We will move these inside DailyCheckIn to use the local `t` function
 
-const ENERGY_LEVELS = [
-  { label: t('en1'), value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: t('en2'), value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: t('en3'), value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: t('en4'), value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
-];
-
-const MENTAL_LEVELS = [
-  { label: t('mn1'), value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: t('en2'), value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: t('mn3'), value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
-  { label: t('mn4'), value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
-];
-
-function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, onResult: (r: Recipe, t: number, c: string) => void, onReset: () => void }) {
+function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfile, lang: Language, onResult: (r: Recipe, t: number, c: string) => void, onReset: () => void }) {
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
+
+  const STRESS_LEVELS = [
+    { label: t('cns1'), value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+    { label: t('cns2'), value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+    { label: t('cns3'), value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+    { label: t('cns4'), value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
+  ];
+
+  const ENERGY_LEVELS = [
+    { label: t('en1'), value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+    { label: t('en2'), value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+    { label: t('en3'), value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+    { label: t('en4'), value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
+  ];
+
+  const MENTAL_LEVELS = [
+    { label: t('mn1'), value: 2, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+    { label: t('mn2'), value: 5, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+    { label: t('mn3'), value: 8, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE },
+    { label: t('mn4'), value: 10, active: PREMIUM_ACTIVE, idle: PREMIUM_IDLE }
+  ];
   const [scaleCns, setScaleCns] = useState(5);
   const [scaleEnergy, setScaleEnergy] = useState(5);
   const [scaleMental, setScaleMental] = useState(5);
@@ -306,7 +312,8 @@ function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, on
           scale_mental: scaleMental,
           had_caffeine_recently: hadCaffeine,
           latitude: lat,
-          longitude: lon
+          longitude: lon,
+          language: lang
         })
       });
 
@@ -413,7 +420,8 @@ function DailyCheckIn({ profile, onResult, onReset }: { profile: UserProfile, on
   );
 }
 
-function ResultScreen({ recipe, weatherTemp, weatherCond, onDone }: { recipe: Recipe, weatherTemp: number, weatherCond: string, onDone: () => void }) {
+function ResultScreen({ recipe, lang, weatherTemp, weatherCond, onDone }: { recipe: Recipe, lang: Language, weatherTemp: number, weatherCond: string, onDone: () => void }) {
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   return (
     <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="glass-panel flex flex-col h-full overflow-y-auto max-h-[95vh] p-0 border-primary/30">
       
@@ -527,6 +535,14 @@ function AppContent() {
   const [hasReadManifest, setHasReadManifest] = useState<boolean | null>(null);
   const [recipeResult, setRecipeResult] = useState<{ recipe: Recipe, temp: number, cond: string } | null>(null);
   const [showBreathwork, setShowBreathwork] = useState(false);
+  const [lang, setLang] = useState<Language>(() => {
+    return (localStorage.getItem('app_lang') as Language) || 'uk';
+  });
+
+  const handleLangChange = (l: Language) => {
+    setLang(l);
+    localStorage.setItem('app_lang', l);
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('bio_profile');
@@ -542,12 +558,13 @@ function AppContent() {
       <div className="bg-orb-1" />
       <div className="bg-orb-2" />
       <div className="z-10 relative flex-1 flex flex-col justify-center h-full max-w-md mx-auto">
+        <LanguageSwitcher currentLang={lang} onSelect={handleLangChange} />
         <AnimatePresence mode="wait">
-          {!hasReadManifest && <WelcomeManifest key="manifest" onComplete={() => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); }} />}
-          {hasReadManifest && !profile && <Onboarding key="onboarding" onComplete={setProfile} />}
-          {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" profile={profile} onResult={(r,t,c) => setRecipeResult({recipe: r, temp: t, cond: c})} onReset={() => setProfile(null)} />}
-          {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} onDone={() => setShowBreathwork(true)} />}
-          {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" protocol={recipeResult.recipe.breathwork_protocol} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
+          {!hasReadManifest && <WelcomeManifest key="manifest" onComplete={(l) => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); handleLangChange(l); }} />}
+          {hasReadManifest && !profile && <Onboarding key="onboarding" lang={lang} onComplete={setProfile} />}
+          {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t,c) => setRecipeResult({recipe: r, temp: t, cond: c})} onReset={() => setProfile(null)} />}
+          {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} onDone={() => setShowBreathwork(true)} />}
+          {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" lang={lang} protocol={recipeResult.recipe.breathwork_protocol} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
         </AnimatePresence>
       </div>
     </div>
