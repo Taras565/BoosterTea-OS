@@ -84,11 +84,24 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     weight = user.weight or 70
     if user.gender == "female": k_ns *= 0.9
     
-    target_state = "RELAX"
-    if scale_cns >= 7: target_state = "RELAX"
-    elif scale_energy < 5 and not had_caffeine: target_state = "ENERGY"
-    elif scale_mental < 6: target_state = "FOCUS"
-    else: target_state = "COMMUNICATION"
+    # Strict Activity-to-Target Mapping
+    if specific_activity_id == "sport":
+        target_state = "ENERGY"
+    elif specific_activity_id == "business":
+        target_state = "COMMUNICATION"
+    elif specific_activity_id in ["coding", "study"]:
+        target_state = "FOCUS"
+    elif specific_activity_id == "creative":
+        target_state = "FOCUS" if scale_mental < 5 else "COMMUNICATION"
+    elif specific_activity_id == "routine":
+        target_state = "RELAX"
+    else:
+        # Fallback to generic slider logic
+        target_state = "RELAX"
+        if scale_cns >= 7: target_state = "RELAX"
+        elif scale_energy < 5 and not had_caffeine: target_state = "ENERGY"
+        elif scale_mental < 6: target_state = "FOCUS"
+        else: target_state = "COMMUNICATION"
 
     # Dynamic State Modifier based on deviation from norm (5)
     state_modifier = 1.0
@@ -130,14 +143,29 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
         "state_modifier": state_modifier
     }
 
-    if target_state == "RELAX":
-        recipe["base_key"] = "Pure GABA" if scale_cns >= 9 else "Soft GABA"
-    elif target_state == "ENERGY":
+    # Strict Molecule (Base) Mapping
+    if specific_activity_id == "sport":
         recipe["base_key"] = "Puer" if not had_caffeine else "GABA (Decaf)"
-    elif target_state == "FOCUS":
-        recipe["base_key"] = "GABA + DHP" if scale_mental < 3 else "GABA"
-    elif target_state == "COMMUNICATION":
+    elif specific_activity_id == "business":
         recipe["base_key"] = "DHP"
+    elif specific_activity_id == "coding":
+        recipe["base_key"] = "GABA + DHP"
+    elif specific_activity_id == "study":
+        recipe["base_key"] = "Pure GABA"
+    elif specific_activity_id == "creative":
+        recipe["base_key"] = "Soft GABA" if target_state == "FOCUS" else "DHP"
+    elif specific_activity_id == "routine":
+        recipe["base_key"] = "Pure GABA" if scale_cns >= 8 else "Soft GABA"
+    else:
+        # Fallback base logic
+        if target_state == "RELAX":
+            recipe["base_key"] = "Pure GABA" if scale_cns >= 9 else "Soft GABA"
+        elif target_state == "ENERGY":
+            recipe["base_key"] = "Puer" if not had_caffeine else "GABA (Decaf)"
+        elif target_state == "FOCUS":
+            recipe["base_key"] = "GABA + DHP" if scale_mental < 3 else "GABA"
+        elif target_state == "COMMUNICATION":
+            recipe["base_key"] = "DHP"
     
     recipe["breathwork_protocol"] = "fire" if target_state == "ENERGY" else "square"
 

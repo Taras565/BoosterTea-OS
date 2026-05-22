@@ -101,8 +101,20 @@ export default function BreathworkTimer({ protocol, lang, onDone }: { protocol: 
         <Target size={48} className="text-primary mb-4" />
         <h2 className="text-2xl font-bold text-white mb-2">{t('sysActive')}</h2>
         <p className="text-gray-400 mb-8">{t('stateLoaded')}</p>
-        <button onClick={() => { triggerHaptic(); onDone(); }} className="premium-btn w-full py-4 rounded-xl font-bold uppercase text-sm tracking-widest">
-          {t('btnFinish')}
+        <button onClick={() => { triggerHaptic(); onDone(); }} className="premium-btn w-full py-4 rounded-xl font-bold uppercase text-sm tracking-widest mb-3">
+          {t('btnFinish') as string}
+        </button>
+        <button onClick={() => {
+          triggerHaptic();
+          const url = "https://www.boostertea.com.ua/";
+          const webApp = (window as any).Telegram?.WebApp;
+          if (webApp && webApp.openLink) {
+            webApp.openLink(url);
+          } else {
+            window.open(url, "_blank");
+          }
+        }} className="bg-gradient-to-r from-emerald-400 to-teal-500 text-black font-extrabold w-full py-4 rounded-xl uppercase text-sm tracking-widest shadow-[0_0_20px_rgba(52,211,153,0.4)] hover:scale-[1.02] transition-transform">
+          {t('btnBuy') as string || '🛒 Замовити концентрат'}
         </button>
       </motion.div>
     );
