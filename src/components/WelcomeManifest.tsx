@@ -168,7 +168,7 @@ export default function WelcomeManifest({ lang, onComplete }: { lang: Language, 
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="w-full p-6 flex flex-col justify-center text-center overflow-y-auto"
+            className="w-full h-full p-6 flex flex-col justify-center text-center overflow-y-auto"
           >
             {slide.icon}
             <h1 className="text-2xl font-black text-white uppercase tracking-widest mb-1 drop-shadow-md">{slide.title}</h1>
