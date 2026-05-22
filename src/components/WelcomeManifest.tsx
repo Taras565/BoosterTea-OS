@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ShieldCheck, Droplet, Sparkles, Activity } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Droplet, Sparkles, Activity, Brain, FlaskConical } from 'lucide-react';
 import { Language, getTranslation } from '../i18n';
 
 const triggerHaptic = () => {
@@ -27,83 +27,65 @@ export default function WelcomeManifest({ lang, onComplete }: { lang: Language, 
   const slides = [
     {
       id: 1,
-      title: "BoosterTea OS",
-      subtitle: t('osSubtitle'),
-      icon: <Droplet size={64} className="text-primary mb-6 mx-auto drop-shadow-[0_0_15px_rgba(0,255,204,0.5)]" />,
+      title: t('wm1Title'),
+      subtitle: t('wm1Sub'),
+      icon: <Droplet size={64} className="text-primary mb-6 mx-auto drop-shadow-[0_0_20px_rgba(0,255,204,0.6)]" />,
       content: (
-        <div className="space-y-4 px-2">
-          <p className="text-[15px] text-gray-300 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: t('osDesc1').replace('Health-Tech помічник', '<span class="text-white font-bold">Health-Tech помічник</span>').replace('Health-Tech assistant', '<span class="text-white font-bold">Health-Tech assistant</span>').replace('Health-Tech ассистент', '<span class="text-white font-bold">Health-Tech ассистент</span>') }} />
-          <p className="text-[15px] text-gray-300 leading-relaxed font-medium">{t('osDesc2')}</p>
-          <div className="bg-primary/10 border border-primary/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(0,255,204,0.1)]">
-            <h4 className="text-xs font-black text-primary uppercase tracking-widest mb-2 flex items-center justify-center gap-2"><TargetIcon /> {t('mission')}</h4>
-            <p className="text-xs text-gray-300 leading-relaxed font-medium">{t('missionDesc')}</p>
-          </div>
+        <div className="space-y-4 px-2 text-center">
+          <p className="text-[15px] text-gray-300 leading-relaxed font-medium">{t('wm1Desc')}</p>
         </div>
       )
     },
     {
       id: 2,
-      title: t('orgTitle'),
-      subtitle: t('orgSubtitle'),
-      icon: <Sparkles size={64} className="text-blue-400 mb-6 mx-auto drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />,
+      title: t('wm2Title'),
+      subtitle: t('wm2Sub'),
+      icon: <Brain size={64} className="text-blue-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]" />,
       content: (
         <div className="space-y-4 px-1">
-          <p className="text-sm text-gray-300 leading-relaxed font-medium mb-6">{t('orgDesc')}</p>
-          <div className="space-y-3 text-left">
-            <div className="bg-black/40 border border-green-500/30 p-3 rounded-xl flex items-start gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500 mt-1 shrink-0 shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-              <div>
-                <p className="text-[13px] font-black text-green-400 uppercase tracking-wider mb-1">GABA</p>
-                <p className="text-[11px] text-gray-400 font-medium leading-snug">{t('gabaDesc')}</p>
-              </div>
-            </div>
-            <div className="bg-black/40 border border-red-500/30 p-3 rounded-xl flex items-start gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500 mt-1 shrink-0 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-              <div>
-                <p className="text-[13px] font-black text-red-400 uppercase tracking-wider mb-1">Puer</p>
-                <p className="text-[11px] text-gray-400 font-medium leading-snug">{t('puerDesc')}</p>
-              </div>
-            </div>
-            <div className="bg-black/40 border border-blue-500/30 p-3 rounded-xl flex items-start gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1 shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-              <div>
-                <p className="text-[13px] font-black text-blue-400 uppercase tracking-wider mb-1">Da Hong Pao</p>
-                <p className="text-[11px] text-gray-400 font-medium leading-snug">{t('dahongDesc')}</p>
-              </div>
-            </div>
+          <p className="text-[14px] text-gray-300 leading-relaxed font-medium text-center">{t('wm2Desc')}</p>
+          <div className="bg-black/40 border border-green-500/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(34,197,94,0.1)] flex items-start gap-3 text-left">
+            <ShieldCheck className="text-green-400 shrink-0 mt-0.5" size={18} />
+            <p className="text-xs text-gray-300 font-medium leading-snug">{t('wm2Fear')}</p>
           </div>
         </div>
       )
     },
     {
       id: 3,
-      title: t('stdTitle'),
-      subtitle: t('stdSubtitle'),
-      icon: <ShieldCheck size={64} className="text-green-400 mb-6 mx-auto drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]" />,
+      title: t('wm3Title'),
+      subtitle: t('wm3Sub'),
+      icon: <FlaskConical size={64} className="text-purple-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(168,85,247,0.6)]" />,
       content: (
         <div className="space-y-4 px-1">
-          <ul className="space-y-3 text-left">
-            <li className="bg-black/40 border border-gray-800 p-4 rounded-xl flex flex-col gap-1">
-              <h4 className="text-[13px] font-black text-white flex items-center gap-2"><span className="text-green-400">🌿</span> {t('std1')}</h4>
-              <p className="text-[11px] text-gray-400 font-medium">{t('std1Desc')}</p>
-            </li>
-            <li className="bg-black/40 border border-gray-800 p-4 rounded-xl flex flex-col gap-1">
-              <h4 className="text-[13px] font-black text-white flex items-center gap-2"><span className="text-blue-400">🛡️</span> {t('std2')}</h4>
-              <p className="text-[11px] text-gray-400 font-medium">{t('std2Desc')}</p>
-            </li>
-            <li className="bg-black/40 border border-gray-800 p-4 rounded-xl flex flex-col gap-1">
-              <h4 className="text-[13px] font-black text-white flex items-center gap-2"><span className="text-red-400">❤️</span> {t('std3')}</h4>
-              <p className="text-[11px] text-gray-400 font-medium">{t('std3Desc')}</p>
-            </li>
-          </ul>
+          <p className="text-[14px] text-gray-300 leading-relaxed font-medium text-center">{t('wm3Desc')}</p>
+          <div className="bg-black/40 border border-purple-500/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(168,85,247,0.1)] flex items-start gap-3 text-left">
+            <Sparkles className="text-purple-400 shrink-0 mt-0.5" size={18} />
+            <p className="text-xs text-gray-300 font-medium leading-snug">{t('wm3Fear')}</p>
+          </div>
         </div>
       )
     },
     {
       id: 4,
-      title: t('ritTitle'),
-      subtitle: t('ritSubtitle'),
-      icon: <Activity size={64} className="text-yellow-400 mb-6 mx-auto drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />,
+      title: t('wm4Title'),
+      subtitle: t('wm4Sub'),
+      icon: <Activity size={64} className="text-red-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(239,68,68,0.6)]" />,
+      content: (
+        <div className="space-y-4 px-1">
+          <p className="text-[14px] text-gray-300 leading-relaxed font-medium text-center">{t('wm4Desc')}</p>
+          <div className="bg-black/40 border border-red-500/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(239,68,68,0.1)] flex items-start gap-3 text-left">
+            <ShieldCheck className="text-red-400 shrink-0 mt-0.5" size={18} />
+            <p className="text-xs text-gray-300 font-medium leading-snug">{t('wm4Fear')}</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 5,
+      title: t('wm5Title'),
+      subtitle: t('wm5Sub'),
+      icon: <Activity size={64} className="text-yellow-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(250,204,21,0.6)]" />,
       content: (
         <div className="space-y-4 px-1">
           <div className="bg-black/40 border border-primary/20 p-5 rounded-xl space-y-5 text-left relative overflow-hidden">
@@ -111,15 +93,15 @@ export default function WelcomeManifest({ lang, onComplete }: { lang: Language, 
             
             <div className="flex gap-4 items-center">
               <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">1</div>
-              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white">{t('rit1')}</strong> {t('rit1Desc')}</p>
+              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white block mb-0.5">{t('wm5Step1')}</strong> {t('wm5Step1D')}</p>
             </div>
             <div className="flex gap-4 items-center">
               <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">2</div>
-              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white">{t('rit2')}</strong> {t('rit2Desc')}</p>
+              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white block mb-0.5">{t('wm5Step2')}</strong> {t('wm5Step2D')}</p>
             </div>
             <div className="flex gap-4 items-center">
               <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">3</div>
-              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white">{t('rit3')}</strong> {t('rit3Desc')}</p>
+              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white block mb-0.5">{t('wm5Step3')}</strong> {t('wm5Step3D')}</p>
             </div>
           </div>
         </div>
