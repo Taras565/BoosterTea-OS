@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, Droplet, Thermometer, Wind, CheckCircle2, ChevronRight, FlaskConical, Target, Zap, Coffee, MessageCircle, Leaf } from 'lucide-react'
+import { Activity, Droplet, Thermometer, Wind, CheckCircle2, ChevronRight, FlaskConical, Target, Zap, Coffee, MessageCircle, Leaf, ShoppingCart } from 'lucide-react'
 
 import BreathworkTimer from './components/BreathworkTimer'
 import WelcomeManifest from './components/WelcomeManifest'
@@ -53,6 +53,35 @@ const activityOptions = [
   { id: 'sport', label: '⚡ Фізична активність', sub: 'Спорт, рух, фізична праця, витривалість' },
   { id: 'routine', label: '🔄 Відновлення та Побут', sub: 'Відпочинок, рутина, баланс' }
 ];
+
+function ResultScreen({ recipe, weatherTemp, weatherCond, drinkFormat, activityType, onDone, lang }: { recipe: Recipe, weatherTemp: number, weatherCond: string, drinkFormat: string, activityType: string, onDone: () => void, lang: Language }) {
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
+  const [activeFormat, setActiveFormat] = useState(drinkFormat);
+
+  const getPredictedTime = () => {
+    if (activeFormat === 'Shot') return t('timeShot');
+    if (activeFormat === 'Cocktail') return t('timeLong');
+    return t('timeTea');
+  };
+
+  const currentWater = activeFormat === 'Shot' ? 0 : (activeFormat === 'Cocktail' ? 50 : 200);
+  const currentJuice = activeFormat === 'Shot' ? 30 : (activeFormat === 'Cocktail' ? 150 : 0);
+  const isHotWeather = weatherTemp > 22;
+  const currentIce = activeFormat === 'Cocktail' ? (isHotWeather ? 4 : 2) : 0;
+  const currentStatus = activeFormat === 'Tea' ? 'Hot' : 'Chilled';
+  
+  const currentInstructions = activeFormat === 'Shot' 
+    ? t('instShot') 
+    : (activeFormat === 'Cocktail' ? t('instCocktail') : t('instTea'));
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col bg-black overflow-y-auto">
+      <div className="relative h-48 shrink-0">
+        {/* Result Screen Content */}
+      </div>
+    </motion.div>
+  );
+}
 
 const triggerHaptic = () => { 
   try { 
@@ -442,11 +471,30 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
 function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, activityType, onDone }: { recipe: Recipe, lang: Language, weatherTemp: number, weatherCond: string, drinkFormat: string, activityType: string, onDone: () => void }) {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   
-  const getPredictedTime = () => {
-    if (drinkFormat === 'tea') return t('timeTea');
-    if (drinkFormat === 'shot') return t('timeShot');
-    return t('timeLong');
+  const normalizeFormat = (f: string) => {
+    if (f === 'long') return 'Cocktail';
+    if (f === 'shot') return 'Shot';
+    return 'Tea';
   };
+  
+  const [activeFormat, setActiveFormat] = useState(normalizeFormat(drinkFormat));
+
+  const getPredictedTime = () => {
+    if (activeFormat === 'Shot') return t('timeShot');
+    if (activeFormat === 'Cocktail') return t('timeLong');
+    return t('timeTea');
+  };
+
+  const currentWater = activeFormat === 'Shot' ? 0 : (activeFormat === 'Cocktail' ? 50 : 200);
+  const currentJuice = activeFormat === 'Shot' ? 30 : (activeFormat === 'Cocktail' ? 150 : 0);
+  const isHotWeather = weatherTemp > 22;
+  const currentIce = activeFormat === 'Cocktail' ? (isHotWeather ? 4 : 2) : 0;
+  const currentStatus = activeFormat === 'Tea' ? 'Hot' : 'Chilled';
+  
+  const currentInstructions = activeFormat === 'Shot' 
+    ? t('instShot' as any) 
+    : (activeFormat === 'Cocktail' ? t('instCocktail' as any) : t('instTea' as any));
+
   return (
     <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="glass-panel flex flex-col h-full overflow-y-auto max-h-[95vh] p-0 border-primary/30">
       
@@ -479,6 +527,19 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
           </div>
         )}
 
+        {/* Format Switcher */}
+        <div className="flex bg-gray-900/50 p-1 rounded-xl border border-gray-800">
+          {['Shot', 'Cocktail', 'Tea'].map(fmt => (
+            <button
+              key={fmt}
+              onClick={() => { triggerHaptic(); setActiveFormat(fmt); }}
+              className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeFormat === fmt ? 'bg-primary text-black shadow-md' : 'text-gray-500 hover:text-gray-300'}`}
+            >
+              {t(`fmt${fmt}` as any) as string}
+            </button>
+          ))}
+        </div>
+
         <div>
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">{t('mixFormula')}</h3>
           <div className="space-y-3">
@@ -493,23 +554,38 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
               <span className="font-bold text-primary shrink-0 text-right text-lg">{recipe.tea_ml} <span className="text-xs text-gray-400">{t('ml')}</span></span>
             </div>
 
-            <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg border border-gray-800">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20"><Droplet size={14} className="text-blue-400"/></div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{t('activator')}</span>
-                  <span className="text-sm font-bold text-white leading-tight">{recipe.activator}</span>
+            {currentJuice > 0 && (
+              <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg border border-gray-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20"><Droplet size={14} className="text-blue-400"/></div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{t('activator')}</span>
+                    <span className="text-sm font-bold text-white leading-tight">{recipe.activator}</span>
+                  </div>
                 </div>
+                <span className="font-bold text-blue-400 shrink-0 text-right text-lg">{currentJuice} <span className="text-xs text-gray-400">{t('ml')}</span></span>
               </div>
-              <span className="font-bold text-blue-400 shrink-0 text-right text-lg">{recipe.juice_ml} <span className="text-xs text-gray-400">{t('ml')}</span></span>
-            </div>
+            )}
+
+            {currentWater > 0 && (
+              <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg border border-gray-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20"><Droplet size={14} className="text-blue-400"/></div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Water</span>
+                    <span className="text-sm font-bold text-white leading-tight">Water</span>
+                  </div>
+                </div>
+                <span className="font-bold text-blue-400 shrink-0 text-right text-lg">{currentWater} <span className="text-xs text-gray-400">{t('ml')}</span></span>
+              </div>
+            )}
 
             <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg border border-gray-800">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center shrink-0 border border-red-500/20"><Thermometer size={14} className="text-red-400"/></div>
                 <div className="flex flex-col">
                   <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{t('temp')}</span>
-                  <span className="text-sm font-bold text-white leading-tight">{recipe.cocktail_status}</span>
+                  <span className="text-sm font-bold text-white leading-tight">{currentStatus}</span>
                 </div>
               </div>
             </div>
@@ -519,7 +595,7 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
                 <div className="w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center shrink-0 border border-cyan-500/20"><Wind size={14} className="text-cyan-400"/></div>
                 <div className="flex flex-col">
                   <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{t('cooling')}</span>
-                  <span className="text-sm font-bold text-white leading-tight">{recipe.ice_cubes > 0 ? `${recipe.ice_cubes} ${t('cubes')}` : t('noIce')}</span>
+                  <span className="text-sm font-bold text-white leading-tight">{currentIce > 0 ? `${currentIce} ${t('cubes')}` : t('noIce')}</span>
                 </div>
               </div>
           </div>
@@ -527,10 +603,10 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
         </div>
 
         {/* Mixology Instructions Block */}
-        {recipe.instructions && (
+        {currentInstructions && (
           <div className="bg-gradient-to-br from-gray-900 to-black p-4 rounded-xl border border-gray-700 shadow-inner mt-4">
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Leaf size={14} className="text-primary"/> {t('barmen')}</h3>
-            <p className="text-sm text-gray-300 leading-relaxed font-medium">{recipe.instructions}</p>
+            <p className="text-sm text-gray-300 leading-relaxed font-medium">{currentInstructions as string}</p>
           </div>
         )}
       </div>
@@ -657,9 +733,27 @@ function AppContent() {
 
   return (
     <div className="app-container p-4">
+      {/* Global Persistent Cart Button */}
+      {hasReadManifest && (
+        <button 
+          onClick={() => {
+            triggerHaptic();
+            const url = "https://www.boostertea.com.ua/";
+            const webApp = (window as any).Telegram?.WebApp;
+            if (webApp && webApp.openLink) {
+              webApp.openLink(url);
+            } else {
+              window.open(url, "_blank");
+            }
+          }}
+          className="fixed top-4 right-4 z-[100] w-12 h-12 bg-black/80 backdrop-blur-md border border-primary/50 rounded-full flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,255,204,0.3)] hover:scale-110 transition-transform"
+        >
+          <ShoppingCart size={20} />
+        </button>
+      )}
       <div className="bg-orb-1" />
       <div className="bg-orb-2" />
-      <div className="z-10 relative flex-1 w-full flex flex-col justify-center h-full max-w-md mx-auto">
+      <div className="z-10 relative flex-1 w-full flex flex-col justify-center h-full max-w-md mx-auto pt-10">
         <LanguageSwitcher currentLang={lang} onSelect={handleLangChange} />
         <AnimatePresence mode="wait">
           {!hasReadManifest && <WelcomeManifest key="manifest" lang={lang} onComplete={() => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); }} />}

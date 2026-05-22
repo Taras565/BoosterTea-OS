@@ -143,7 +143,13 @@ export const translations = {
     btnAbort: "Перервати",
     sysActive: "Систему активовану на 100%",
     stateLoaded: "Твій стан завантажено.",
-    btnFinish: "Завершити"
+    btnFinish: "Завершити",
+    fmtShot: "🥃 Шот",
+    fmtCocktail: "🍹 Коктейль",
+    fmtTea: "🍵 Чай",
+    instShot: "Випий залпом як шот для миттєвого ефекту. Не запивай водою 5 хвилин.",
+    instCocktail: "Змішай у шейкері або високій склянці. Додай лід. Пий повільно протягом 15 хвилин.",
+    instTea: "Залий гарячою водою (не окропом). Настоюй 2 хвилини і пий неспішно."
   },
   en: {
     wm1Title: "Liquid Operating System",
@@ -276,7 +282,13 @@ export const translations = {
     btnAbort: "Abort",
     sysActive: "System 100% Activated",
     stateLoaded: "Your state is loaded.",
-    btnFinish: "Finish"
+    btnFinish: "Finish",
+    fmtShot: "🥃 Shot",
+    fmtCocktail: "🍹 Cocktail",
+    fmtTea: "🍵 Tea",
+    instShot: "Drink it all at once as a shot for instant effect. Do not drink water for 5 minutes.",
+    instCocktail: "Mix in a shaker or tall glass. Add ice. Sip slowly over 15 minutes.",
+    instTea: "Pour hot water (not boiling). Steep for 2 minutes and drink unhurriedly."
   },
   ru: {
     wm1Title: "Жидкая Операционная Система",
@@ -409,7 +421,13 @@ export const translations = {
     btnAbort: "Прервать",
     sysActive: "Система активирована на 100%",
     stateLoaded: "Твое состояние загружено.",
-    btnFinish: "Завершить"
+    btnFinish: "Завершить",
+    fmtShot: "🥃 Шот",
+    fmtCocktail: "🍹 Коктейль",
+    fmtTea: "🍵 Чай",
+    instShot: "Выпей залпом как шот для мгновенного эффекта. Не запивай водой 5 минут.",
+    instCocktail: "Смешай в шейкере или высоком стакане. Добавь лед. Пей медленно в течение 15 минут.",
+    instTea: "Залей горячей водой (не кипятком). Настаивай 2 минуты и пей неспешно."
   },
   es: {
     wm1Title: "Sistema Operativo Líquido",
@@ -542,7 +560,13 @@ export const translations = {
     btnAbort: "Abortar",
     sysActive: "Sistema 100% Activado",
     stateLoaded: "Tu estado ha sido cargado.",
-    btnFinish: "Terminar"
+    btnFinish: "Terminar",
+    fmtShot: "🥃 Shot",
+    fmtCocktail: "🍹 Cóctel",
+    fmtTea: "🍵 Té",
+    instShot: "Bébelo de un trago para un efecto instantáneo. No bebas agua durante 5 minutos.",
+    instCocktail: "Mezcla en una coctelera o vaso alto. Añade hielo. Bebe lentamente durante 15 minutos.",
+    instTea: "Vierte agua caliente (no hirviendo). Deja reposar por 2 minutos y bebe sin prisas."
   }
 };
 
