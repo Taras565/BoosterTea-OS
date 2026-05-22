@@ -243,6 +243,16 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
         "log_id": log.log_id
     }
 
+@app.get("/api/stats")
+def get_stats(db: Session = Depends(database.get_db)):
+    users_count = db.query(models.User).count()
+    logs_count = db.query(models.StateLog).count()
+    return {
+        "status": "online",
+        "total_users": users_count,
+        "total_checkins": logs_count
+    }
+
 @app.get("/api/export_data")
 def export_data(token: str, db: Session = Depends(database.get_db)):
     if not BOT_TOKEN or token != BOT_TOKEN:

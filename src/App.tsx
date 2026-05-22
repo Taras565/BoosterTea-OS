@@ -571,6 +571,16 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
           }
         }} className="py-3 rounded-xl border border-primary/50 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors uppercase tracking-wider">{t('btnShare')}</button>
         <button onClick={() => { triggerHaptic(); onDone(); }} className="premium-btn font-bold py-3 rounded-xl text-sm uppercase tracking-wider">{t('btnBrewed')}</button>
+        <button onClick={() => {
+          triggerHaptic();
+          const url = "https://www.boostertea.com.ua/";
+          const webApp = (window as any).Telegram?.WebApp;
+          if (webApp && webApp.openLink) {
+            webApp.openLink(url);
+          } else {
+            window.open(url, "_blank");
+          }
+        }} className="bg-gradient-to-r from-emerald-400 to-teal-500 text-black font-extrabold py-3 rounded-xl text-sm uppercase tracking-wider flex items-center justify-center gap-2 mt-2 shadow-[0_0_15px_rgba(52,211,153,0.5)] hover:scale-[1.02] transition-transform">{t('btnBuy') as string}</button>
       </div>
     </motion.div>
   );
