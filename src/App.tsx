@@ -396,32 +396,6 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
         </div>
       </div>
 
-      <div className="mb-6">
-        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">{t('format')}</h3>
-        <div className="flex gap-2 p-1 bg-black/40 border border-gray-800 rounded-xl">
-          <button 
-            onClick={() => { triggerHaptic(); setDrinkFormat('tea'); }} 
-            className={`flex-1 py-2 flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'tea' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
-          >
-            <span>{t('formatTea')}</span>
-            <span className="text-[9px] font-normal opacity-70 lowercase mt-0.5">{t('timeTea')}</span>
-          </button>
-          <button 
-            onClick={() => { triggerHaptic(); setDrinkFormat('shot'); }} 
-            className={`flex-1 py-2 flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'shot' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
-          >
-            <span>{t('formatShot')}</span>
-            <span className="text-[9px] font-normal opacity-70 lowercase mt-0.5">{t('timeShot')}</span>
-          </button>
-          <button 
-            onClick={() => { triggerHaptic(); setDrinkFormat('long'); }} 
-            className={`flex-1 py-2 flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'long' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
-          >
-            <span>{t('formatLong')}</span>
-            <span className="text-[9px] font-normal opacity-70 lowercase mt-0.5">{t('timeLong')}</span>
-          </button>
-        </div>
-      </div>
 
       {errorMsg && (
         <div className="mb-4 p-3 bg-red-900/30 border border-red-500/50 rounded-xl text-center">
