@@ -233,7 +233,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
 
 // We will move these inside DailyCheckIn to use the local `t` function
 
-function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfile, lang: Language, onResult: (r: Recipe, t: number, c: string) => void, onReset: () => void }) {
+function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfile, lang: Language, onResult: (r: Recipe, t: number, c: string, f: string) => void, onReset: () => void }) {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
 
@@ -329,7 +329,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
       if (!res.ok) throw new Error("Calculation failed");
       const data = await res.json();
       
-      onResult(data.recipe, data.weather.temp, data.weather.condition);
+      onResult(data.recipe, data.weather.temp, data.weather.condition, drinkFormat);
     } catch (err) {
       console.error(err);
       setErrorMsg("Втрачено зв'язок із сервером. Перевірте інтернет.");
@@ -400,21 +400,24 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
         <div className="flex gap-2 p-1 bg-black/40 border border-gray-800 rounded-xl">
           <button 
             onClick={() => { triggerHaptic(); setDrinkFormat('tea'); }} 
-            className={`flex-1 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'tea' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
+            className={`flex-1 py-2 flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'tea' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
           >
-            {t('formatTea')}
+            <span>{t('formatTea')}</span>
+            <span className="text-[9px] font-normal opacity-70 lowercase mt-0.5">{t('timeTea')}</span>
           </button>
           <button 
             onClick={() => { triggerHaptic(); setDrinkFormat('shot'); }} 
-            className={`flex-1 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'shot' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
+            className={`flex-1 py-2 flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'shot' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
           >
-            {t('formatShot')}
+            <span>{t('formatShot')}</span>
+            <span className="text-[9px] font-normal opacity-70 lowercase mt-0.5">{t('timeShot')}</span>
           </button>
           <button 
             onClick={() => { triggerHaptic(); setDrinkFormat('long'); }} 
-            className={`flex-1 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'long' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
+            className={`flex-1 py-2 flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'long' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
           >
-            {t('formatLong')}
+            <span>{t('formatLong')}</span>
+            <span className="text-[9px] font-normal opacity-70 lowercase mt-0.5">{t('timeLong')}</span>
           </button>
         </div>
       </div>
@@ -436,8 +439,14 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
   );
 }
 
-function ResultScreen({ recipe, lang, weatherTemp, weatherCond, onDone }: { recipe: Recipe, lang: Language, weatherTemp: number, weatherCond: string, onDone: () => void }) {
+function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, onDone }: { recipe: Recipe, lang: Language, weatherTemp: number, weatherCond: string, drinkFormat: string, onDone: () => void }) {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
+  
+  const getPredictedTime = () => {
+    if (drinkFormat === 'tea') return t('timeTea');
+    if (drinkFormat === 'shot') return t('timeShot');
+    return t('timeLong');
+  };
   return (
     <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="glass-panel flex flex-col h-full overflow-y-auto max-h-[95vh] p-0 border-primary/30">
       
@@ -462,7 +471,11 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, onDone }: { reci
         {recipe.explanation && (
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
             <h3 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2"><Target size={14}/> {t('sysAnalysis')}</h3>
-            <p className="text-xs text-gray-300 leading-relaxed italic">{recipe.explanation}</p>
+            <p className="text-xs text-gray-300 leading-relaxed italic mb-3">{recipe.explanation}</p>
+            <div className="pt-3 border-t border-primary/10 flex items-center justify-between">
+              <span className="text-xs text-gray-400">{t('predictedEffect')}:</span>
+              <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">{getPredictedTime()}</span>
+            </div>
           </div>
         )}
 
@@ -549,7 +562,7 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, onDone }: { reci
 function AppContent() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [hasReadManifest, setHasReadManifest] = useState<boolean | null>(null);
-  const [recipeResult, setRecipeResult] = useState<{ recipe: Recipe, temp: number, cond: string } | null>(null);
+  const [recipeResult, setRecipeResult] = useState<{ recipe: Recipe, temp: number, cond: string, format: string } | null>(null);
   const [showBreathwork, setShowBreathwork] = useState(false);
   const [lang, setLang] = useState<Language>(() => {
     return (localStorage.getItem('app_lang') as Language) || 'uk';
@@ -624,8 +637,8 @@ function AppContent() {
         <AnimatePresence mode="wait">
           {!hasReadManifest && <WelcomeManifest key="manifest" lang={lang} onComplete={() => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); }} />}
           {hasReadManifest && !profile && <Onboarding key="onboarding" lang={lang} onComplete={setProfile} />}
-          {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t,c) => setRecipeResult({recipe: r, temp: t, cond: c})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
-          {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} onDone={() => setShowBreathwork(true)} />}
+          {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t_val,c, f) => setRecipeResult({recipe: r, temp: t_val, cond: c, format: f})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
+          {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} drinkFormat={recipeResult.format} onDone={() => setShowBreathwork(true)} />}
           {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" lang={lang} protocol={recipeResult.recipe.breathwork_protocol} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
         </AnimatePresence>
       </div>
