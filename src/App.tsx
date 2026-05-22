@@ -557,10 +557,10 @@ function AppContent() {
     <div className="app-container p-4">
       <div className="bg-orb-1" />
       <div className="bg-orb-2" />
-      <div className="z-10 relative flex-1 flex flex-col justify-center h-full max-w-md mx-auto">
+      <div className="z-10 relative flex-1 w-full flex flex-col justify-center h-full max-w-md mx-auto">
         <LanguageSwitcher currentLang={lang} onSelect={handleLangChange} />
         <AnimatePresence mode="wait">
-          {!hasReadManifest && <WelcomeManifest key="manifest" onComplete={(l) => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); handleLangChange(l); }} />}
+          {!hasReadManifest && <WelcomeManifest key="manifest" lang={lang} onComplete={() => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); }} />}
           {hasReadManifest && !profile && <Onboarding key="onboarding" lang={lang} onComplete={setProfile} />}
           {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t,c) => setRecipeResult({recipe: r, temp: t, cond: c})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
           {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} onDone={() => setShowBreathwork(true)} />}

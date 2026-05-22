@@ -12,10 +12,10 @@ const triggerHaptic = () => {
 };
 
 const flags: Record<Language, string> = {
-  uk: '🇺🇦',
-  en: '🇬🇧',
-  ru: '🇷🇺',
-  es: '🇪🇸'
+  uk: 'UA',
+  en: 'EN',
+  ru: 'RU',
+  es: 'ES'
 };
 
 const langNames: Record<Language, string> = {

@@ -20,9 +20,8 @@ function TargetIcon() {
   )
 }
 
-export default function WelcomeManifest({ onComplete }: { onComplete: (lang: Language) => void }) {
+export default function WelcomeManifest({ lang, onComplete }: { lang: Language, onComplete: () => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [lang, setLang] = useState<Language>('uk');
 
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
 
@@ -134,7 +133,7 @@ export default function WelcomeManifest({ onComplete }: { onComplete: (lang: Lan
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(prev => prev + 1);
     } else {
-      onComplete(lang);
+      onComplete();
     }
   };
 
@@ -147,7 +146,6 @@ export default function WelcomeManifest({ onComplete }: { onComplete: (lang: Lan
       exit={{ opacity: 0, scale: 0.95 }}
       className="glass-panel flex flex-col h-full max-h-[95vh] overflow-hidden p-0 border-primary/30 relative"
     >
-      <LanguageSwitcher currentLang={lang} onSelect={setLang} />
       
       {/* Progress Indicators */}
       <div className="flex gap-2 p-6 pb-2 z-20 mt-4">
@@ -171,7 +169,7 @@ export default function WelcomeManifest({ onComplete }: { onComplete: (lang: Lan
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 p-6 flex flex-col justify-center text-center overflow-y-auto"
+            className="w-full p-6 flex flex-col justify-center text-center overflow-y-auto"
           >
             {slide.icon}
             <h1 className="text-2xl font-black text-white uppercase tracking-widest mb-1 drop-shadow-md">{slide.title}</h1>
