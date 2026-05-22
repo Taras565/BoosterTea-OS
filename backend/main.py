@@ -63,6 +63,8 @@ def get_current_user_tg(x_telegram_init_data: Optional[str] = Header(None)):
     
     return True
 
+import json
+
 @app.get("/api/reset_db")
 def reset_db():
     try:
@@ -71,6 +73,38 @@ def reset_db():
         return {"status": "Database successfully reset with new schema!"}
     except Exception as e:
         return {"status": "Error", "message": str(e)}
+
+@app.get("/api/me")
+def get_me(db: Session = Depends(database.get_db), tg_user: bool = Depends(get_current_user_tg), x_telegram_init_data: Optional[str] = Header(None)):
+    if not x_telegram_init_data:
+        return {"user": None}
+    
+    try:
+        parsed_data = dict(parse_qsl(x_telegram_init_data))
+        user_json = parsed_data.get("user")
+        if not user_json:
+            return {"user": None}
+        
+        tg_id = json.loads(user_json).get("id")
+        user = db.query(models.User).filter(models.User.telegram_id == tg_id).first()
+        
+        if user:
+            return {
+                "user": {
+                    "name": user.username or "",
+                    "weight": user.weight,
+                    "gender": user.gender,
+                    "birthDate": str(user.birth_date) if user.birth_date else "",
+                    "profession": user.profession_type,
+                    "taste_acid": user.taste_acid_pref,
+                    "taste_bitter": user.taste_bitter_pref,
+                    "taste_sweet": user.taste_sweet_pref
+                }
+            }
+    except Exception as e:
+        print("Error in /api/me:", e)
+    
+    return {"user": None}
 
 class RegistrationRequest(BaseModel):
     telegram_id: int

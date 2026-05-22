@@ -69,10 +69,10 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({ 
-    name: initData?.user?.firstName || '', 
+    name: initData?.user?.first_name || initData?.user?.username || '', 
     gender: 'male', 
     weight: 70, 
-    birthDate: '1995-05-15', 
+    birthDate: '', 
     profession: '', 
     sub_profession: '', 
     taste_acid: 5, 
@@ -570,10 +570,37 @@ function AppContent() {
       return;
     }
 
-    const saved = localStorage.getItem('bio_profile');
-    if (saved) setProfile(JSON.parse(saved));
-    const manifest = localStorage.getItem('has_read_manifest');
-    setHasReadManifest(manifest === 'true');
+    const checkBackendAndStorage = async () => {
+      const rawInitData = (window as any).Telegram?.WebApp?.initData;
+      let dbUserFound = false;
+
+      if (rawInitData) {
+        try {
+          const res = await fetch(`${API_URL}/me`, {
+            headers: { 'X-Telegram-Init-Data': rawInitData }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.user && data.user.birthDate) {
+              setProfile(data.user);
+              localStorage.setItem('bio_profile', JSON.stringify(data.user));
+              setHasReadManifest(true);
+              localStorage.setItem('has_read_manifest', 'true');
+              dbUserFound = true;
+            }
+          }
+        } catch(e) {}
+      }
+
+      if (!dbUserFound) {
+        const saved = localStorage.getItem('bio_profile');
+        if (saved) setProfile(JSON.parse(saved));
+        const manifest = localStorage.getItem('has_read_manifest');
+        setHasReadManifest(manifest === 'true');
+      }
+    };
+    
+    checkBackendAndStorage();
 
     // Secret Developer Shortcut: Ctrl + Alt + R to reset app
     const handleKeyDown = (e: KeyboardEvent) => {
