@@ -44,17 +44,18 @@ def t_avatar(avatar_id, lang):
     return avatars.get(avatar_id, avatars["neo"]).get(lang, avatars.get(avatar_id, avatars["neo"])["uk"])
 
 def determine_avatar(base: str, target: str, profession: str, stress: int, lang: str):
-    if "GABA" in base and target in ["FOCUS", "RELAX"] and stress >= 7:
+    if target == "RELAX":
         a = t_avatar("zen", lang)
-        return { "id": "avatar_zen_master", "name": a["name"], "slogan": a["slogan"], "image": "/avatar_zen_master_1778484425493.png", "stats": { "focus": 40, "energy": 10, "calm": 50 } }
-    if "Да Хун Пао" in base or "Da Hong Pao" in base and profession == "CREATIVE":
+        return { "id": "human_zen", "name": a["name"], "slogan": a["slogan"], "image": "/human_zen.png", "stats": { "focus": 40, "energy": 10, "calm": 50 } }
+    elif target == "FOCUS":
         a = t_avatar("creative", lang)
-        return { "id": "avatar_creative_cyborg", "name": a["name"], "slogan": a["slogan"], "image": "/avatar_creative_cyborg_1778484439484.png", "stats": { "focus": 30, "energy": 30, "calm": 20 } }
-    if ("Шу Пуер" in base or "Саган" in base or "Puer" in base or "Sagan" in base) and target == "ENERGY" and stress <= 4:
+        return { "id": "human_creative", "name": a["name"], "slogan": a["slogan"], "image": "/human_creative.png", "stats": { "focus": 40, "energy": 30, "calm": 30 } }
+    elif target == "ENERGY":
         a = t_avatar("energy", lang)
-        return { "id": "avatar_energy_phoenix", "name": a["name"], "slogan": a["slogan"], "image": "/avatar_energy_phoenix_1778484456721.png", "stats": { "focus": 20, "energy": 60, "calm": 5 } }
-    a = t_avatar("neo", lang)
-    return { "id": "avatar_adaptive_neo", "name": a["name"], "slogan": a["slogan"], "image": "/avatar_adaptive_neo_1778484470404.png", "stats": { "focus": 25, "energy": 25, "calm": 25 } }
+        return { "id": "human_energy", "name": a["name"], "slogan": a["slogan"], "image": "/human_energy.png", "stats": { "focus": 20, "energy": 60, "calm": 5 } }
+    else:
+        a = t_avatar("neo", lang)
+        return { "id": "human_balance", "name": a["name"], "slogan": a["slogan"], "image": "/human_balance.png", "stats": { "focus": 33, "energy": 33, "calm": 33 } }
 
 ACTIVITY_MULTIPLIERS = {
     "coding":   {"psych": 9, "phys": 1},
