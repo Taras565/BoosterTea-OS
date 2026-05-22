@@ -541,8 +541,16 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, onD
           if (webApp && webApp.shareToStory) {
             const host = window.location.origin.includes('localhost') ? 'https://boostertea-app.onrender.com' : window.location.origin;
             const mediaUrl = `${host}${recipe.avatar_image || '/bg-tea.png'}`;
+            
+            const templates = ['shareTpl1', 'shareTpl2', 'shareTpl3'] as const;
+            const randomKey = templates[Math.floor(Math.random() * templates.length)];
+            const rawText = t(randomKey as any);
+            const finalText = rawText
+              .replace('{STATE}', recipe.avatar_name)
+              .replace('{BASE}', recipe.base);
+
             webApp.shareToStory(mediaUrl, {
-              text: `${t('shareText')} ${recipe.avatar_name}! 🍵\n${t('shareBase')} ${recipe.base}\n\n${t('shareLink')}`,
+              text: finalText,
               widget_link: {
                 url: "https://t.me/boostertea_os_bot/app",
                 name: t('shareTitle')
