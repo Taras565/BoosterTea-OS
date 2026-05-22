@@ -99,14 +99,20 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     elif target_state == "FOCUS" and scale_mental < 5:
         state_modifier = 1.0 + ((5 - scale_mental) * 0.1)  # Max +30% at mental 2
 
-    v_tea = round(weight * k_ns * state_modifier, 1)
+    base_coef = 0.4
+    v_tea = weight * base_coef * k_ns * state_modifier
+
+    if had_caffeine:
+        v_tea = v_tea * 0.7 
+        
+    v_tea = round(v_tea, 1)
 
     recipe = {
         "base_key": "GABA",
-        "activator": "Apple-Ginger", # We will translate activators later
+        "activator": "Apple-Ginger", 
         "tea_ml": v_tea,
-        "juice_ml": 100,
-        "water_ml": 50,
+        "juice_ml": 0,
+        "water_ml": 0,
         "ice_cubes": 0,
         "cocktail_status": "Chilled",
         "instructions": "",
@@ -122,21 +128,12 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     elif target_state == "COMMUNICATION":
         recipe["base_key"] = "DHP"
     
-    if had_caffeine:
-        recipe["tea_ml"] = round(recipe["tea_ml"] / 2, 1)
-
     recipe["breathwork_protocol"] = "fire" if target_state == "ENERGY" else "square"
 
     is_hot_weather = weather_temp > 22
     t_sweet = user.taste_sweet_pref or 5
     t_acid = user.taste_acid_pref or 5
     t_bitter = user.taste_bitter_pref or 5
-
-    recipe["juice_ml"] = 120
-    recipe["water_ml"] = 30
-
-    garnish = ""
-    glass_type = ""
 
     # Activator translations
     acts = {
@@ -181,33 +178,43 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     status_key = "Ice"
 
     if drink_format == "shot":
-        shot_coef = 0.65
-        recipe["tea_ml"] = round(recipe["tea_ml"] * shot_coef, 1)
-        recipe["juice_ml"] = round(15 + (recipe["tea_ml"] * 0.1), 1)
+        recipe["juice_ml"] = 20
         recipe["water_ml"] = 0
+        recipe["ice_cubes"] = 0
         status_key = "Shot"
         glass_key = "Shot"
+        if t_acid >= 7: act_key = "Spicy Ginger"; garnish_key = ""
+        else: act_key = "Ruby Grapefruit"; garnish_key = ""
     elif drink_format == "tea":
         recipe["juice_ml"] = 0
-        recipe["water_ml"] = 150
-        status_key = "Hot" if not is_hot_weather else "Ice"
-        glass_key = "Double" if not is_hot_weather else "Highball"
-    elif is_hot_weather:
-        recipe["ice_cubes"] = round(weather_temp / 6)
-        status_key = "Ice"
-        glass_key = "Highball"
-        if t_acid >= 7 and t_sweet < 7: act_key = "Ruby Grapefruit"; garnish_key = "Rosemary"
-        elif t_sweet >= 7 and t_acid < 7: act_key = "Blackberry Lavender"; garnish_key = "Blueberries"
-        elif t_bitter >= 7: act_key = "Tonic"; garnish_key = "Lemon Zest"
-        else: act_key = "Lime Lemonade"; garnish_key = "Mint Lime"
-    else:
-        recipe["ice_cubes"] = 0
-        status_key = "Hot"
-        glass_key = "Double"
-        if t_sweet >= 7 and t_acid < 7: act_key = "Buckthorn Honey"; garnish_key = "Cinnamon"
-        elif t_acid >= 7 and t_sweet < 7: act_key = "Warm Cranberry"; garnish_key = "Orange"
-        elif t_bitter >= 7: act_key = "Spicy Ginger"; garnish_key = "Pepper"
-        else: act_key = "Classic Apple"; garnish_key = "Apple"
+        recipe["water_ml"] = 180
+        if is_hot_weather:
+            status_key = "Ice"
+            glass_key = "Highball"
+            recipe["ice_cubes"] = max(1, round(weather_temp / 5))
+        else:
+            status_key = "Hot"
+            glass_key = "Double"
+            recipe["ice_cubes"] = 0
+    else: # long
+        recipe["juice_ml"] = 80
+        recipe["water_ml"] = 100
+        if is_hot_weather:
+            status_key = "Ice"
+            glass_key = "Highball"
+            recipe["ice_cubes"] = max(1, round(weather_temp / 4))
+            if t_acid >= 7 and t_sweet < 7: act_key = "Ruby Grapefruit"; garnish_key = "Rosemary"
+            elif t_sweet >= 7 and t_acid < 7: act_key = "Blackberry Lavender"; garnish_key = "Blueberries"
+            elif t_bitter >= 7: act_key = "Tonic"; garnish_key = "Lemon Zest"
+            else: act_key = "Lime Lemonade"; garnish_key = "Mint Lime"
+        else:
+            status_key = "Hot"
+            glass_key = "Highball"
+            recipe["ice_cubes"] = 0
+            if t_sweet >= 7 and t_acid < 7: act_key = "Buckthorn Honey"; garnish_key = "Cinnamon"
+            elif t_acid >= 7 and t_sweet < 7: act_key = "Warm Cranberry"; garnish_key = "Orange"
+            elif t_bitter >= 7: act_key = "Spicy Ginger"; garnish_key = "Pepper"
+            else: act_key = "Classic Apple"; garnish_key = "Apple"
 
     recipe["base"] = get_base_name(recipe["base_key"], language)
     
@@ -264,10 +271,10 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     tgt_es = {"RELAX": "Relajación", "ENERGY": "Energía", "FOCUS": "Enfoque", "COMMUNICATION": "Comunicación"}[target_state]
 
     exp = {
-        "uk": f"Формула (Вага {weight} кг × HD k_ns {k_ns:.2f} × Модифікатор {state_modifier:.2f}) = {recipe['tea_ml']} мл. База {recipe['base']} та техніка '{tech}' точно підібрані для переходу в стан {tgt_uk}.",
-        "en": f"Formula (Weight {weight} kg × HD k_ns {k_ns:.2f} × Modifier {state_modifier:.2f}) = {recipe['tea_ml']} ml. Base {recipe['base']} and '{tech_en}' technique perfectly match the {tgt_en} target state.",
-        "ru": f"Формула (Вес {weight} кг × HD k_ns {k_ns:.2f} × Модификатор {state_modifier:.2f}) = {recipe['tea_ml']} мл. База {recipe['base']} и техника '{tech_ru}' точно подобраны для перехода в состояние {tgt_ru}.",
-        "es": f"Fórmula (Peso {weight} kg × HD k_ns {k_ns:.2f} × Modificador {state_modifier:.2f}) = {recipe['tea_ml']} ml. La base {recipe['base']} y técnica '{tech_es}' están adaptadas para el estado {tgt_es}."
+        "uk": f"Формула: (Вага {weight} кг × Базовий коеф. {base_coef:.2f} × Нейро-ємність {k_ns:.2f} × Модифікатор стану {state_modifier:.2f}) = {recipe['tea_ml']} мл. Ця фізіологічно точна доза бази {recipe['base']} та техніка '{tech}' підібрані для переходу в стан {tgt_uk}.",
+        "en": f"Formula: (Weight {weight} kg × Base coef {base_coef:.2f} × Neuro-capacity {k_ns:.2f} × State modifier {state_modifier:.2f}) = {recipe['tea_ml']} ml. This precise dose of {recipe['base']} and '{tech_en}' technique are matched for the {tgt_en} target state.",
+        "ru": f"Формула: (Вес {weight} кг × Базовый коэф. {base_coef:.2f} × Нейро-емкость {k_ns:.2f} × Модификатор состояния {state_modifier:.2f}) = {recipe['tea_ml']} мл. Эта физиологически точная доза базы {recipe['base']} и техника '{tech_ru}' подобраны для перехода в состояние {tgt_ru}.",
+        "es": f"Fórmula: (Peso {weight} kg × Coeficiente base {base_coef:.2f} × Neuro-capacidad {k_ns:.2f} × Modificador de estado {state_modifier:.2f}) = {recipe['tea_ml']} ml. Esta dosis precisa de {recipe['base']} y la técnica '{tech_es}' están adaptadas para el estado {tgt_es}."
     }
     recipe["explanation"] = exp[language]
 
