@@ -112,23 +112,19 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
         "breathwork_protocol": "square"
     }
 
-    sub = specific_activity_id
-    if sub == 'coding': recipe["base_key"] = "Soft GABA"
-    elif sub == 'study': recipe["base_key"] = "GABA"
-    elif sub == 'business': recipe["base_key"] = "GABA + DHP"; recipe["activator"] = "Lemon Fresh"
-    elif sub == 'creative': recipe["base_key"] = "DHP"
-    elif sub == 'sport': recipe["base_key"] = "Puer"
-    elif sub == 'routine': recipe["base_key"] = "Pure GABA"
-
-    if scale_cns >= 7 and recipe["base_key"] == "Puer":
-        recipe["base_key"] = "GABA (Stress)"
+    if target_state == "RELAX":
+        recipe["base_key"] = "Pure GABA" if scale_cns >= 9 else "Soft GABA"
+    elif target_state == "ENERGY":
+        recipe["base_key"] = "Puer" if not had_caffeine else "GABA (Decaf)"
+    elif target_state == "FOCUS":
+        recipe["base_key"] = "GABA + DHP" if scale_mental < 3 else "GABA"
+    elif target_state == "COMMUNICATION":
+        recipe["base_key"] = "DHP"
     
     if had_caffeine:
         recipe["tea_ml"] = round(recipe["tea_ml"] / 2, 1)
-        if recipe["base_key"] in ["Puer", "DHP"]:
-            recipe["base_key"] = "GABA (Decaf)"
 
-    recipe["breathwork_protocol"] = "fire" if recipe["base_key"] == "Puer" else "square"
+    recipe["breathwork_protocol"] = "fire" if target_state == "ENERGY" else "square"
 
     is_hot_weather = weather_temp > 22
     t_sweet = user.taste_sweet_pref or 5
@@ -256,12 +252,21 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     recipe["avatar_image"] = avatar["image"]
     recipe["stats"] = avatar["stats"]
 
-    # Simplistic generic explanation to save space
+    tech = "Дихання Вогню" if target_state == "ENERGY" else "Квадратне Дихання"
+    tech_en = "Breath of Fire" if target_state == "ENERGY" else "Square Breathing"
+    tech_ru = "Дыхание Огня" if target_state == "ENERGY" else "Квадратное Дыхание"
+    tech_es = "Respiración de Fuego" if target_state == "ENERGY" else "Respiración Cuadrada"
+
+    tgt_uk = {"RELAX": "Спокою", "ENERGY": "Енергії", "FOCUS": "Фокусу", "COMMUNICATION": "Комунікації"}[target_state]
+    tgt_en = {"RELAX": "Relaxation", "ENERGY": "Energy", "FOCUS": "Focus", "COMMUNICATION": "Communication"}[target_state]
+    tgt_ru = {"RELAX": "Спокойствия", "ENERGY": "Энергии", "FOCUS": "Фокуса", "COMMUNICATION": "Коммуникации"}[target_state]
+    tgt_es = {"RELAX": "Relajación", "ENERGY": "Energía", "FOCUS": "Enfoque", "COMMUNICATION": "Comunicación"}[target_state]
+
     exp = {
-        "uk": f"База {recipe['base']} ({recipe['tea_ml']} мл) ідеально балансує твою нервову систему в цьому стані.",
-        "en": f"The base {recipe['base']} ({recipe['tea_ml']} ml) perfectly balances your nervous system in this state.",
-        "ru": f"База {recipe['base']} ({recipe['tea_ml']} мл) идеально балансирует твою нервную систему в этом состоянии.",
-        "es": f"La base {recipe['base']} ({recipe['tea_ml']} ml) equilibra perfectamente tu sistema nervioso en este estado."
+        "uk": f"Формула (Вага {weight} кг × HD k_ns {k_ns:.2f} × Модифікатор {state_modifier:.2f}) = {recipe['tea_ml']} мл. База {recipe['base']} та техніка '{tech}' точно підібрані для переходу в стан {tgt_uk}.",
+        "en": f"Formula (Weight {weight} kg × HD k_ns {k_ns:.2f} × Modifier {state_modifier:.2f}) = {recipe['tea_ml']} ml. Base {recipe['base']} and '{tech_en}' technique perfectly match the {tgt_en} target state.",
+        "ru": f"Формула (Вес {weight} кг × HD k_ns {k_ns:.2f} × Модификатор {state_modifier:.2f}) = {recipe['tea_ml']} мл. База {recipe['base']} и техника '{tech_ru}' точно подобраны для перехода в состояние {tgt_ru}.",
+        "es": f"Fórmula (Peso {weight} kg × HD k_ns {k_ns:.2f} × Modificador {state_modifier:.2f}) = {recipe['tea_ml']} ml. La base {recipe['base']} y técnica '{tech_es}' están adaptadas para el estado {tgt_es}."
     }
     recipe["explanation"] = exp[language]
 
