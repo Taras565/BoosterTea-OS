@@ -82,13 +82,23 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     k_ns = get_k_ns(user.hd_type)
     weight = user.weight or 70
     if user.gender == "female": k_ns *= 0.9
-    v_tea = round(weight * k_ns, 1)
-
+    
     target_state = "RELAX"
     if scale_cns >= 7: target_state = "RELAX"
     elif scale_energy < 5 and not had_caffeine: target_state = "ENERGY"
     elif scale_mental < 6: target_state = "FOCUS"
     else: target_state = "COMMUNICATION"
+
+    # Dynamic State Modifier based on deviation from norm (5)
+    state_modifier = 1.0
+    if target_state == "RELAX" and scale_cns > 5:
+        state_modifier = 1.0 + ((scale_cns - 5) * 0.06)  # Max +30% at stress 10
+    elif target_state == "ENERGY" and scale_energy < 5:
+        state_modifier = 1.0 + ((5 - scale_energy) * 0.1)  # Max +30% at energy 2
+    elif target_state == "FOCUS" and scale_mental < 5:
+        state_modifier = 1.0 + ((5 - scale_mental) * 0.1)  # Max +30% at mental 2
+
+    v_tea = round(weight * k_ns * state_modifier, 1)
 
     recipe = {
         "base_key": "GABA",

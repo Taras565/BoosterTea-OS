@@ -46,12 +46,12 @@ const PREMIUM_ACTIVE = 'bg-primary/10 text-white border-primary shadow-[0_0_12px
 const PREMIUM_IDLE = 'bg-black/40 text-gray-500 border-gray-800 hover:bg-gray-800 hover:text-gray-300';
 
 const activityOptions = [
-  { id: 'coding', label: '💻 Працюю за монітором', sub: 'IT, дизайн, офіс, аналітика' },
-  { id: 'study', label: '📚 Навчання / Іспити', sub: 'Студенти, курси, підготовка' },
-  { id: 'business', label: '🤝 Бізнес / Переговори', sub: 'Менеджмент, продажі, зустрічі' },
-  { id: 'creative', label: '🎨 Творчість / Креатив', sub: 'Контент, дизайн, блог, музика' },
-  { id: 'sport', label: '⚡ Спорт & Активність', sub: 'Тренування, рух, важка праця' },
-  { id: 'routine', label: '🔄 Побут / Відновлення', sub: 'Рутина, декрет, тонус, відпочинок' }
+  { id: 'coding', label: '💻 Фокус та Аналітика', sub: 'Розрахунки, дані, максимальна уважність' },
+  { id: 'study', label: '📚 Засвоєння інформації', sub: 'Навчання, пам\'ять, концентрація на новому' },
+  { id: 'business', label: '🤝 Комунікація та Управління', sub: 'Зустрічі, виступи, прийняття рішень' },
+  { id: 'creative', label: '🎨 Креатив та Ідеї', sub: 'Пошук нестандартних рішень, творчий потік' },
+  { id: 'sport', label: '⚡ Фізична активність', sub: 'Спорт, рух, фізична праця, витривалість' },
+  { id: 'routine', label: '🔄 Відновлення та Побут', sub: 'Відпочинок, рутина, баланс' }
 ];
 
 const triggerHaptic = () => { 
@@ -138,7 +138,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-panel p-6 h-full flex flex-col justify-center">
-      <h2 className="text-2xl font-bold text-primary text-center mb-2">BoosterTea OS Ініціалізація</h2>
+      <h2 className="text-2xl font-bold text-primary text-center mb-2">Налаштування BoosterTea OS</h2>
       <div className="flex justify-center space-x-2 mb-8">
         {[1,2,3].map(i => <div key={i} className={`h-1 w-10 rounded ${step >= i ? 'bg-primary' : 'bg-gray-700'}`} />)}
       </div>
@@ -354,7 +354,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
       </div>
       
       <div className="bg-black/40 p-3 rounded-xl border border-primary/20 mb-6 flex justify-between items-center">
-        <div><p className="text-xs text-gray-500 uppercase">Активність</p><p className="text-sm font-bold text-primary">{profile.profession}</p></div>
+        <div><p className="text-xs text-gray-500 uppercase">Активність</p><p className="text-sm font-bold text-primary">{activityOptions.find(o => o.id === profile.profession)?.label || profile.profession}</p></div>
       </div>
       
       <div className="space-y-4 mb-6">
@@ -556,10 +556,29 @@ function AppContent() {
   };
 
   useEffect(() => {
+    // Auto-reset via URL for AI assistant
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('reset') === 'true') {
+      localStorage.clear();
+      window.history.replaceState({}, document.title, window.location.pathname);
+      window.location.reload();
+      return;
+    }
+
     const saved = localStorage.getItem('bio_profile');
     if (saved) setProfile(JSON.parse(saved));
     const manifest = localStorage.getItem('has_read_manifest');
     setHasReadManifest(manifest === 'true');
+
+    // Secret Developer Shortcut: Ctrl + Alt + R to reset app
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'r') {
+        localStorage.clear();
+        window.location.reload();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   if (hasReadManifest === null) return null; // Avoid flicker on load
