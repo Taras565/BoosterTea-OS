@@ -17,28 +17,28 @@ def get_k_ns(hd_type: str) -> float:
 def t_avatar(avatar_id, lang):
     avatars = {
         "zen": {
-            "uk": {"name": "Дзен-Майстер", "slogan": "Розум холодний, як лід у твоїй склянці. Повний контроль над хаосом."},
-            "en": {"name": "Zen Master", "slogan": "Mind cold as ice in your glass. Full control over chaos."},
-            "ru": {"name": "Дзен-Мастер", "slogan": "Разум холодный, как лед. Полный контроль над хаосом."},
-            "es": {"name": "Maestro Zen", "slogan": "Mente fría como hielo. Control total sobre el caos."}
+            "uk": {"name": "АБСОЛЮТНИЙ ЧІЛ", "slogan": "Жодних нервів. Тільки спокій, ясний розум і повний контроль."},
+            "en": {"name": "ABSOLUTE CHILL", "slogan": "Zero stress. Just peace, clear mind, and full control."},
+            "ru": {"name": "АБСОЛЮТНЫЙ ЧИЛЛ", "slogan": "Никаких нервов. Только покой, ясный ум и полный контроль."},
+            "es": {"name": "RELAX ABSOLUTO", "slogan": "Cero estrés. Solo paz, mente clara y control total."}
         },
         "creative": {
-            "uk": {"name": "Креативний Кіборг", "slogan": "Нейрони заряджені. Синдром білого аркуша знищено. Твори."},
-            "en": {"name": "Creative Cyborg", "slogan": "Neurons charged. Writer's block destroyed. Create."},
-            "ru": {"name": "Креативный Киборг", "slogan": "Нейроны заряжены. Синдром белого листа уничтожен. Твори."},
-            "es": {"name": "Ciborg Creativo", "slogan": "Neuronas cargadas. Bloqueo de escritor destruido. Crea."}
+            "uk": {"name": "ТВОРЧИЙ ПОТІК", "slogan": "Думки ясні. Натхнення на максимумі. Час створювати нове."},
+            "en": {"name": "CREATIVE FLOW", "slogan": "Clear thoughts. Max inspiration. Time to create."},
+            "ru": {"name": "ТВОРЧЕСКИЙ ПОТОК", "slogan": "Мысли ясны. Вдохновение на максимуме. Время создавать новое."},
+            "es": {"name": "FLUJO CREATIVO", "slogan": "Pensamientos claros. Inspiración al máximo. Hora de crear."}
         },
         "energy": {
-            "uk": {"name": "Енергетичний Фенікс", "slogan": "Повне перезавантаження та миттєвий підйом. Час завойовувати світ."},
-            "en": {"name": "Energy Phoenix", "slogan": "Full reboot and instant rise. Time to conquer the world."},
-            "ru": {"name": "Энергетический Феникс", "slogan": "Полная перезагрузка и подъем. Время завоевывать мир."},
-            "es": {"name": "Fénix de Energía", "slogan": "Reinicio completo y ascenso instantáneo. Hora de conquistar el mundo."}
+            "uk": {"name": "ТУРБО-РЕЖИМ", "slogan": "Батарейка на 100%. Жодної втоми. Готовність звертати гори."},
+            "en": {"name": "TURBO MODE", "slogan": "Battery at 100%. Zero fatigue. Ready to move mountains."},
+            "ru": {"name": "ТУРБО-РЕЖИМ", "slogan": "Батарейка на 100%. Никакой усталости. Готовность сворачивать горы."},
+            "es": {"name": "MODO TURBO", "slogan": "Batería al 100%. Cero fatiga. Listo para mover montañas."}
         },
         "neo": {
-            "uk": {"name": "Адаптивний Нео", "slogan": "Система відновлює ресурси. Крок за кроком повертаємо баланс."},
-            "en": {"name": "Adaptive Neo", "slogan": "System restoring resources. Step by step returning balance."},
-            "ru": {"name": "Адаптивный Нео", "slogan": "Система восстанавливает ресурсы. Шаг за шагом возвращаем баланс."},
-            "es": {"name": "Neo Adaptativo", "slogan": "Sistema restaurando recursos. Paso a paso devolviendo el equilibrio."}
+            "uk": {"name": "ІДЕАЛЬНИЙ БАЛАНС", "slogan": "Все під контролем. Енергія та фокус у цілковитій гармонії."},
+            "en": {"name": "PERFECT BALANCE", "slogan": "Everything under control. Energy and focus in perfect harmony."},
+            "ru": {"name": "ИДЕАЛЬНЫЙ БАЛАНС", "slogan": "Все под контролем. Энергия и фокус в полной гармонии."},
+            "es": {"name": "EQUILIBRIO PERFECTO", "slogan": "Todo bajo control. Energía y enfoque en perfecta armonía."}
         }
     }
     return avatars.get(avatar_id, avatars["neo"]).get(lang, avatars.get(avatar_id, avatars["neo"])["uk"])
