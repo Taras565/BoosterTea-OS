@@ -439,7 +439,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
   );
 }
 
-function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, onDone }: { recipe: Recipe, lang: Language, weatherTemp: number, weatherCond: string, drinkFormat: string, onDone: () => void }) {
+function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, activityType, onDone }: { recipe: Recipe, lang: Language, weatherTemp: number, weatherCond: string, drinkFormat: string, activityType: string, onDone: () => void }) {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   
   const getPredictedTime = () => {
@@ -541,10 +541,19 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, onD
           if (webApp && webApp.shareToStory) {
             const host = window.location.origin.includes('localhost') ? 'https://boostertea-app.onrender.com' : window.location.origin;
             const mediaUrl = `${host}${recipe.avatar_image || '/bg-tea.png'}`;
-            
-            const templates = ['shareTpl1', 'shareTpl2', 'shareTpl3'] as const;
-            const randomKey = templates[Math.floor(Math.random() * templates.length)];
-            const rawText = t(randomKey as any);
+            const getActivityTemplateKey = (act: string) => {
+              switch (act) {
+                case 'coding': return 'shareTplCoding';
+                case 'study': return 'shareTplStudy';
+                case 'business': return 'shareTplBusiness';
+                case 'creative': return 'shareTplCreative';
+                case 'sport': return 'shareTplSport';
+                case 'routine': return 'shareTplRoutine';
+                default: return 'shareTplCoding';
+              }
+            };
+            const templateKey = getActivityTemplateKey(activityType);
+            const rawText = t(templateKey as any);
             const finalText = rawText
               .replace('{STATE}', recipe.avatar_name)
               .replace('{BASE}', recipe.base);
@@ -646,7 +655,7 @@ function AppContent() {
           {!hasReadManifest && <WelcomeManifest key="manifest" lang={lang} onComplete={() => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); }} />}
           {hasReadManifest && !profile && <Onboarding key="onboarding" lang={lang} onComplete={setProfile} />}
           {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t_val,c, f) => setRecipeResult({recipe: r, temp: t_val, cond: c, format: f})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
-          {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} drinkFormat={recipeResult.format} onDone={() => setShowBreathwork(true)} />}
+          {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} drinkFormat={recipeResult.format} activityType={profile.profession} onDone={() => setShowBreathwork(true)} />}
           {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" lang={lang} protocol={recipeResult.recipe.breathwork_protocol} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
         </AnimatePresence>
       </div>
