@@ -359,28 +359,28 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
       
       <div className="space-y-4 mb-6">
         <div className="bg-black/30 p-4 rounded-xl border border-gray-800">
-          <div className="flex justify-between items-center mb-3"><label className="text-sm font-bold text-white">Рівень стресу (ЦНС)</label></div>
+          <div className="flex justify-between items-center mb-3"><label className="text-sm font-bold text-white">{t('cnsLoad')}</label></div>
           <div className="grid grid-cols-4 gap-2">
             {STRESS_LEVELS.map(lvl => (
-              <button key={lvl.label} onClick={() => { setScaleCns(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-xs font-bold uppercase rounded-lg border transition-all duration-300 ${scaleCns === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
+              <button key={lvl.label} onClick={() => { setScaleCns(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold uppercase rounded-lg border transition-all duration-300 ${scaleCns === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
             ))}
           </div>
         </div>
 
         <div className="bg-black/30 p-4 rounded-xl border border-gray-800">
-          <div className="flex justify-between items-center mb-3"><label className="text-sm font-bold text-white">Рівень енергії</label></div>
+          <div className="flex justify-between items-center mb-3"><label className="text-sm font-bold text-white">{t('energyLvl')}</label></div>
           <div className="grid grid-cols-4 gap-2">
             {ENERGY_LEVELS.map(lvl => (
-              <button key={lvl.label} onClick={() => { setScaleEnergy(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-xs font-bold uppercase rounded-lg border transition-all duration-300 ${scaleEnergy === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
+              <button key={lvl.label} onClick={() => { setScaleEnergy(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold uppercase rounded-lg border transition-all duration-300 ${scaleEnergy === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
             ))}
           </div>
         </div>
 
         <div className="bg-black/30 p-4 rounded-xl border border-gray-800">
-          <div className="flex justify-between items-center mb-3"><label className="text-sm font-bold text-white">Ментальний фокус</label></div>
+          <div className="flex justify-between items-center mb-3"><label className="text-sm font-bold text-white">{t('mentalLvl')}</label></div>
           <div className="grid grid-cols-4 gap-2">
             {MENTAL_LEVELS.map(lvl => (
-              <button key={lvl.label} onClick={() => { setScaleMental(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-xs font-bold uppercase rounded-lg border transition-all duration-300 ${scaleMental === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
+              <button key={lvl.label} onClick={() => { setScaleMental(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold uppercase rounded-lg border transition-all duration-300 ${scaleMental === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
             ))}
           </div>
         </div>
@@ -389,7 +389,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
       <div className="mb-6 bg-black/30 p-4 rounded-xl border border-gray-800 flex items-center justify-between cursor-pointer" onClick={() => { setHadCaffeine(!hadCaffeine); triggerHaptic(); }}>
         <div className="flex items-center gap-3">
           <Coffee className={hadCaffeine ? "text-primary" : "text-gray-500"} size={20} />
-          <span className="text-sm text-white font-medium">Пив каву / енергетик сьогодні?</span>
+          <span className="text-sm text-white font-medium">{t('caffeine')}</span>
         </div>
         <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${hadCaffeine ? 'bg-primary border-primary text-black' : 'border-gray-600'}`}>
           {hadCaffeine && <CheckCircle2 size={16} />}
@@ -397,19 +397,25 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
       </div>
 
       <div className="mb-6">
-        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Формат напою</h3>
+        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">{t('format')}</h3>
         <div className="flex gap-2 p-1 bg-black/40 border border-gray-800 rounded-xl">
           <button 
-            onClick={() => { triggerHaptic(); setDrinkFormat('long'); }} 
-            className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'long' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
+            onClick={() => { triggerHaptic(); setDrinkFormat('tea'); }} 
+            className={`flex-1 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'tea' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
           >
-            Лонг (Баланс)
+            {t('formatTea')}
           </button>
           <button 
             onClick={() => { triggerHaptic(); setDrinkFormat('shot'); }} 
-            className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'shot' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
+            className={`flex-1 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'shot' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
           >
-            Шот (Миттєва Дія)
+            {t('formatShot')}
+          </button>
+          <button 
+            onClick={() => { triggerHaptic(); setDrinkFormat('long'); }} 
+            className={`flex-1 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${drinkFormat === 'long' ? 'bg-primary/20 text-primary border border-primary/50 shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
+          >
+            {t('formatLong')}
           </button>
         </div>
       </div>

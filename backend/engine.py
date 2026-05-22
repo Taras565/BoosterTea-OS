@@ -190,6 +190,11 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
         recipe["water_ml"] = 0
         status_key = "Shot"
         glass_key = "Shot"
+    elif drink_format == "tea":
+        recipe["juice_ml"] = 0
+        recipe["water_ml"] = 150
+        status_key = "Hot" if not is_hot_weather else "Ice"
+        glass_key = "Double" if not is_hot_weather else "Highball"
     elif is_hot_weather:
         recipe["ice_cubes"] = round(weather_temp / 6)
         status_key = "Ice"
@@ -208,7 +213,13 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
         else: act_key = "Classic Apple"; garnish_key = "Apple"
 
     recipe["base"] = get_base_name(recipe["base_key"], language)
-    recipe["activator"] = acts.get(act_key, acts["Apple-Ginger"]).get(language, acts.get(act_key, acts["Apple-Ginger"])["uk"])
+    
+    if drink_format == "tea":
+        tea_activator = {"uk": "Чиста Вода", "en": "Pure Water", "ru": "Чистая Вода", "es": "Agua Pura"}
+        recipe["activator"] = tea_activator[language]
+    else:
+        recipe["activator"] = acts.get(act_key, acts["Apple-Ginger"]).get(language, acts.get(act_key, acts["Apple-Ginger"])["uk"])
+        
     recipe["cocktail_status"] = statuses[status_key][language]
     
     g_str = garnishes.get(garnish_key, {}).get(language, "")
@@ -226,10 +237,16 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
             "en": f"Take {gl_str}. Pour {recipe['activator']} ({recipe['juice_ml']} ml, bought separately) and water ({recipe['water_ml']} ml). Add {recipe['tea_ml']} ml of our '{recipe['base']}' concentrate. Garnish with {g_str}.",
             "ru": f"Возьмите {gl_str}. Налейте {recipe['activator']} ({recipe['juice_ml']} мл, покупается отдельно) и воду ({recipe['water_ml']} мл). Влейте {recipe['tea_ml']} мл нашего концентрата «{recipe['base']}». Украсьте {g_str}.",
             "es": f"Toma {gl_str}. Vierte {recipe['activator']} ({recipe['juice_ml']} ml, comprado por separado) y agua ({recipe['water_ml']} ml). Añade {recipe['tea_ml']} ml de nuestro concentrado '{recipe['base']}'. Adorna con {g_str}."
+        },
+        "tea": {
+            "uk": f"Формат «Просто Чай». Візьміть {gl_str}. Додайте {recipe['tea_ml']} мл нашого концентрату «{recipe['base']}» та залийте водою ({recipe['water_ml']} мл). Мінімум зусиль — максимум результату.",
+            "en": f"'Just Tea' format. Take {gl_str}. Add {recipe['tea_ml']} ml of our '{recipe['base']}' concentrate and pour water ({recipe['water_ml']} ml). Minimum effort — maximum result.",
+            "ru": f"Формат «Просто Чай». Возьмите {gl_str}. Добавьте {recipe['tea_ml']} мл нашего концентрата «{recipe['base']}» и залейте водой ({recipe['water_ml']} мл). Минимум усилий — максимум результата.",
+            "es": f"Formato 'Solo Té'. Toma {gl_str}. Añade {recipe['tea_ml']} ml de nuestro concentrado '{recipe['base']}' y vierte agua ({recipe['water_ml']} ml). Mínimo esfuerzo — máximo resultado."
         }
     }
     
-    fmt = "shot" if drink_format == "shot" else "long"
+    fmt = drink_format if drink_format in ["shot", "tea"] else "long"
     recipe["instructions"] = inst[fmt][language]
 
     avatar = determine_avatar(recipe["base_key"], target_state, user.profession_type, scale_cns, language)
