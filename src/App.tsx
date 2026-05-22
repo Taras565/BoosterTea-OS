@@ -14,7 +14,7 @@ const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname.includ
 type UserProfile = {
   name: string;
   gender: string;
-  weight: number;
+  weight: number | string;
   birthDate: string;
   profession: string;
   sub_profession: string;
@@ -71,7 +71,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
   const [data, setData] = useState({ 
     name: initData?.user?.first_name || initData?.user?.username || '', 
     gender: 'male', 
-    weight: 70, 
+    weight: '' as string | number, 
     birthDate: '', 
     profession: '', 
     sub_profession: '', 
@@ -108,7 +108,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
           body: JSON.stringify({
             telegram_id: telegramId,
             username: username,
-            weight: data.weight,
+            weight: Number(data.weight) || 70,
             gender: data.gender,
             birth_date: data.birthDate,
             profession_type: data.profession,
@@ -161,7 +161,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
           </div>
 
           <div><label className="block text-gray-400 text-sm mb-1">{t('weightTitle')}</label>
-            <input type="number" value={data.weight} onChange={e => setData({...data, weight: parseInt(e.target.value)||0})} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white text-center text-xl" />
+            <input type="number" value={data.weight} onChange={e => setData({...data, weight: e.target.value})} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white text-center text-xl" placeholder="70" />
           </div>
           <div><label className="block text-gray-400 text-sm mb-1">{t('birthDate')}</label>
             <input type="date" value={data.birthDate} onChange={e => setData({...data, birthDate: e.target.value})} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white" />
