@@ -529,18 +529,18 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, onDone }: { reci
             const host = window.location.origin.includes('localhost') ? 'https://boostertea-app.onrender.com' : window.location.origin;
             const mediaUrl = `${host}${recipe.avatar_image || '/bg-tea.png'}`;
             webApp.shareToStory(mediaUrl, {
-              text: `Мій стан: ${recipe.avatar_name}! 🍵\nБаза: ${recipe.base}\n\nЗгенеруй свій чайний стан в BoosterTea OS:`,
+              text: `${t('shareText')} ${recipe.avatar_name}! 🍵\n${t('shareBase')} ${recipe.base}\n\n${t('shareLink')}`,
               widget_link: {
                 url: "https://t.me/boostertea_os_bot/app",
-                name: "Відкрити BoosterTea OS"
+                name: t('shareTitle')
               }
             });
           } else {
-            if (webApp && webApp.showAlert) webApp.showAlert("Ваша версія Telegram не підтримує Stories. Будь ласка, оновіть додаток.");
-            else alert("Stories не підтримуються на вашому пристрої.");
+            if (webApp && webApp.showAlert) webApp.showAlert(t('errNoStory'));
+            else alert(t('errNoStory'));
           }
-        }} className="py-3 rounded-xl border border-primary/50 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors uppercase tracking-wider">Поділитися</button>
-        <button onClick={() => { triggerHaptic(); onDone(); }} className="premium-btn font-bold py-3 rounded-xl text-sm uppercase tracking-wider">Заварив!</button>
+        }} className="py-3 rounded-xl border border-primary/50 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors uppercase tracking-wider">{t('btnShare')}</button>
+        <button onClick={() => { triggerHaptic(); onDone(); }} className="premium-btn font-bold py-3 rounded-xl text-sm uppercase tracking-wider">{t('btnBrewed')}</button>
       </div>
     </motion.div>
   );
