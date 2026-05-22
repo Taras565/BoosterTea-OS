@@ -176,7 +176,11 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
             {activityOptions.map(tile => (
               <button 
                 key={tile.id}
-                onClick={() => { setData({...data, profession: tile.id, sub_profession: ''}); triggerHaptic(); }} 
+                onClick={() => { 
+                  setData({...data, profession: tile.id, sub_profession: ''}); 
+                  triggerHaptic(); 
+                  setTimeout(() => setStep(3), 300);
+                }} 
                 className={`w-full p-4 rounded-xl border flex flex-col items-start transition-all ${data.profession === tile.id ? 'border-primary bg-primary/20 shadow-[0_0_10px_rgba(0,255,204,0.3)]' : 'border-gray-700 bg-black/30'}`}
               >
                 <span className={`font-bold text-lg mb-1 ${data.profession === tile.id ? 'text-white' : 'text-gray-300'}`}>{tile.label}</span>
@@ -200,7 +204,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { label: 'Мінімум', value: 2 },
-                  { label: t('cns2'), value: 5 },
+                  { label: t('bal'), value: 5 },
                   { label: 'Максимум', value: 8 }
                 ].map(lvl => {
                   const isActive = (data as any)[tasteItem.k] === lvl.value;
@@ -339,7 +343,14 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel p-6 flex flex-col h-full overflow-y-auto max-h-[90vh]">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-white">Стан на сьогодні</h2>
-        <button onClick={() => { triggerHaptic(); localStorage.removeItem('bio_profile'); localStorage.removeItem('has_read_manifest'); onReset(); }} className="text-xs text-red-400 border border-red-900/50 bg-red-900/20 px-2 py-1 rounded hover:bg-red-900/40 transition-colors">Скинути</button>
+        <button onClick={() => { 
+          triggerHaptic(); 
+          if (window.confirm("Ви впевнені, що хочете скинути біометричний профіль?")) {
+            localStorage.removeItem('bio_profile'); 
+            localStorage.removeItem('has_read_manifest'); 
+            onReset(); 
+          }
+        }} className="text-xs text-red-400 border border-red-900/50 bg-red-900/20 px-2 py-1 rounded hover:bg-red-900/40 transition-colors">Скинути</button>
       </div>
       
       <div className="bg-black/40 p-3 rounded-xl border border-primary/20 mb-6 flex justify-between items-center">

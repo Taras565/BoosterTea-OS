@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ShieldCheck, Droplet, Sparkles, Activity } from 'lucide-react';
 import { Language, getTranslation } from '../i18n';
-import LanguageSwitcher from './LanguageSwitcher';
 
 const triggerHaptic = () => {
   try {
