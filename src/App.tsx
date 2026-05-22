@@ -192,32 +192,31 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
       )}
 
       {step === 3 && (
-        <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4">
-          <h3 className="text-lg font-bold text-white mb-4">Смакова карта</h3>
-          {[
-            {k:'taste_acid', label: t('acid')}, {k:'taste_bitter', label: t('bitter')}, {k:'taste_sweet', label: t('sweet')}
-          ].map(tasteItem => (
-            <div key={tasteItem.k} className="bg-black/30 p-4 rounded-xl border border-gray-800">
-              <div className="flex justify-between items-center mb-3">
-                <label className="text-sm font-bold text-white uppercase tracking-wider">{tasteItem.label}</label>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: 'Мінімум', value: 2 },
-                  { label: t('bal'), value: 5 },
-                  { label: 'Максимум', value: 8 }
-                ].map(lvl => {
-                  const isActive = (data as any)[tasteItem.k] === lvl.value;
-                  const btnClass = isActive ? PREMIUM_ACTIVE : PREMIUM_IDLE;
-                  return (
-                    <button key={lvl.label} onClick={() => { setData({...data, [tasteItem.k]: lvl.value}); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-xs font-bold uppercase rounded-lg border transition-all duration-300 ${btnClass}`}>
-                      {lvl.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+        <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4 flex flex-col h-full">
+          <h3 className="text-lg font-bold text-white mb-2">{t('tasteTitle')}</h3>
+          <div className="grid grid-cols-1 gap-2 flex-1 overflow-y-auto pb-4">
+            {[
+              { id: 'refreshing', label: t('tasteRef'), desc: t('tasteRefD'), a: 8, b: 2, s: 2 },
+              { id: 'tart', label: t('tasteTart'), desc: t('tasteTartD'), a: 2, b: 8, s: 2 },
+              { id: 'soft', label: t('tasteSoft'), desc: t('tasteSoftD'), a: 2, b: 2, s: 8 },
+              { id: 'balanced', label: t('tasteBal'), desc: t('tasteBalD'), a: 5, b: 5, s: 5 },
+            ].map(prof => {
+              const isActive = data.taste_acid === prof.a && data.taste_bitter === prof.b && data.taste_sweet === prof.s;
+              return (
+                <button 
+                  key={prof.id}
+                  onClick={() => { 
+                    setData({...data, taste_acid: prof.a, taste_bitter: prof.b, taste_sweet: prof.s}); 
+                    triggerHaptic(); 
+                  }} 
+                  className={`w-full p-4 rounded-xl border flex flex-col items-start transition-all ${isActive ? 'border-primary bg-primary/20 shadow-[0_0_10px_rgba(0,255,204,0.3)]' : 'border-gray-700 bg-black/30'}`}
+                >
+                  <span className={`font-bold text-base mb-1 ${isActive ? 'text-white' : 'text-gray-300'}`}>{prof.label}</span>
+                  <span className={`text-xs ${isActive ? 'text-primary' : 'text-gray-400'}`}>{prof.desc}</span>
+                </button>
+              );
+            })}
+          </div>
         </motion.div>
       )}
 
@@ -452,9 +451,9 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, onDone }: { reci
       </div>
 
       <div className="px-6 py-4 grid grid-cols-3 gap-2 bg-black/60 border-b border-gray-800">
-        <div className="text-center"><p className="text-xs text-gray-500 mb-1">Фокус</p><div className="h-1.5 bg-gray-800 rounded-full"><div className="h-full bg-blue-500 rounded-full" style={{width: `${recipe.stats.focus}%`}}></div></div><p className="text-xs font-bold mt-1">+{recipe.stats.focus}%</p></div>
-        <div className="text-center"><p className="text-xs text-gray-500 mb-1">Енергія</p><div className="h-1.5 bg-gray-800 rounded-full"><div className="h-full bg-yellow-500 rounded-full" style={{width: `${recipe.stats.energy}%`}}></div></div><p className="text-xs font-bold mt-1">+{recipe.stats.energy}%</p></div>
-        <div className="text-center"><p className="text-xs text-gray-500 mb-1">Спокій</p><div className="h-1.5 bg-gray-800 rounded-full"><div className="h-full bg-primary rounded-full" style={{width: `${recipe.stats.calm}%`}}></div></div><p className="text-xs font-bold mt-1">+{recipe.stats.calm}%</p></div>
+        <div className="text-center"><p className="text-xs text-gray-500 mb-1">{t('focus')}</p><div className="h-1.5 bg-gray-800 rounded-full"><div className="h-full bg-blue-500 rounded-full" style={{width: `${recipe.stats.focus}%`}}></div></div><p className="text-xs font-bold mt-1">+{recipe.stats.focus}%</p></div>
+        <div className="text-center"><p className="text-xs text-gray-500 mb-1">{t('energy')}</p><div className="h-1.5 bg-gray-800 rounded-full"><div className="h-full bg-yellow-500 rounded-full" style={{width: `${recipe.stats.energy}%`}}></div></div><p className="text-xs font-bold mt-1">+{recipe.stats.energy}%</p></div>
+        <div className="text-center"><p className="text-xs text-gray-500 mb-1">{t('calm')}</p><div className="h-1.5 bg-gray-800 rounded-full"><div className="h-full bg-primary rounded-full" style={{width: `${recipe.stats.calm}%`}}></div></div><p className="text-xs font-bold mt-1">+{recipe.stats.calm}%</p></div>
       </div>
 
       <div className="p-6 space-y-6 flex-1">
@@ -462,41 +461,41 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, onDone }: { reci
         {/* Explanation Block */}
         {recipe.explanation && (
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
-            <h3 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2"><Target size={14}/> Аналіз Системи</h3>
+            <h3 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2"><Target size={14}/> {t('sysAnalysis')}</h3>
             <p className="text-xs text-gray-300 leading-relaxed italic">{recipe.explanation}</p>
           </div>
         )}
 
         <div>
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Формула Змішування</h3>
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">{t('mixFormula')}</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg border border-gray-800">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20"><FlaskConical size={14} className="text-primary"/></div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">База</span>
+                  <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{t('base')}</span>
                   <span className="text-sm font-bold text-white leading-tight">{recipe.base}</span>
                 </div>
               </div>
-              <span className="font-bold text-primary shrink-0 text-right text-lg">{recipe.tea_ml} <span className="text-xs text-gray-400">мл</span></span>
+              <span className="font-bold text-primary shrink-0 text-right text-lg">{recipe.tea_ml} <span className="text-xs text-gray-400">{t('ml')}</span></span>
             </div>
 
             <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg border border-gray-800">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20"><Droplet size={14} className="text-blue-400"/></div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Активатор</span>
+                  <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{t('activator')}</span>
                   <span className="text-sm font-bold text-white leading-tight">{recipe.activator}</span>
                 </div>
               </div>
-              <span className="font-bold text-blue-400 shrink-0 text-right text-lg">{recipe.juice_ml} <span className="text-xs text-gray-400">мл</span></span>
+              <span className="font-bold text-blue-400 shrink-0 text-right text-lg">{recipe.juice_ml} <span className="text-xs text-gray-400">{t('ml')}</span></span>
             </div>
 
             <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg border border-gray-800">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center shrink-0 border border-red-500/20"><Thermometer size={14} className="text-red-400"/></div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Температура</span>
+                  <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{t('temp')}</span>
                   <span className="text-sm font-bold text-white leading-tight">{recipe.cocktail_status}</span>
                 </div>
               </div>
@@ -506,8 +505,8 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, onDone }: { reci
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center shrink-0 border border-cyan-500/20"><Wind size={14} className="text-cyan-400"/></div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Охолодження</span>
-                  <span className="text-sm font-bold text-white leading-tight">{recipe.ice_cubes > 0 ? `${recipe.ice_cubes} куб.` : 'Без льоду'}</span>
+                  <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{t('cooling')}</span>
+                  <span className="text-sm font-bold text-white leading-tight">{recipe.ice_cubes > 0 ? `${recipe.ice_cubes} ${t('cubes')}` : t('noIce')}</span>
                 </div>
               </div>
           </div>
@@ -517,7 +516,7 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, onDone }: { reci
         {/* Mixology Instructions Block */}
         {recipe.instructions && (
           <div className="bg-gradient-to-br from-gray-900 to-black p-4 rounded-xl border border-gray-700 shadow-inner mt-4">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Leaf size={14} className="text-primary"/> Рішення Бармена</h3>
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Leaf size={14} className="text-primary"/> {t('barmen')}</h3>
             <p className="text-sm text-gray-300 leading-relaxed font-medium">{recipe.instructions}</p>
           </div>
         )}
