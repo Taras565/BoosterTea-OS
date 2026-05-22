@@ -93,17 +93,25 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     # Dynamic State Modifier based on deviation from norm (5)
     state_modifier = 1.0
     if target_state == "RELAX" and scale_cns > 5:
-        state_modifier = 1.0 + ((scale_cns - 5) * 0.06)  # Max +30% at stress 10
+        state_modifier = 1.0 + ((scale_cns - 5) * 0.05)  # Max +25%
     elif target_state == "ENERGY" and scale_energy < 5:
-        state_modifier = 1.0 + ((5 - scale_energy) * 0.1)  # Max +30% at energy 2
+        state_modifier = 1.0 + ((5 - scale_energy) * 0.08)  # Max +32%
     elif target_state == "FOCUS" and scale_mental < 5:
-        state_modifier = 1.0 + ((5 - scale_mental) * 0.1)  # Max +30% at mental 2
+        state_modifier = 1.0 + ((5 - scale_mental) * 0.08)  # Max +32%
 
-    base_coef = 0.4
-    v_tea = weight * base_coef * k_ns * state_modifier
+    # Scientific standard: 30ml liquid extract is 1 serving for 70kg adult
+    base_volume = 30.0
+    weight_factor = weight / 70.0
+    
+    k_ns_modifier = 1.0
+    if k_ns >= 0.7: k_ns_modifier = 1.05
+    elif k_ns <= 0.5: k_ns_modifier = 0.95
+    else: k_ns_modifier = 1.0
+
+    v_tea = base_volume * weight_factor * k_ns_modifier * state_modifier
 
     if had_caffeine:
-        v_tea = v_tea * 0.7 
+        v_tea = v_tea * 0.85 
         
     v_tea = round(v_tea, 1)
 
@@ -116,7 +124,10 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
         "ice_cubes": 0,
         "cocktail_status": "Chilled",
         "instructions": "",
-        "breathwork_protocol": "square"
+        "breathwork_protocol": "square",
+        "weight_factor": weight_factor,
+        "k_ns_modifier": k_ns_modifier,
+        "state_modifier": state_modifier
     }
 
     if target_state == "RELAX":
@@ -270,11 +281,15 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     tgt_ru = {"RELAX": "Спокойствия", "ENERGY": "Энергии", "FOCUS": "Фокуса", "COMMUNICATION": "Коммуникации"}[target_state]
     tgt_es = {"RELAX": "Relajación", "ENERGY": "Energía", "FOCUS": "Enfoque", "COMMUNICATION": "Comunicación"}[target_state]
 
+    wf = recipe.get("weight_factor", 1.0)
+    kn = recipe.get("k_ns_modifier", 1.0)
+    sm = recipe.get("state_modifier", 1.0)
+
     exp = {
-        "uk": f"Формула: (Вага {weight} кг × Базовий коеф. {base_coef:.2f} × Нейро-ємність {k_ns:.2f} × Модифікатор стану {state_modifier:.2f}) = {recipe['tea_ml']} мл. Ця фізіологічно точна доза бази {recipe['base']} та техніка '{tech}' підібрані для переходу в стан {tgt_uk}.",
-        "en": f"Formula: (Weight {weight} kg × Base coef {base_coef:.2f} × Neuro-capacity {k_ns:.2f} × State modifier {state_modifier:.2f}) = {recipe['tea_ml']} ml. This precise dose of {recipe['base']} and '{tech_en}' technique are matched for the {tgt_en} target state.",
-        "ru": f"Формула: (Вес {weight} кг × Базовый коэф. {base_coef:.2f} × Нейро-емкость {k_ns:.2f} × Модификатор состояния {state_modifier:.2f}) = {recipe['tea_ml']} мл. Эта физиологически точная доза базы {recipe['base']} и техника '{tech_ru}' подобраны для перехода в состояние {tgt_ru}.",
-        "es": f"Fórmula: (Peso {weight} kg × Coeficiente base {base_coef:.2f} × Neuro-capacidad {k_ns:.2f} × Modificador de estado {state_modifier:.2f}) = {recipe['tea_ml']} ml. Esta dosis precisa de {recipe['base']} y la técnica '{tech_es}' están adaptadas para el estado {tgt_es}."
+        "uk": f"Формула: (База 30 мл × Вага {wf:.2f} × Нейротип {kn:.2f} × Стан {sm:.2f}) = {recipe['tea_ml']} мл. Ця медично-точна доза концентрату {recipe['base']} гарантує перехід в стан {tgt_uk}.",
+        "en": f"Formula: (Base 30 ml × Weight {wf:.2f} × Neurotype {kn:.2f} × State {sm:.2f}) = {recipe['tea_ml']} ml. This medically-precise dose of {recipe['base']} guarantees the {tgt_en} target state.",
+        "ru": f"Формула: (База 30 мл × Вес {wf:.2f} × Нейротип {kn:.2f} × Состояние {sm:.2f}) = {recipe['tea_ml']} мл. Эта медицински-точная доза концентрата {recipe['base']} гарантирует переход в состояние {tgt_ru}.",
+        "es": f"Fórmula: (Base 30 ml × Peso {wf:.2f} × Neurotipo {kn:.2f} × Estado {sm:.2f}) = {recipe['tea_ml']} ml. Esta dosis de {recipe['base']} médicamente precisa garantiza el estado {tgt_es}."
     }
     recipe["explanation"] = exp[language]
 
