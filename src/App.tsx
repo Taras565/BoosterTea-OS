@@ -54,34 +54,6 @@ const activityOptions = [
   { id: 'routine', label: '🔄 Відновлення та Побут', sub: 'Відпочинок, рутина, баланс' }
 ];
 
-function ResultScreen({ recipe, weatherTemp, weatherCond, drinkFormat, activityType, onDone, lang }: { recipe: Recipe, weatherTemp: number, weatherCond: string, drinkFormat: string, activityType: string, onDone: () => void, lang: Language }) {
-  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
-  const [activeFormat, setActiveFormat] = useState(drinkFormat);
-
-  const getPredictedTime = () => {
-    if (activeFormat === 'Shot') return t('timeShot');
-    if (activeFormat === 'Cocktail') return t('timeLong');
-    return t('timeTea');
-  };
-
-  const currentWater = activeFormat === 'Shot' ? 0 : (activeFormat === 'Cocktail' ? 50 : 200);
-  const currentJuice = activeFormat === 'Shot' ? 30 : (activeFormat === 'Cocktail' ? 150 : 0);
-  const isHotWeather = weatherTemp > 22;
-  const currentIce = activeFormat === 'Cocktail' ? (isHotWeather ? 4 : 2) : 0;
-  const currentStatus = activeFormat === 'Tea' ? 'Hot' : 'Chilled';
-  
-  const currentInstructions = activeFormat === 'Shot' 
-    ? t('instShot') 
-    : (activeFormat === 'Cocktail' ? t('instCocktail') : t('instTea'));
-
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col bg-black overflow-y-auto">
-      <div className="relative h-48 shrink-0">
-        {/* Result Screen Content */}
-      </div>
-    </motion.div>
-  );
-}
 
 const triggerHaptic = () => { 
   try { 
