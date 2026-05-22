@@ -138,32 +138,32 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-panel p-6 h-full flex flex-col justify-center">
-      <h2 className="text-2xl font-bold text-primary text-center mb-2">Налаштування BoosterTea OS</h2>
+      <h2 className="text-2xl font-bold text-primary text-center mb-2">{t('setupTitle')}</h2>
       <div className="flex justify-center space-x-2 mb-8">
         {[1,2,3].map(i => <div key={i} className={`h-1 w-10 rounded ${step >= i ? 'bg-primary' : 'bg-gray-700'}`} />)}
       </div>
 
       {step === 1 && (
         <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4">
-          <h3 className="text-lg font-bold text-white mb-4">Біометрія</h3>
+          <h3 className="text-lg font-bold text-white mb-4">{t('biometry')}</h3>
           
           <div className="mb-4">
-            <label className="block text-gray-400 text-sm mb-1">Ім'я (Псевдонім)</label>
-            <input type="text" value={data.name} onChange={e => setData({...data, name: e.target.value})} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white placeholder-gray-600" placeholder="Neo..." />
+            <label className="block text-gray-400 text-sm mb-1">{t('enterName')}</label>
+            <input type="text" value={data.name} onChange={e => setData({...data, name: e.target.value})} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white placeholder-gray-600" placeholder={t('namePlaceholder')} />
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-400 text-sm mb-1">Стать (Гормональний фон)</label>
+            <label className="block text-gray-400 text-sm mb-1">{t('gender')}</label>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => { setData({...data, gender: 'male'}); triggerHaptic(); }} className={`p-3 rounded-lg border text-sm font-bold transition-all ${data.gender === 'male' ? 'border-blue-500 bg-blue-500/20 text-blue-400' : 'border-gray-700 bg-black/30 text-gray-400'}`}>Чоловіча</button>
-              <button onClick={() => { setData({...data, gender: 'female'}); triggerHaptic(); }} className={`p-3 rounded-lg border text-sm font-bold transition-all ${data.gender === 'female' ? 'border-pink-500 bg-pink-500/20 text-pink-400' : 'border-gray-700 bg-black/30 text-gray-400'}`}>Жіноча</button>
+              <button onClick={() => { setData({...data, gender: 'male'}); triggerHaptic(); }} className={`p-3 rounded-lg border text-sm font-bold transition-all ${data.gender === 'male' ? 'border-blue-500 bg-blue-500/20 text-blue-400' : 'border-gray-700 bg-black/30 text-gray-400'}`}>{t('male')}</button>
+              <button onClick={() => { setData({...data, gender: 'female'}); triggerHaptic(); }} className={`p-3 rounded-lg border text-sm font-bold transition-all ${data.gender === 'female' ? 'border-pink-500 bg-pink-500/20 text-pink-400' : 'border-gray-700 bg-black/30 text-gray-400'}`}>{t('female')}</button>
             </div>
           </div>
 
-          <div><label className="block text-gray-400 text-sm mb-1">Вага (кг)</label>
+          <div><label className="block text-gray-400 text-sm mb-1">{t('weightTitle')}</label>
             <input type="number" value={data.weight} onChange={e => setData({...data, weight: parseInt(e.target.value)||0})} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white text-center text-xl" />
           </div>
-          <div><label className="block text-gray-400 text-sm mb-1">Дата народження</label>
+          <div><label className="block text-gray-400 text-sm mb-1">{t('birthDate')}</label>
             <input type="date" value={data.birthDate} onChange={e => setData({...data, birthDate: e.target.value})} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white" />
           </div>
         </motion.div>
@@ -171,7 +171,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
 
       {step === 2 && (
         <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4 flex flex-col h-full">
-          <h3 className="text-lg font-bold text-white mb-2">Твій основний режим:</h3>
+          <h3 className="text-lg font-bold text-white mb-2">{t('modeSelect')}:</h3>
           <div className="grid grid-cols-1 gap-2 flex-1 overflow-y-auto">
             {activityOptions.map(tile => (
               <button 
@@ -224,7 +224,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
         <div className="w-full mt-4 flex justify-center py-4"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
       ) : (
         <button onClick={handleNext} className="w-full mt-4 premium-btn font-bold py-4 rounded-xl flex justify-center items-center gap-2 active:scale-95 transition-all uppercase tracking-wider text-sm">
-          {step === 3 ? 'Створити Профіль' : 'Далі'} <ChevronRight size={20} />
+          {step === 3 ? t('btnCreateProfile') : t('btnNext')} <ChevronRight size={20} />
         </button>
       )}
     </motion.div>

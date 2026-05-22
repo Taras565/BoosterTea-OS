@@ -11,16 +11,11 @@ const triggerHaptic = () => {
   } catch (e) {}
 };
 
-function TargetIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-    </svg>
-  )
-}
+// TargetIcon removed to fix unused warning
 
 export default function WelcomeManifest({ lang, onComplete }: { lang: Language, onComplete: () => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
 
@@ -110,7 +105,11 @@ export default function WelcomeManifest({ lang, onComplete }: { lang: Language, 
   ];
 
   const nextSlide = () => {
+    if (isTransitioning) return;
     triggerHaptic();
+    setIsTransitioning(true);
+    setTimeout(() => setIsTransitioning(false), 300);
+
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(prev => prev + 1);
     } else {

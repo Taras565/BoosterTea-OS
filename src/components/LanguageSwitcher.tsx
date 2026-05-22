@@ -1,7 +1,6 @@
 import { Language } from '../i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
-import { Globe } from 'lucide-react';
 
 const triggerHaptic = () => {
   try {
