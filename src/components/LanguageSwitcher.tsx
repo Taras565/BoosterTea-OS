@@ -45,7 +45,7 @@ export default function LanguageSwitcher({ currentLang, onSelect }: { currentLan
   };
 
   return (
-    <div className="absolute top-4 right-4 z-50" ref={ref}>
+    <div className="absolute top-4 left-4 z-50" ref={ref}>
       <button 
         onClick={() => { triggerHaptic(); setIsOpen(!isOpen); }}
         className="w-10 h-10 rounded-full bg-black/60 border border-gray-700 backdrop-blur-md flex items-center justify-center text-xl shadow-lg hover:border-primary/50 transition-colors"
@@ -60,7 +60,7 @@ export default function LanguageSwitcher({ currentLang, onSelect }: { currentLan
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-12 right-0 bg-black/80 border border-gray-700 backdrop-blur-xl rounded-xl p-2 flex flex-col gap-1 shadow-2xl min-w-[140px]"
+            className="absolute top-12 left-0 bg-black/80 border border-gray-700 backdrop-blur-xl rounded-xl p-2 flex flex-col gap-1 shadow-2xl min-w-[140px]"
           >
             {(Object.keys(flags) as Language[]).map((lang) => (
               <button
