@@ -83,15 +83,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
 
   const handleNext = async () => {
     triggerHaptic();
-    if (step === 2 && !data.profession) { 
-      if ((window as any).Telegram?.WebApp?.showAlert) {
-        (window as any).Telegram.WebApp.showAlert("Будь ласка, оберіть ваш режим.");
-      } else {
-        alert("Будь ласка, оберіть ваш режим.");
-      }
-      return; 
-    }
-    if (step < 3) setStep(step + 1);
+    if (step < 2) setStep(step + 1);
     else {
       setLoading(true);
       try {
@@ -172,28 +164,6 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
 
       {step === 2 && (
         <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4 flex flex-col h-full">
-          <h3 className="text-lg font-bold text-white mb-2">{t('modeSelect')}:</h3>
-          <div className="grid grid-cols-1 gap-2 flex-1 overflow-y-auto">
-            {activityOptions.map(tile => (
-              <button 
-                key={tile.id}
-                onClick={() => { 
-                  setData({...data, profession: tile.id, sub_profession: ''}); 
-                  triggerHaptic(); 
-                  setTimeout(() => setStep(3), 300);
-                }} 
-                className={`w-full p-4 rounded-xl border flex flex-col items-start transition-all ${data.profession === tile.id ? 'border-primary bg-primary/20 shadow-[0_0_10px_rgba(0,255,204,0.3)]' : 'border-gray-700 bg-black/30'}`}
-              >
-                <span className={`font-bold text-lg mb-1 ${data.profession === tile.id ? 'text-white' : 'text-gray-300'}`}>{tile.label}</span>
-                <span className={`text-xs ${data.profession === tile.id ? 'text-primary' : 'text-gray-400'}`}>{tile.sub}</span>
-              </button>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {step === 3 && (
-        <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4 flex flex-col h-full">
           <h3 className="text-lg font-bold text-white mb-2">{t('tasteTitle')}</h3>
           <div className="grid grid-cols-1 gap-2 flex-1 overflow-y-auto pb-4">
             {[
@@ -225,7 +195,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
         <div className="w-full mt-4 flex justify-center py-4"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
       ) : (
         <button onClick={handleNext} className="w-full mt-4 premium-btn font-bold py-4 rounded-xl flex justify-center items-center gap-2 active:scale-95 transition-all uppercase tracking-wider text-sm">
-          {step === 3 ? t('btnCreateProfile') : t('btnNext')} <ChevronRight size={20} />
+          {step === 2 ? t('btnCreateProfile') : t('btnNext')} <ChevronRight size={20} />
         </button>
       )}
     </motion.div>
@@ -263,6 +233,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
   const [scaleMental, setScaleMental] = useState(5);
   const [hadCaffeine, setHadCaffeine] = useState(false);
   const [drinkFormat, setDrinkFormat] = useState('long');
+  const [currentActivity, setCurrentActivity] = useState(profile.profession || 'routine');
   
   const [loading, setLoading] = useState(false);
   const [currentTemp, setCurrentTemp] = useState<number | null>(null);
@@ -309,7 +280,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
         },
         body: JSON.stringify({
           telegram_id: telegramId,
-          specific_activity_id: profile.profession,
+          specific_activity_id: currentActivity,
           drink_format: drinkFormat,
           scale_cns: scaleCns,
           scale_energy: scaleEnergy,
@@ -353,8 +324,19 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
         }} className="text-xs text-red-400 border border-red-900/50 bg-red-900/20 px-2 py-1 rounded hover:bg-red-900/40 transition-colors">Скинути</button>
       </div>
       
-      <div className="bg-black/40 p-3 rounded-xl border border-primary/20 mb-6 flex justify-between items-center">
-        <div><p className="text-xs text-gray-500 uppercase">Активність</p><p className="text-sm font-bold text-primary">{activityOptions.find(o => o.id === profile.profession)?.label || profile.profession}</p></div>
+      <div className="mb-6">
+        <label className="text-sm font-bold text-white mb-3 block">Яка твоя ціль зараз?</label>
+        <div className="grid grid-cols-2 gap-2">
+          {activityOptions.map(tile => (
+            <button 
+              key={tile.id}
+              onClick={() => { setCurrentActivity(tile.id); triggerHaptic(); }}
+              className={`p-2 rounded-lg border text-xs sm:text-sm text-left transition-all flex flex-col justify-center ${currentActivity === tile.id ? 'border-primary bg-primary/20 text-white shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'border-gray-700 bg-black/30 text-gray-400 hover:bg-black/50'}`}
+            >
+              <span className="font-bold whitespace-normal leading-tight">{tile.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
       
       <div className="space-y-4 mb-6">
