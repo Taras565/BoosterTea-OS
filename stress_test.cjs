@@ -1,7 +1,7 @@
 const fs = require('fs');
 
-const API_URL = "https://boostertea-os-backend.onrender.com/api";
-const NUM_TESTS = 200;
+const API_URL = "http://localhost:8000/api";
+const NUM_TESTS = 100;
 
 const genders = ["male", "female"];
 const professions = ["coding", "study", "business", "creative", "sport", "routine"];
@@ -55,6 +55,8 @@ async function runTest(idx) {
         scale_energy: Math.floor(Math.random() * 9) + 2,
         scale_mental: Math.floor(Math.random() * 9) + 2,
         had_caffeine_recently: Math.random() > 0.5,
+        caffeine_mg: [0, 60, 120, 150, 200][Math.floor(Math.random() * 5)],
+        caffeine_time: "14:30",
         drink_format: formats[Math.floor(Math.random() * formats.length)],
         latitude: 50.45,
         longitude: 30.52,

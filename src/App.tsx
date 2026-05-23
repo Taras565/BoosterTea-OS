@@ -99,7 +99,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
 
   const handleNext = async () => {
     triggerHaptic();
-    if (step < 2) setStep(step + 1);
+    if (step < 3) setStep(step + 1);
     else {
       setLoading(true);
       try {
@@ -119,8 +119,8 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
             username: username,
             weight: Number(data.weight) || 70,
             gender: data.gender,
-            birth_date: data.birthDate,
-            profession_type: data.profession,
+            birth_date: data.birthDate || "1990-01-01",
+            profession_type: data.profession || "routine",
             taste_acid_pref: data.taste_acid,
             taste_bitter_pref: data.taste_bitter,
             taste_sweet_pref: data.taste_sweet,
