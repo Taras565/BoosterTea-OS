@@ -26,6 +26,9 @@ class User(Base):
     taste_bitter_pref = Column(Integer, default=5)
     taste_sweet_pref = Column(Integer, default=5)
     caffeine_sensitivity = Column(String(50), default="normal")
+    smoker = Column(Boolean, default=False)
+    oral_contraceptives = Column(Boolean, default=False)
+    target_bedtime = Column(String(10), nullable=True) # зберігатимемо як "23:00"
 
     # B2B & Flywheel Retention (Block 1)
     company_id = Column(String(50), nullable=True)
@@ -58,8 +61,11 @@ class StateLog(Base):
     scale_cns = Column(Integer, nullable=True)
     scale_energy = Column(Integer, nullable=True)
     scale_mental = Column(Integer, nullable=True)
-    had_caffeine = Column(Boolean, nullable=True)
+    caffeine_mg = Column(Integer, nullable=True)
+    caffeine_time = Column(String(10), nullable=True)
+    had_caffeine_recently = Column(Boolean, nullable=True) # deprecated, but kept for backwards compatibility
     weather_temp = Column(Integer, nullable=True)
+    latitude = Column(Float, nullable=True)
     weather_condition = Column(String(50), nullable=True)
     
     # Super-Personalization Addon

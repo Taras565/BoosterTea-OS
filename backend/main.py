@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 from pydantic import BaseModel
 from typing import Optional
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import asyncio
 import httpx
 import os
@@ -125,6 +126,9 @@ class RegistrationRequest(BaseModel):
     caffeine_sensitivity: str = "normal"
     company_id: Optional[str] = None
     last_period_date: Optional[date] = None
+    smoker: bool = False
+    oral_contraceptives: bool = False
+    target_bedtime: Optional[str] = "23:00"
 
 class StateRequest(BaseModel):
     telegram_id: int
@@ -133,6 +137,8 @@ class StateRequest(BaseModel):
     scale_energy: int
     scale_mental: int
     had_caffeine_recently: bool
+    caffeine_mg: Optional[int] = None
+    caffeine_time: Optional[str] = None
     drink_format: str = "long"
     latitude: Optional[float] = None
     longitude: Optional[float] = None
@@ -172,7 +178,10 @@ def register_user(req: RegistrationRequest, db: Session = Depends(database.get_d
             taste_sweet_pref=req.taste_sweet_pref,
             caffeine_sensitivity=req.caffeine_sensitivity,
             company_id=req.company_id,
-            last_period_date=req.last_period_date
+            last_period_date=req.last_period_date,
+            smoker=req.smoker,
+            oral_contraceptives=req.oral_contraceptives,
+            target_bedtime=req.target_bedtime
         )
         db.add(user)
         db.commit()
@@ -220,18 +229,28 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
         delta = date.today() - user.last_period_date
         menstrual_cycle_day = (delta.days % 28) + 1
 
+    # Get last 30 days logs for cycling logic
+    thirty_days_ago = date.today() - timedelta(days=30)
+    past_logs = db.query(models.StateLog).filter(
+        models.StateLog.telegram_id == user.telegram_id,
+        func.date(models.StateLog.created_at) >= thirty_days_ago
+    ).all()
+
     # Engine Logic
     recipe = determine_recipe(
         scale_cns=req.scale_cns,
         scale_energy=req.scale_energy,
         scale_mental=req.scale_mental,
+        caffeine_mg=req.caffeine_mg,
+        caffeine_time=req.caffeine_time,
         had_caffeine=req.had_caffeine_recently,
         specific_activity_id=req.specific_activity_id,
         drink_format=req.drink_format,
         weather_temp=weather_temp,
         user=user,
         language=req.language,
-        menstrual_cycle_day=menstrual_cycle_day
+        menstrual_cycle_day=menstrual_cycle_day,
+        past_logs=past_logs
     )
 
     # Save Log
@@ -240,7 +259,9 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
         scale_cns=req.scale_cns,
         scale_energy=req.scale_energy,
         scale_mental=req.scale_mental,
-        had_caffeine=req.had_caffeine_recently,
+        caffeine_mg=req.caffeine_mg,
+        caffeine_time=req.caffeine_time,
+        had_caffeine_recently=req.had_caffeine_recently,
         current_activity=req.specific_activity_id,
         weather_temp=weather_temp,
         weather_condition=weather_condition,

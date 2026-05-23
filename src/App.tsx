@@ -25,6 +25,9 @@ type UserProfile = {
   company_id?: string;
   current_streak_cycle?: number;
   last_period_date?: string;
+  smoker?: boolean;
+  oral_contraceptives?: boolean;
+  target_bedtime?: string;
 };
 
 type Recipe = {
@@ -88,7 +91,10 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
     taste_sweet: 5,
     caffeine_sensitivity: 'normal' as 'normal' | 'high',
     lastPeriodDate: '',
-    optInHealthData: false
+    optInHealthData: false,
+    targetBedtime: '23:00',
+    smoker: false,
+    oralContraceptives: false
   });
 
   const handleNext = async () => {
@@ -119,7 +125,10 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
             taste_bitter_pref: data.taste_bitter,
             taste_sweet_pref: data.taste_sweet,
             caffeine_sensitivity: data.caffeine_sensitivity,
-            last_period_date: data.lastPeriodDate || undefined
+            last_period_date: data.lastPeriodDate || undefined,
+            target_bedtime: data.targetBedtime,
+            smoker: data.smoker,
+            oral_contraceptives: data.oralContraceptives
           })
         });
         
@@ -184,6 +193,28 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
             <div className="grid grid-cols-1 gap-2">
               <button onClick={() => { setData({...data, caffeine_sensitivity: 'normal'}); triggerHaptic(); }} className={`p-3 rounded-lg border text-sm transition-all text-left ${data.caffeine_sensitivity === 'normal' ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/30 text-gray-400'}`}>⚡ {t('cafSensNormal' as any) || 'Нормальна'}</button>
               <button onClick={() => { setData({...data, caffeine_sensitivity: 'high'}); triggerHaptic(); }} className={`p-3 rounded-lg border text-sm transition-all text-left ${data.caffeine_sensitivity === 'high' ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/30 text-gray-400'}`}>🐢 {t('cafSensHigh' as any) || 'Повільний метаболізм (сильно діє)'}</button>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-400 text-sm mb-1">Цільовий час сну (для комендантської години)</label>
+            <input type="time" value={data.targetBedtime} onChange={e => setData({...data, targetBedtime: e.target.value})} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white" />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-400 text-sm mb-2">Метаболічні фактори (CYP1A2)</label>
+            <div className="flex flex-col gap-3">
+              <label className="flex items-center gap-3 cursor-pointer p-3 bg-black/30 border border-gray-700 rounded-lg">
+                <input type="checkbox" checked={data.smoker} onChange={e => setData({...data, smoker: e.target.checked})} className="w-5 h-5 rounded border-gray-600 text-primary bg-black" />
+                <span className="text-sm text-gray-300">Я курю (пришвидшує розпад кофеїну)</span>
+              </label>
+              
+              {data.gender === 'female' && (
+                <label className="flex items-center gap-3 cursor-pointer p-3 bg-black/30 border border-gray-700 rounded-lg">
+                  <input type="checkbox" checked={data.oralContraceptives} onChange={e => setData({...data, oralContraceptives: e.target.checked})} className="w-5 h-5 rounded border-gray-600 text-primary bg-black" />
+                  <span className="text-sm text-gray-300">Приймаю оральні контрацептиви (уповільнює розпад)</span>
+                </label>
+              )}
             </div>
           </div>
         </motion.div>
@@ -277,7 +308,8 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
   const [scaleCns, setScaleCns] = useState(5);
   const [scaleEnergy, setScaleEnergy] = useState(5);
   const [scaleMental, setScaleMental] = useState(5);
-  const [hadCaffeine, setHadCaffeine] = useState(false);
+  const [caffeineMg, setCaffeineMg] = useState<number | null>(null);
+  const [caffeineTime, setCaffeineTime] = useState<string>('');
   const [drinkFormat, setDrinkFormat] = useState('long');
   const [currentActivity, setCurrentActivity] = useState(profile.profession || 'routine');
   
@@ -332,7 +364,9 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
           scale_cns: scaleCns,
           scale_energy: scaleEnergy,
           scale_mental: scaleMental,
-          had_caffeine_recently: hadCaffeine,
+          had_caffeine_recently: caffeineMg !== null && caffeineMg > 0,
+          caffeine_mg: caffeineMg,
+          caffeine_time: caffeineTime || undefined,
           latitude: lat,
           longitude: lon,
           language: lang
@@ -473,14 +507,24 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
         </div>
       </div>
 
-      <div className="mb-6 bg-black/30 p-4 rounded-xl border border-gray-800 flex items-center justify-between cursor-pointer" onClick={() => { setHadCaffeine(!hadCaffeine); triggerHaptic(); }}>
-        <div className="flex items-center gap-3">
-          <Coffee className={hadCaffeine ? "text-primary" : "text-gray-500"} size={20} />
-          <span className="text-sm text-white font-medium">{t('caffeine')}</span>
+      <div className="mb-6 bg-black/30 p-4 rounded-xl border border-gray-800">
+        <label className="text-sm font-bold text-white mb-3 block flex items-center gap-2">
+          <Coffee size={18} className="text-primary"/> Спожитий кофеїн сьогодні
+        </label>
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <button onClick={() => { setCaffeineMg(0); triggerHaptic(); }} className={`p-2 rounded-lg border text-xs font-bold transition-all ${caffeineMg === 0 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Нічого (0 мг)</button>
+          <button onClick={() => { setCaffeineMg(60); triggerHaptic(); }} className={`p-2 rounded-lg border text-xs font-bold transition-all ${caffeineMg === 60 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Еспресо (60 мг)</button>
+          <button onClick={() => { setCaffeineMg(120); triggerHaptic(); }} className={`p-2 rounded-lg border text-xs font-bold transition-all ${caffeineMg === 120 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Фільтр (120 мг)</button>
+          <button onClick={() => { setCaffeineMg(150); triggerHaptic(); }} className={`p-2 rounded-lg border text-xs font-bold transition-all ${caffeineMg === 150 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Енергетик (150 мг)</button>
+          <button onClick={() => { setCaffeineMg(200); triggerHaptic(); }} className={`p-2 rounded-lg border text-xs font-bold transition-all ${caffeineMg === 200 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Багато (&gt;200 мг)</button>
         </div>
-        <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${hadCaffeine ? 'bg-primary border-primary text-black' : 'border-gray-600'}`}>
-          {hadCaffeine && <CheckCircle2 size={16} />}
-        </div>
+        
+        {caffeineMg !== null && caffeineMg > 0 && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="mt-2">
+            <label className="block text-gray-400 text-xs mb-1">Час останнього прийому (важливо для розрахунку періоду напіврозпаду)</label>
+            <input type="time" value={caffeineTime} onChange={e => setCaffeineTime(e.target.value)} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white text-sm" />
+          </motion.div>
+        )}
       </div>
 
 

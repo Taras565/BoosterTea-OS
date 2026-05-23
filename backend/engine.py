@@ -75,11 +75,15 @@ def get_base_name(base_type: str, lang: str) -> str:
         "Puer": {"uk": "Шу Пуер (var. kucha)", "en": "Shu Puer (var. kucha)", "ru": "Шу Пуэр (var. kucha)", "es": "Shu Puer (var. kucha)"},
         "Pure GABA": {"uk": "Чиста Преміум GABA", "en": "Pure Premium GABA", "ru": "Чистая Премиум GABA", "es": "GABA Premium Pura"},
         "GABA (Stress)": {"uk": "GABA (Стрес-компенсація)", "en": "GABA (Stress Compensation)", "ru": "GABA (Стресс-компенсация)", "es": "GABA (Compensación de Estrés)"},
-        "GABA (Decaf)": {"uk": "GABA (Захист від кофеїну)", "en": "GABA (Caffeine Protection)", "ru": "GABA (Защита от кофеина)", "es": "GABA (Protección contra cafeína)"}
+        "GABA (Decaf)": {"uk": "GABA (Захист від кофеїну)", "en": "GABA (Caffeine Protection)", "ru": "GABA (Защита от кофеина)", "es": "GABA (Protección contra cafeína)"},
+        "Bacopa Monnieri": {"uk": "Бакопа Моньє (Нейрогенез)", "en": "Bacopa Monnieri", "ru": "Бакопа Монье (Нейрогенез)", "es": "Bacopa Monnieri"},
+        "L-Theanine Isolate": {"uk": "L-Теанін Ізолят", "en": "L-Theanine Isolate", "ru": "L-Теанин Изолят", "es": "Aislado de L-Teanina"}
     }
     return bases.get(base_type, bases["GABA"]).get(lang, bases.get(base_type, bases["GABA"])["uk"])
 
-def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_caffeine: bool, specific_activity_id: str, drink_format: str, weather_temp: int, user, language: str = "uk", menstrual_cycle_day: int = None):
+from datetime import date, datetime
+
+def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, caffeine_mg: int, caffeine_time: str, had_caffeine: bool, specific_activity_id: str, drink_format: str, weather_temp: int, user, language: str = "uk", menstrual_cycle_day: int = None, past_logs=None):
     k_ns = get_k_ns(user.hd_type)
     weight = user.weight or 70
     if user.gender == "female": k_ns *= 0.9
@@ -137,12 +141,63 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
 
     v_tea = base_volume * weight_factor * k_ns_modifier * state_modifier * endocrine_modifier
 
-    if had_caffeine:
-        if getattr(user, "caffeine_sensitivity", "normal") == "high":
-            v_tea = v_tea * 0.65  # 35% reduction for slow metabolizers
-        else:
-            v_tea = v_tea * 0.85  # 15% reduction for normal metabolizers
-        
+    # Block 1 & 2: Pharmacokinetics & Curfew
+    half_life = 5.0
+    if getattr(user, "oral_contraceptives", False):
+        half_life = 10.0
+    elif getattr(user, "smoker", False):
+        half_life = 3.5
+    
+    if getattr(user, "caffeine_sensitivity", "normal") == "high":
+        half_life *= 1.5
+
+    residual_caffeine = 0
+    curfew_active = False
+    now = datetime.now()
+    
+    if caffeine_mg and caffeine_time:
+        try:
+            h, m = map(int, caffeine_time.split(':'))
+            intake_time = now.replace(hour=h, minute=m, second=0, microsecond=0)
+            if intake_time > now:
+                intake_time = intake_time.replace(day=intake_time.day - 1)
+            hours_passed = (now - intake_time).total_seconds() / 3600.0
+            residual_caffeine = caffeine_mg * (0.5 ** (hours_passed / half_life))
+        except:
+            pass
+            
+    if residual_caffeine > 30:
+        v_tea = v_tea * 0.7 # Reduce tea amount if still high residual caffeine
+
+    target_bedtime = getattr(user, "target_bedtime", "23:00")
+    if target_bedtime:
+        try:
+            bh, bm = map(int, target_bedtime.split(':'))
+            bed_time = now.replace(hour=bh, minute=bm, second=0, microsecond=0)
+            if bed_time < now:
+                bed_time = bed_time.replace(day=bed_time.day + 1)
+            hours_to_sleep = (bed_time - now).total_seconds() / 3600.0
+            
+            curfew_window = half_life * 1.5
+            if hours_to_sleep < curfew_window:
+                curfew_active = True
+        except:
+            pass
+
+    # Block 3: Cycling (Tolerance)
+    stimulant_days = 0
+    gaba_days = 0
+    if past_logs:
+        for log in past_logs:
+            if log.recommended_recipe_id:
+                if "DHP" in log.recommended_recipe_id or "Puer" in log.recommended_recipe_id:
+                    stimulant_days += 1
+                if "GABA" in log.recommended_recipe_id:
+                    gaba_days += 1
+                    
+    tolerance_active_stim = stimulant_days > 20
+    tolerance_active_gaba = gaba_days > 21
+
     v_tea = round(v_tea, 1)
 
     recipe = {
@@ -188,7 +243,25 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     # Late Luteal phase (PMDD) -> enforce Pure GABA for resistance
     if menstrual_cycle_day is not None and 24 <= menstrual_cycle_day <= 28 and "GABA" in recipe["base_key"]:
         recipe["base_key"] = "Pure GABA"
+        
+    explanation = []
     
+    # Enforce Curfew
+    if curfew_active and ("DHP" in recipe["base_key"] or "Puer" in recipe["base_key"]):
+        recipe["base_key"] = "Bacopa Monnieri" if target_state == "FOCUS" else "Soft GABA"
+        explanation.append("Активовано захист сну (Комендантська година на стимулятори).")
+        
+    # Enforce Tolerance/Cycling
+    if tolerance_active_stim and ("DHP" in recipe["base_key"] or "Puer" in recipe["base_key"]):
+        recipe["base_key"] = "Bacopa Monnieri"
+        explanation.append("Алгоритм ротації: перерва від кофеїну для відновлення аденозинових рецепторів.")
+    if tolerance_active_gaba and "GABA" in recipe["base_key"]:
+        recipe["base_key"] = "L-Theanine Isolate"
+        explanation.append("Алгоритм ротації: пауза для ГАМК задля ап-регуляції рецепторів.")
+        
+    if explanation:
+        recipe["explanation"] = " ".join(explanation)
+
     if scale_cns >= 8:
         recipe["breathwork_protocol"] = "square"
         recipe["clinical_override"] = True
@@ -292,11 +365,34 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
         elif language == "ru": recipe["base"] = f"GABA ({half} мл) + Да Хун Пао ({half} мл)"
         else: recipe["base"] = f"GABA ({half} ml) + Da Hong Pao ({half} ml)"
     
-    if drink_format == "tea":
-        tea_activator = {"uk": "Чиста Вода", "en": "Pure Water", "ru": "Чистая Вода", "es": "Agua Pura"}
-        recipe["activator"] = tea_activator[language]
+    # Block 4: Hydration & Gastrointestinal Kinetics
+    base_water = 180.0
+    dynamic_water = base_water * weight_factor
+    
+    if weather_temp > 30:
+        dynamic_water += 200
+    elif weather_temp > 25:
+        dynamic_water += 100
+        
+    if specific_activity_id == "sport":
+        dynamic_water += 150
+        
+    # Max safe limit for rapid gastric emptying without hyperosmolarity per single intake
+    if dynamic_water > 750:
+        dynamic_water = 750
+        
+    recipe["water_ml"] = round(dynamic_water)
+    
+    if is_hot_weather:
+        status_key = "Ice"
+        recipe["ice_cubes"] = 4
     else:
-        recipe["activator"] = acts.get(act_key, acts["Apple-Ginger"]).get(language, acts.get(act_key, acts["Apple-Ginger"])["uk"])
+        if specific_activity_id == "routine" or target_state == "RELAX":
+            status_key = "Hot"
+        else:
+            status_key = "Shot" if drink_format == "shot" else "Ice"
+
+    recipe["activator"] = acts.get(act_key, acts["Apple-Ginger"]).get(language, acts.get(act_key, acts["Apple-Ginger"])["uk"])
         
     recipe["cocktail_status"] = statuses[status_key][language]
     
