@@ -149,7 +149,17 @@ export const translations = {
     fmtTea: "🍵 Чай",
     instShot: "Випий залпом як шот для миттєвого ефекту. Не запивай водою 5 хвилин.",
     instCocktail: "Змішай у шейкері або високій склянці. Додай лід. Пий повільно протягом 15 хвилин.",
-    instTea: "Залий гарячою водою (не окропом). Настоюй 2 хвилини і пий неспішно."
+    instTea: "Залий гарячою водою (не окропом). Настоюй 2 хвилини і пий неспішно.",
+
+    // Profile & Flywheel
+    profileTitle: "Профіль Амбасадора",
+    boosterStars: "Баланс Booster Stars",
+    ambassadorStatus: "Статус: Рекрут-Алхімік",
+    promoCode: "Твій промокод (Zero CAC)",
+    copyBtn: "Скопіювати",
+    copiedBtn: "Скопійовано!",
+    sharePromo: "Поділитися в Stories (+50 ⭐️)",
+    trustFund: "13% з кожного замовлення за твоїм кодом йде у Довірчий Фонд на підтримку волонтерських ініціатив."
   },
   en: {
     wm1Title: "Liquid Operating System",
@@ -288,7 +298,17 @@ export const translations = {
     fmtTea: "🍵 Tea",
     instShot: "Drink it all at once as a shot for instant effect. Do not drink water for 5 minutes.",
     instCocktail: "Mix in a shaker or tall glass. Add ice. Sip slowly over 15 minutes.",
-    instTea: "Pour hot water (not boiling). Steep for 2 minutes and drink unhurriedly."
+    instTea: "Pour hot water (not boiling). Steep for 2 minutes and drink unhurriedly.",
+
+    // Profile & Flywheel
+    profileTitle: "Ambassador Profile",
+    boosterStars: "Booster Stars Balance",
+    ambassadorStatus: "Status: Novice Alchemist",
+    promoCode: "Your promo code (Zero CAC)",
+    copyBtn: "Copy",
+    copiedBtn: "Copied!",
+    sharePromo: "Share to Stories (+50 ⭐️)",
+    trustFund: "13% of every order using your code goes to the Trust Fund to support charity initiatives."
   },
   ru: {
     wm1Title: "Жидкая Операционная Система",
@@ -427,7 +447,17 @@ export const translations = {
     fmtTea: "🍵 Чай",
     instShot: "Выпей залпом как шот для мгновенного эффекта. Не запивай водой 5 минут.",
     instCocktail: "Смешай в шейкере или высоком стакане. Добавь лед. Пей медленно в течение 15 минут.",
-    instTea: "Залей горячей водой (не кипятком). Настаивай 2 минуты и пей неспешно."
+    instTea: "Залей горячей водой (не кипятком). Настаивай 2 минуты и пей неспешно.",
+
+    // Profile & Flywheel
+    profileTitle: "Профиль Амбассадора",
+    boosterStars: "Баланс Booster Stars",
+    ambassadorStatus: "Статус: Рекрут-Алхимик",
+    promoCode: "Твой промокод (Zero CAC)",
+    copyBtn: "Скопировать",
+    copiedBtn: "Скопировано!",
+    sharePromo: "Поделиться в Stories (+50 ⭐️)",
+    trustFund: "13% с каждого заказа по твоему коду идет в Доверительный Фонд на поддержку волонтерских инициатив."
   },
   es: {
     wm1Title: "Sistema Operativo Líquido",
@@ -566,7 +596,17 @@ export const translations = {
     fmtTea: "🍵 Té",
     instShot: "Bébelo de un trago para un efecto instantáneo. No bebas agua durante 5 minutos.",
     instCocktail: "Mezcla en una coctelera o vaso alto. Añade hielo. Bebe lentamente durante 15 minutos.",
-    instTea: "Vierte agua caliente (no hirviendo). Deja reposar por 2 minutos y bebe sin prisas."
+    instTea: "Vierte agua caliente (no hirviendo). Deja reposar por 2 minutos y bebe sin prisas.",
+
+    // Profile & Flywheel
+    profileTitle: "Perfil de Embajador",
+    boosterStars: "Balance de Booster Stars",
+    ambassadorStatus: "Estado: Alquimista Novato",
+    promoCode: "Tu código promocional (Zero CAC)",
+    copyBtn: "Copiar",
+    copiedBtn: "¡Copiado!",
+    sharePromo: "Compartir en Stories (+50 ⭐️)",
+    trustFund: "El 13% de cada pedido con tu código va al Fondo Fiduciario para apoyar iniciativas benéficas."
   }
 };
 

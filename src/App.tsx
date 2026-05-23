@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, Droplet, Thermometer, Wind, CheckCircle2, ChevronRight, FlaskConical, Target, Zap, Coffee, MessageCircle, Leaf, ShoppingCart } from 'lucide-react'
+import { Activity, Droplet, Thermometer, Wind, CheckCircle2, ChevronRight, FlaskConical, Target, Zap, Coffee, MessageCircle, Leaf, ShoppingCart, User, Star, Shield, Copy } from 'lucide-react'
 
 import BreathworkTimer from './components/BreathworkTimer'
 import WelcomeManifest from './components/WelcomeManifest'
@@ -608,9 +608,94 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
   );
 }
 
+function ProfileScreen({ profile, lang, onClose }: { profile: UserProfile, lang: Language, onClose: () => void }) {
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
+  const [copied, setCopied] = useState(false);
+  
+  const promoCode = `BOOSTER-${profile.name.toUpperCase().substring(0,4)}-2026`;
+
+  const handleCopy = () => {
+    triggerHaptic();
+    navigator.clipboard.writeText(promoCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = () => {
+    triggerHaptic();
+    const webApp = (window as any).Telegram?.WebApp;
+    if (webApp && webApp.shareToStory) {
+      const mediaUrl = window.location.origin.includes('localhost') ? 'https://boostertea-app.onrender.com/bg-tea.png' : `${window.location.origin}/bg-tea.png`;
+      webApp.shareToStory(mediaUrl, {
+        text: `Мій промокод на біо-буст: ${promoCode}\nЗамовляй BoosterTea і 13% піде на ЗСУ! 🇺🇦`,
+        widget_link: {
+          url: `https://t.me/boostertea_os_bot/app?startapp=${promoCode}`,
+          name: t('shareTitle')
+        }
+      });
+    } else {
+      if (webApp && webApp.showAlert) webApp.showAlert(t('errNoStory'));
+      else alert(t('errNoStory'));
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-panel p-6 flex flex-col h-full overflow-y-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-white uppercase tracking-wider">{t('profileTitle')}</h2>
+        <button onClick={() => { triggerHaptic(); onClose(); }} className="text-gray-400 hover:text-white p-2 bg-black/30 rounded-full">
+          ✕
+        </button>
+      </div>
+
+      <div className="bg-gradient-to-br from-gray-900 to-black p-5 rounded-2xl border border-primary/20 shadow-[0_0_15px_rgba(0,255,204,0.1)] mb-6 relative overflow-hidden">
+        <div className="absolute -right-6 -top-6 text-primary/10">
+          <Star size={100} />
+        </div>
+        <div className="relative z-10">
+          <h3 className="text-gray-400 text-xs uppercase tracking-wider mb-1">{t('boosterStars')}</h3>
+          <div className="flex items-baseline gap-2 mb-2">
+            <span className="text-4xl font-black text-primary drop-shadow-[0_0_8px_rgba(0,255,204,0.4)]">50</span>
+            <Star className="text-primary" size={24} fill="currentColor" />
+          </div>
+          <p className="text-sm font-bold text-white mb-1">{profile.name}</p>
+          <p className="text-xs text-emerald-400">{t('ambassadorStatus')}</p>
+        </div>
+      </div>
+
+      <div className="bg-black/40 p-4 rounded-xl border border-gray-800 mb-6">
+        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t('promoCode')}</h3>
+        <div className="flex items-center gap-2">
+          <div className="flex-1 bg-black/60 border border-gray-700 p-3 rounded-lg text-center">
+            <span className="font-mono font-bold text-white tracking-widest">{promoCode}</span>
+          </div>
+          <button 
+            onClick={handleCopy}
+            className={`p-3 rounded-lg border transition-all flex items-center justify-center min-w-[50px] ${copied ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-primary/10 border-primary/50 text-primary hover:bg-primary/20'}`}
+          >
+            {copied ? <CheckCircle2 size={20} /> : <Copy size={20} />}
+          </button>
+        </div>
+      </div>
+
+      <button onClick={handleShare} className="w-full premium-btn font-bold py-4 rounded-xl flex justify-center items-center gap-2 uppercase tracking-wider text-sm mb-6">
+        {t('sharePromo')}
+      </button>
+
+      <div className="mt-auto bg-blue-900/10 p-4 rounded-xl border border-blue-500/20 flex gap-3 items-start">
+        <Shield className="text-blue-400 shrink-0 mt-1" size={20} />
+        <p className="text-xs text-blue-200/80 leading-relaxed font-medium">
+          {t('trustFund')}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
 function AppContent() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [hasReadManifest, setHasReadManifest] = useState<boolean | null>(null);
+  const [showProfile, setShowProfile] = useState(false);
   const [recipeResult, setRecipeResult] = useState<{ recipe: Recipe, temp: number, cond: string, format: string } | null>(null);
   const [showBreathwork, setShowBreathwork] = useState(false);
   const [lang, setLang] = useState<Language>(() => {
@@ -679,34 +764,48 @@ function AppContent() {
 
   return (
     <div className="app-container p-4">
-      {/* Global Persistent Cart Button */}
-      {hasReadManifest && (
-        <button 
-          onClick={() => {
-            triggerHaptic();
-            const url = "https://www.boostertea.com.ua/";
-            const webApp = (window as any).Telegram?.WebApp;
-            if (webApp && webApp.openLink) {
-              webApp.openLink(url);
-            } else {
-              window.open(url, "_blank");
-            }
-          }}
-          className="fixed top-4 right-4 z-[100] w-12 h-12 bg-black/80 backdrop-blur-md border border-primary/50 rounded-full flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,255,204,0.3)] hover:scale-110 transition-transform"
-        >
-          <ShoppingCart size={20} />
-        </button>
+      {/* Global Persistent Action Buttons */}
+      {hasReadManifest && profile && (
+        <div className="fixed top-4 right-4 z-[100] flex gap-2">
+          <button 
+            onClick={() => { triggerHaptic(); setShowProfile(true); }}
+            className="w-12 h-12 bg-black/80 backdrop-blur-md border border-emerald-500/50 rounded-full flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.3)] hover:scale-110 transition-transform"
+          >
+            <User size={20} />
+          </button>
+          <button 
+            onClick={() => {
+              triggerHaptic();
+              const url = "https://www.boostertea.com.ua/";
+              const webApp = (window as any).Telegram?.WebApp;
+              if (webApp && webApp.openLink) {
+                webApp.openLink(url);
+              } else {
+                window.open(url, "_blank");
+              }
+            }}
+            className="w-12 h-12 bg-black/80 backdrop-blur-md border border-primary/50 rounded-full flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,255,204,0.3)] hover:scale-110 transition-transform"
+          >
+            <ShoppingCart size={20} />
+          </button>
+        </div>
       )}
       <div className="bg-orb-1" />
       <div className="bg-orb-2" />
       <div className="z-10 relative flex-1 w-full flex flex-col justify-center h-full max-w-md mx-auto pt-10">
         <LanguageSwitcher currentLang={lang} onSelect={handleLangChange} />
         <AnimatePresence mode="wait">
-          {!hasReadManifest && <WelcomeManifest key="manifest" lang={lang} onComplete={() => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); }} />}
-          {hasReadManifest && !profile && <Onboarding key="onboarding" lang={lang} onComplete={setProfile} />}
-          {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t_val,c, f) => setRecipeResult({recipe: r, temp: t_val, cond: c, format: f})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
-          {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} drinkFormat={recipeResult.format} activityType={profile.profession} onDone={() => setShowBreathwork(true)} />}
-          {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" lang={lang} protocol={recipeResult.recipe.breathwork_protocol} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
+          {showProfile && profile ? (
+            <ProfileScreen key="profile" lang={lang} profile={profile} onClose={() => setShowProfile(false)} />
+          ) : (
+            <>
+              {!hasReadManifest && <WelcomeManifest key="manifest" lang={lang} onComplete={() => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); }} />}
+              {hasReadManifest && !profile && <Onboarding key="onboarding" lang={lang} onComplete={setProfile} />}
+              {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t_val,c, f) => setRecipeResult({recipe: r, temp: t_val, cond: c, format: f})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
+              {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} drinkFormat={recipeResult.format} activityType={profile.profession} onDone={() => setShowBreathwork(true)} />}
+              {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" lang={lang} protocol={recipeResult.recipe.breathwork_protocol} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
+            </>
+          )}
         </AnimatePresence>
       </div>
     </div>
