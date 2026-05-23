@@ -324,22 +324,37 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
         }} className="text-xs text-red-400 border border-red-900/50 bg-red-900/20 px-2 py-1 rounded hover:bg-red-900/40 transition-colors">Скинути</button>
       </div>
       
-      <div className="mb-6">
-        <label className="text-sm font-bold text-white mb-3 block">Яка твоя ціль зараз?</label>
-        <div className="grid grid-cols-2 gap-2">
-          {activityOptions.map(tile => (
+      <div className="mb-6 bg-black/40 p-4 rounded-xl border border-primary/20">
+        <label className="text-sm font-bold text-white mb-3 block flex items-center gap-2">
+          <MessageCircle size={18} className="text-primary"/> Опишіть вашу поточну ситуацію
+        </label>
+        <div className="flex flex-col gap-2">
+          {[
+            { id: 'tired_physical', label: 'Фізичне виснаження (Тренування, Праця)', act: 'routine', e: 2, c: 8, m: 5 },
+            { id: 'tired_mental', label: 'Мозок кипить (Довга розумова робота)', act: 'routine', e: 5, c: 8, m: 2 },
+            { id: 'stress_event', label: 'Стрес / Мандраж перед важливою подією', act: 'business', e: 5, c: 10, m: 5 },
+            { id: 'need_focus', label: 'Сідаю за складну задачу, потрібен Фокус', act: 'coding', e: 5, c: 5, m: 8 },
+            { id: 'need_energy', label: 'Треба агресивна енергія (Спорт / Драйв)', act: 'sport', e: 8, c: 5, m: 5 }
+          ].map(sit => (
             <button 
-              key={tile.id}
-              onClick={() => { setCurrentActivity(tile.id); triggerHaptic(); }}
-              className={`p-2 rounded-lg border text-xs sm:text-sm text-left transition-all flex flex-col justify-center ${currentActivity === tile.id ? 'border-primary bg-primary/20 text-white shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'border-gray-700 bg-black/30 text-gray-400 hover:bg-black/50'}`}
+              key={sit.id}
+              onClick={() => { 
+                setCurrentActivity(sit.act); 
+                setScaleEnergy(sit.e);
+                setScaleCns(sit.c);
+                setScaleMental(sit.m);
+                triggerHaptic(); 
+              }}
+              className={`p-3 rounded-lg border text-sm text-left transition-all ${currentActivity === sit.act && scaleEnergy === sit.e ? 'border-primary bg-primary/20 text-white shadow-[0_0_10px_rgba(0,255,204,0.2)]' : 'border-gray-700 bg-black/50 text-gray-400 hover:bg-black/70'}`}
             >
-              <span className="font-bold whitespace-normal leading-tight">{tile.label}</span>
+              {sit.label}
             </button>
           ))}
         </div>
       </div>
       
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4 mb-6 opacity-80 hover:opacity-100 transition-opacity">
+        <p className="text-xs text-gray-500 uppercase tracking-widest text-center mb-2">Точне калібрування (Опціонально)</p>
         <div className="bg-black/30 p-4 rounded-xl border border-gray-800">
           <div className="flex justify-between items-center mb-3"><label className="text-sm font-bold text-white">{t('cnsLoad')}</label></div>
           <div className="grid grid-cols-4 gap-2">
