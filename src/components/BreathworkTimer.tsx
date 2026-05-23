@@ -1,7 +1,26 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Target } from 'lucide-react';
+import { Target, ShoppingCart, Share } from 'lucide-react';
 import { Language, getTranslation } from '../i18n';
+
+// Local copy of Recipe type for prop validation
+type Recipe = {
+  base: string;
+  activator: string;
+  tea_ml: number;
+  juice_ml: number;
+  water_ml: number;
+  ice_cubes: number;
+  cocktail_status: string;
+  breathwork_protocol: string;
+  instructions: string;
+  avatar_id: string;
+  avatar_name: string;
+  avatar_slogan: string;
+  avatar_image: string;
+  stats: { focus: number, energy: number, calm: number };
+  explanation?: string;
+};
 
 const triggerHaptic = () => {
   try {
@@ -21,8 +40,9 @@ const triggerHeavyHaptic = () => {
   } catch (e) {}
 };
 
-export default function BreathworkTimer({ protocol, lang, onDone }: { protocol: string, lang: Language, onDone: () => void }) {
+export default function BreathworkTimer({ recipe, lang, activityType, onDone }: { recipe: Recipe, lang: Language, activityType: string, onDone: () => void }) {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
+  const protocol = recipe.breathwork_protocol;
   const [phase, setPhase] = useState(t('initSystem'));
   const [totalTime, setTotalTime] = useState(90);
   const [isFinished, setIsFinished] = useState(false);
@@ -96,26 +116,70 @@ export default function BreathworkTimer({ protocol, lang, onDone }: { protocol: 
   }, [protocol, isFinished]);
 
   if (isFinished) {
+    const handleShare = () => {
+      triggerHaptic();
+      const webApp = (window as any).Telegram?.WebApp;
+      if (webApp && webApp.shareToStory) {
+        const host = window.location.origin.includes('localhost') ? 'https://boostertea-app.onrender.com' : window.location.origin;
+        const mediaUrl = `${host}${recipe.avatar_image || '/bg-tea.png'}`;
+        const getActivityTemplateKey = (act: string) => {
+          switch (act) {
+            case 'coding': return 'shareTplCoding';
+            case 'study': return 'shareTplStudy';
+            case 'business': return 'shareTplBusiness';
+            case 'creative': return 'shareTplCreative';
+            case 'sport': return 'shareTplSport';
+            case 'routine': return 'shareTplRoutine';
+            default: return 'shareTplCoding';
+          }
+        };
+        const templateKey = getActivityTemplateKey(activityType);
+        const rawText = t(templateKey as any);
+        const finalText = rawText
+          .replace('{STATE}', recipe.avatar_name)
+          .replace('{BASE}', recipe.base);
+
+        webApp.shareToStory(mediaUrl, {
+          text: finalText,
+          widget_link: {
+            url: "https://t.me/boostertea_os_bot/app",
+            name: t('shareTitle')
+          }
+        });
+      } else {
+        if (webApp && webApp.showAlert) webApp.showAlert(t('errNoStory'));
+        else alert(t('errNoStory'));
+      }
+    };
+
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-6 text-center">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 text-center">
         <Target size={48} className="text-primary mb-4" />
         <h2 className="text-2xl font-bold text-white mb-2">{t('sysActive')}</h2>
         <p className="text-gray-400 mb-8">{t('stateLoaded')}</p>
-        <button onClick={() => { triggerHaptic(); onDone(); }} className="premium-btn w-full py-4 rounded-xl font-bold uppercase text-sm tracking-widest mb-3">
-          {t('btnFinish') as string}
-        </button>
-        <button onClick={() => {
-          triggerHaptic();
-          const url = "https://www.boostertea.com.ua/";
-          const webApp = (window as any).Telegram?.WebApp;
-          if (webApp && webApp.openLink) {
-            webApp.openLink(url);
-          } else {
-            window.open(url, "_blank");
-          }
-        }} className="bg-gradient-to-r from-emerald-400 to-teal-500 text-black font-extrabold w-full py-4 rounded-xl uppercase text-sm tracking-widest shadow-[0_0_20px_rgba(52,211,153,0.4)] hover:scale-[1.02] transition-transform">
-          {t('btnBuy') as string || '🛒 Замовити концентрат'}
-        </button>
+        
+        <div className="w-full max-w-sm space-y-3">
+          <button onClick={handleShare} className="w-full py-4 rounded-xl border border-primary/50 bg-primary/10 text-primary font-bold flex items-center justify-center gap-2 uppercase text-sm tracking-widest hover:bg-primary/20 transition-colors">
+            <Share size={18} /> {t('sharePromo')}
+          </button>
+          
+          <button onClick={() => {
+            triggerHaptic();
+            const url = "https://www.boostertea.com.ua/";
+            const webApp = (window as any).Telegram?.WebApp;
+            if (webApp && webApp.openLink) {
+              webApp.openLink(url);
+            } else {
+              window.open(url, "_blank");
+            }
+          }} className="w-full py-4 rounded-xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-2 uppercase text-sm tracking-widest hover:bg-emerald-500/20 transition-colors">
+            <ShoppingCart size={18} /> {t('btnBuy') as string || 'Замовити концентрат'}
+          </button>
+
+          <button onClick={() => { triggerHaptic(); onDone(); }} className="w-full py-4 rounded-xl text-gray-500 hover:text-white uppercase text-sm tracking-widest transition-colors font-bold mt-2">
+            {t('btnFinish') as string}
+          </button>
+        </div>
       </motion.div>
     );
   }

@@ -803,7 +803,7 @@ function AppContent() {
               {hasReadManifest && !profile && <Onboarding key="onboarding" lang={lang} onComplete={setProfile} />}
               {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t_val,c, f) => setRecipeResult({recipe: r, temp: t_val, cond: c, format: f})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
               {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} drinkFormat={recipeResult.format} activityType={profile.profession} onDone={() => setShowBreathwork(true)} />}
-              {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" lang={lang} protocol={recipeResult.recipe.breathwork_protocol} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
+              {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" lang={lang} recipe={recipeResult.recipe} activityType={profile.profession} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
             </>
           )}
         </AnimatePresence>
