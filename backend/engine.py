@@ -170,7 +170,14 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
         elif target_state == "COMMUNICATION":
             recipe["base_key"] = "DHP"
     
-    recipe["breathwork_protocol"] = "fire" if target_state == "ENERGY" else "square"
+    if scale_cns >= 8:
+        recipe["breathwork_protocol"] = "square"
+        recipe["clinical_override"] = True
+    else:
+        recipe["breathwork_protocol"] = "fire" if target_state == "ENERGY" else "square"
+        recipe["clinical_override"] = False
+
+    recipe["scale_cns"] = scale_cns
 
     is_hot_weather = weather_temp > 22
     t_sweet = user.taste_sweet_pref or 5

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Target, ShoppingCart, Share } from 'lucide-react';
+import { Target, ShoppingCart, Share, Volume2, VolumeX, AlertTriangle } from 'lucide-react';
 import { Language, getTranslation } from '../i18n';
 
 // Local copy of Recipe type for prop validation
@@ -20,6 +20,8 @@ type Recipe = {
   avatar_image: string;
   stats: { focus: number, energy: number, calm: number };
   explanation?: string;
+  scale_cns?: number;
+  clinical_override?: boolean;
 };
 
 const triggerHaptic = () => {
@@ -44,9 +46,17 @@ export default function BreathworkTimer({ recipe, lang, activityType, onDone }: 
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   const protocol = recipe.breathwork_protocol;
   const [phase, setPhase] = useState(t('initSystem'));
-  const [totalTime, setTotalTime] = useState(90);
+  
+  const getInitialTime = (cns: number) => {
+    if (cns <= 4) return 120; // 2 mins
+    if (cns <= 7) return 180; // 3 mins
+    return 300; // 5 mins
+  };
+  
+  const [totalTime, setTotalTime] = useState(getInitialTime(recipe.scale_cns || 5));
   const [isFinished, setIsFinished] = useState(false);
   const [scale, setScale] = useState(1);
+  const [audioEnabled, setAudioEnabled] = useState(true);
 
   useEffect(() => {
     if (totalTime <= 0) {
@@ -114,6 +124,103 @@ export default function BreathworkTimer({ recipe, lang, activityType, onDone }: 
       return () => clearInterval(cleanup);
     }
   }, [protocol, isFinished]);
+
+  // Audio Context for Neuromodulation
+  useEffect(() => {
+    if (!audioEnabled || isFinished) return;
+    
+    // Using standard audio context
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    
+    const ctx = new AudioContext();
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = 0.5;
+    masterGain.connect(ctx.destination);
+
+    let oscillators: any[] = [];
+    let noiseNode: any;
+
+    if (protocol === 'square') {
+      // 432 Hz Relaxation
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = 432;
+      
+      const lfo = ctx.createOscillator();
+      lfo.type = 'sine';
+      lfo.frequency.value = 0.1; // slow modulation
+      
+      const lfoGain = ctx.createGain();
+      lfoGain.gain.value = 0.2;
+      
+      lfo.connect(lfoGain);
+      lfoGain.connect(masterGain.gain);
+      
+      osc.connect(masterGain);
+      osc.start();
+      lfo.start();
+      oscillators.push(osc, lfo);
+
+    } else if (protocol === 'fire') {
+      // 40 Hz Binaural Beats (Gamma) + Brown Noise
+      const oscL = ctx.createOscillator();
+      oscL.type = 'sine';
+      oscL.frequency.value = 200;
+      
+      const oscR = ctx.createOscillator();
+      oscR.type = 'sine';
+      oscR.frequency.value = 240;
+      
+      const merger = ctx.createChannelMerger(2);
+      oscL.connect(merger, 0, 0); // left
+      oscR.connect(merger, 0, 1); // right
+      
+      const beatGain = ctx.createGain();
+      beatGain.gain.value = 0.4;
+      merger.connect(beatGain);
+      beatGain.connect(masterGain);
+      
+      const bufferSize = ctx.sampleRate * 2;
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      let lastOut = 0;
+      for (let i = 0; i < bufferSize; i++) {
+          let white = Math.random() * 2 - 1;
+          output[i] = (lastOut + (0.02 * white)) / 1.02;
+          lastOut = output[i];
+          output[i] *= 3.5;
+      }
+      noiseNode = ctx.createBufferSource();
+      noiseNode.buffer = noiseBuffer;
+      noiseNode.loop = true;
+      
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.value = 0.2;
+      noiseNode.connect(noiseGain);
+      noiseGain.connect(masterGain);
+
+      oscL.start();
+      oscR.start();
+      noiseNode.start();
+      oscillators.push(oscL, oscR);
+    }
+
+    // Fade in
+    masterGain.gain.setValueAtTime(0, ctx.currentTime);
+    masterGain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 2);
+
+    return () => {
+      masterGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
+      setTimeout(() => {
+        try {
+          oscillators.forEach(o => o.stop());
+          if (noiseNode) noiseNode.stop();
+          ctx.close();
+        } catch(e) {}
+      }, 1000);
+    };
+  }, [audioEnabled, isFinished, protocol]);
 
   if (isFinished) {
     const handleShare = () => {
@@ -186,6 +293,15 @@ export default function BreathworkTimer({ recipe, lang, activityType, onDone }: 
 
   return (
     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6 overflow-hidden">
+      <div className="absolute top-4 right-4 z-[60]">
+        <button 
+          onClick={() => { triggerHaptic(); setAudioEnabled(!audioEnabled); }}
+          className="w-10 h-10 bg-black/50 border border-gray-800 backdrop-blur-md rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+        >
+          {audioEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+        </button>
+      </div>
+
       <div className="absolute top-12 text-center w-full">
         <p className="text-gray-400 text-sm uppercase tracking-widest mb-1">{protocol === 'square' ? t('timerSquare') : t('timerFire')}</p>
         <p className="text-primary font-bold text-xl">
@@ -193,7 +309,19 @@ export default function BreathworkTimer({ recipe, lang, activityType, onDone }: 
         </p>
       </div>
 
-      <div className="relative w-48 h-48 flex items-center justify-center mb-8">
+      {recipe.clinical_override && (
+        <div className="absolute top-28 w-full max-w-sm px-4 z-[55]">
+          <div className="bg-red-900/20 border border-red-500/30 rounded-xl p-3 flex items-start gap-3 text-red-400">
+            <AlertTriangle size={18} className="shrink-0 mt-0.5" />
+            <p className="text-left text-[11px] leading-relaxed">
+              <strong className="block mb-1 text-red-300">Клінічний запобіжник</strong>
+              Високий рівень стресу. Агресивні практики заблоковано. Активовано протокол релаксації.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="relative w-48 h-48 flex items-center justify-center mb-8 mt-12">
         <motion.div 
           animate={{ scale: scale }} 
           transition={{ duration: protocol === 'square' ? 4 : 0.2, ease: "easeInOut" }}
@@ -207,9 +335,13 @@ export default function BreathworkTimer({ recipe, lang, activityType, onDone }: 
         <h2 className="relative z-10 text-2xl font-bold text-white uppercase tracking-widest drop-shadow-md text-center">{phase}</h2>
       </div>
       
-      <div className="text-center px-8 mb-4 h-16">
-        <p className="text-gray-300 text-sm leading-relaxed">
+      <div className="text-center px-8 mb-4 h-24">
+        <p className="text-gray-300 text-sm leading-relaxed mb-3">
           {protocol === 'square' ? t('instSquare') : t('instFire')}
+        </p>
+        <p className="text-[10px] text-gray-500 font-medium tracking-widest uppercase">
+          {audioEnabled && (protocol === 'square' ? '🔊 432 Hz Парасимпатична Релаксація' : '🔊 40 Hz Гамма-ритм (Нейромодуляція)')}
+          {!audioEnabled && '🔇 Аудіо-стимуляцію вимкнено'}
         </p>
       </div>
       

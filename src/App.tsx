@@ -40,6 +40,8 @@ type Recipe = {
   avatar_image: string;
   stats: { focus: number, energy: number, calm: number };
   explanation?: string;
+  scale_cns?: number;
+  clinical_override?: boolean;
 };
 
 // --- Constants ---
