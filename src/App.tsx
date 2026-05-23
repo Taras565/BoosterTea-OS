@@ -22,6 +22,9 @@ type UserProfile = {
   taste_bitter: number;
   taste_sweet: number;
   caffeine_sensitivity: 'normal' | 'high';
+  company_id?: string;
+  current_streak_cycle?: number;
+  last_period_date?: string;
 };
 
 type Recipe = {
@@ -42,6 +45,7 @@ type Recipe = {
   explanation?: string;
   scale_cns?: number;
   clinical_override?: boolean;
+  supplement?: string;
 };
 
 // --- Constants ---
@@ -82,7 +86,9 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
     taste_acid: 5, 
     taste_bitter: 5, 
     taste_sweet: 5,
-    caffeine_sensitivity: 'normal' as 'normal' | 'high'
+    caffeine_sensitivity: 'normal' as 'normal' | 'high',
+    lastPeriodDate: '',
+    optInHealthData: false
   });
 
   const handleNext = async () => {
@@ -112,7 +118,8 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
             taste_acid_pref: data.taste_acid,
             taste_bitter_pref: data.taste_bitter,
             taste_sweet_pref: data.taste_sweet,
-            caffeine_sensitivity: data.caffeine_sensitivity
+            caffeine_sensitivity: data.caffeine_sensitivity,
+            last_period_date: data.lastPeriodDate || undefined
           })
         });
         
@@ -165,6 +172,13 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
             <input type="date" value={data.birthDate} onChange={e => setData({...data, birthDate: e.target.value})} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white" />
           </div>
           
+          {data.gender === 'female' && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}>
+              <label className="block text-gray-400 text-sm mb-1">Початок останнього циклу (для адаптації ГАМК)</label>
+              <input type="date" value={data.lastPeriodDate} onChange={e => setData({...data, lastPeriodDate: e.target.value})} className="w-full bg-pink-900/20 border border-pink-900/50 rounded-lg p-3 text-white" />
+            </motion.div>
+          )}
+          
           <div className="mb-4 mt-2">
             <label className="block text-gray-400 text-sm mb-1">{t('cafSensTitle' as any) || 'Чутливість до кави'}</label>
             <div className="grid grid-cols-1 gap-2">
@@ -174,8 +188,23 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
           </div>
         </motion.div>
       )}
-
+      
       {step === 2 && (
+        <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-6 flex flex-col h-full justify-center">
+          <h3 className="text-xl font-bold text-white mb-2 text-center">Конфіденційність (MHMDA)</h3>
+          <div className="bg-black/40 p-5 rounded-xl border border-gray-800">
+            <p className="text-sm text-gray-300 leading-relaxed mb-4">
+              Згідно з Washington My Health My Data Act, ми не зберігаємо ваші дані про менструальні цикли чи стрес без вашої явної згоди і <b>ніколи</b> не передаємо їх третім особам. Дані використовуються виключно для адаптації рецептів.
+            </p>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" checked={data.optInHealthData} onChange={e => {setData({...data, optInHealthData: e.target.checked}); triggerHaptic();}} className="mt-1 w-5 h-5 rounded border-gray-600 text-primary focus:ring-primary bg-black" />
+              <span className="text-sm text-gray-200">Я даю згоду на обробку моїх біометричних даних (Opt-in)</span>
+            </label>
+          </div>
+        </motion.div>
+      )}
+
+      {step === 3 && (
         <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4 flex flex-col h-full">
           <h3 className="text-lg font-bold text-white mb-2">{t('tasteTitle')}</h3>
           <div className="grid grid-cols-1 gap-2 flex-1 overflow-y-auto pb-4">
@@ -207,8 +236,12 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
       {loading ? (
         <div className="w-full mt-4 flex justify-center py-4"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
       ) : (
-        <button onClick={handleNext} className="w-full mt-4 premium-btn font-bold py-4 rounded-xl flex justify-center items-center gap-2 active:scale-95 transition-all uppercase tracking-wider text-sm">
-          {step === 2 ? t('btnCreateProfile') : t('btnNext')} <ChevronRight size={20} />
+        <button 
+          onClick={handleNext} 
+          disabled={step === 2 && !data.optInHealthData}
+          className={`w-full mt-4 premium-btn font-bold py-4 rounded-xl flex justify-center items-center gap-2 active:scale-95 transition-all uppercase tracking-wider text-sm ${step === 2 && !data.optInHealthData ? 'opacity-50 cursor-not-allowed saturate-0' : ''}`}
+        >
+          {step === 3 ? t('btnCreateProfile') : t('btnNext')} <ChevronRight size={20} />
         </button>
       )}
     </motion.div>
@@ -404,7 +437,10 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
       <div className="space-y-4 mb-6 opacity-80 hover:opacity-100 transition-opacity">
         <p className="text-xs text-gray-500 uppercase tracking-widest text-center mb-2">Точне калібрування (Опціонально)</p>
         <div className="bg-black/30 p-4 rounded-xl border border-gray-800">
-          <div className="flex justify-between items-center mb-3"><label className="text-sm font-bold text-white">{t('cnsLoad')}</label></div>
+          <div className="flex justify-between items-center mb-3">
+            <label className="text-sm font-bold text-white">{t('cnsLoad')}</label>
+            <button onClick={() => { setScaleCns(5); triggerHaptic(); }} className="text-[10px] text-gray-500 hover:text-white underline">{t('unsure' as any) || 'Не певен'}</button>
+          </div>
           <div className="grid grid-cols-4 gap-2">
             {STRESS_LEVELS.map(lvl => (
               <button key={lvl.label} onClick={() => { setScaleCns(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold uppercase rounded-lg border transition-all duration-300 ${scaleCns === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
@@ -413,7 +449,10 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
         </div>
 
         <div className="bg-black/30 p-4 rounded-xl border border-gray-800">
-          <div className="flex justify-between items-center mb-3"><label className="text-sm font-bold text-white">{t('energyLvl')}</label></div>
+          <div className="flex justify-between items-center mb-3">
+            <label className="text-sm font-bold text-white">{t('energyLvl')}</label>
+            <button onClick={() => { setScaleEnergy(5); triggerHaptic(); }} className="text-[10px] text-gray-500 hover:text-white underline">{t('unsure' as any) || 'Не певен'}</button>
+          </div>
           <div className="grid grid-cols-4 gap-2">
             {ENERGY_LEVELS.map(lvl => (
               <button key={lvl.label} onClick={() => { setScaleEnergy(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold uppercase rounded-lg border transition-all duration-300 ${scaleEnergy === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
@@ -422,7 +461,10 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
         </div>
 
         <div className="bg-black/30 p-4 rounded-xl border border-gray-800">
-          <div className="flex justify-between items-center mb-3"><label className="text-sm font-bold text-white">{t('mentalLvl')}</label></div>
+          <div className="flex justify-between items-center mb-3">
+            <label className="text-sm font-bold text-white">{t('mentalLvl')}</label>
+            <button onClick={() => { setScaleMental(5); triggerHaptic(); }} className="text-[10px] text-gray-500 hover:text-white underline">{t('unsure' as any) || 'Не певен'}</button>
+          </div>
           <div className="grid grid-cols-4 gap-2">
             {MENTAL_LEVELS.map(lvl => (
               <button key={lvl.label} onClick={() => { setScaleMental(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold uppercase rounded-lg border transition-all duration-300 ${scaleMental === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
@@ -701,9 +743,17 @@ function ProfileScreen({ profile, lang, onClose }: { profile: UserProfile, lang:
         </div>
         <div className="relative z-10">
           <h3 className="text-gray-400 text-xs uppercase tracking-wider mb-1">{t('boosterStars')}</h3>
-          <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-4xl font-black text-primary drop-shadow-[0_0_8px_rgba(0,255,204,0.4)]">50</span>
-            <Star className="text-primary" size={24} fill="currentColor" />
+          <div className="flex justify-between items-end mb-2">
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-black text-primary drop-shadow-[0_0_8px_rgba(0,255,204,0.4)]">50</span>
+              <Star className="text-primary" size={24} fill="currentColor" />
+            </div>
+            {profile.current_streak_cycle && (
+               <div className="flex flex-col items-end">
+                 <span className="text-[10px] text-gray-400 uppercase tracking-widest">Цикл утримання</span>
+                 <span className="text-sm text-emerald-400 font-bold">{profile.current_streak_cycle}/7 Днів</span>
+               </div>
+            )}
           </div>
           <p className="text-sm font-bold text-white mb-1">{profile.name}</p>
           <p className="text-xs text-emerald-400">{t('ambassadorStatus')}</p>
@@ -753,6 +803,18 @@ function AppContent() {
     setLang(l);
     localStorage.setItem('app_lang', l);
   };
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        document.body.style.filter = "blur(10px) grayscale(50%)";
+      } else {
+        document.body.style.filter = "none";
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   useEffect(() => {
     // Auto-reset via URL for AI assistant

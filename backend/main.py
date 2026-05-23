@@ -99,7 +99,10 @@ def get_me(db: Session = Depends(database.get_db), tg_user: bool = Depends(get_c
                     "taste_acid": user.taste_acid_pref,
                     "taste_bitter": user.taste_bitter_pref,
                     "taste_sweet": user.taste_sweet_pref,
-                    "caffeine_sensitivity": user.caffeine_sensitivity
+                    "caffeine_sensitivity": user.caffeine_sensitivity,
+                    "company_id": user.company_id,
+                    "current_streak_cycle": user.current_streak_cycle,
+                    "last_period_date": str(user.last_period_date) if user.last_period_date else None
                 }
             }
     except Exception as e:
@@ -120,6 +123,8 @@ class RegistrationRequest(BaseModel):
     birth_time: Optional[str] = "12:00"
     birth_place: Optional[str] = None
     caffeine_sensitivity: str = "normal"
+    company_id: Optional[str] = None
+    last_period_date: Optional[date] = None
 
 class StateRequest(BaseModel):
     telegram_id: int
@@ -165,7 +170,9 @@ def register_user(req: RegistrationRequest, db: Session = Depends(database.get_d
             taste_acid_pref=req.taste_acid_pref,
             taste_bitter_pref=req.taste_bitter_pref,
             taste_sweet_pref=req.taste_sweet_pref,
-            caffeine_sensitivity=req.caffeine_sensitivity
+            caffeine_sensitivity=req.caffeine_sensitivity,
+            company_id=req.company_id,
+            last_period_date=req.last_period_date
         )
         db.add(user)
         db.commit()
@@ -207,6 +214,12 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
         except Exception as e:
             print(f"Weather fetch failed: {e}")
 
+    # Determine menstrual cycle day if applicable
+    menstrual_cycle_day = None
+    if user.gender.lower() in ['female', 'жінка', 'f'] and user.last_period_date:
+        delta = date.today() - user.last_period_date
+        menstrual_cycle_day = (delta.days % 28) + 1
+
     # Engine Logic
     recipe = determine_recipe(
         scale_cns=req.scale_cns,
@@ -217,7 +230,8 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
         drink_format=req.drink_format,
         weather_temp=weather_temp,
         user=user,
-        language=req.language
+        language=req.language,
+        menstrual_cycle_day=menstrual_cycle_day
     )
 
     # Save Log
@@ -231,9 +245,32 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
         weather_temp=weather_temp,
         weather_condition=weather_condition,
         recommended_recipe_id=recipe["base"],
-        assigned_avatar_id=recipe.get("avatar_id")
+        assigned_avatar_id=recipe.get("avatar_id"),
+        company_id=user.company_id,
+        menstrual_cycle_day=menstrual_cycle_day
     )
     db.add(log)
+    
+    # Streak & Grace Period Logic
+    today = date.today()
+    if user.last_checkin_date:
+        days_missed = (today - user.last_checkin_date).days
+        if days_missed == 1:
+            user.current_streak_cycle += 1
+        elif days_missed == 2 and user.grace_periods > 0:
+            user.grace_periods -= 1
+            user.current_streak_cycle += 1
+        elif days_missed > 1:
+            user.current_streak_cycle = 1 # Reset cycle after grace period fail
+            user.grace_periods = 1 # Restore grace period on new cycle
+    else:
+        user.current_streak_cycle = 1
+        
+    if user.current_streak_cycle > 7:
+        user.current_streak_cycle = 1 # Capped streak logic
+        
+    user.last_checkin_date = today
+
     db.commit()
 
     # Schedule Feedback Push
@@ -276,3 +313,60 @@ def export_data(token: str, db: Session = Depends(database.get_db)):
         
     output.seek(0)
     return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=liquid_os_users.csv"})
+
+
+# B2B Pulse API with Anonymity Threshold
+@app.get("/api/v1/b2b/pulse")
+def get_b2b_pulse(company_id: str, db: Session = Depends(database.get_db)):
+    if not company_id:
+        raise HTTPException(status_code=400, detail="Missing company_id")
+        
+    today = date.today()
+    logs = db.query(models.StateLog).filter(
+        models.StateLog.company_id == company_id,
+        func.date(models.StateLog.created_at) == today
+    ).all()
+    
+    unique_users = set(log.telegram_id for log in logs)
+    
+    if len(unique_users) < 3:
+        return {"status": "insufficient_data", "message": "Anonymity threshold not met (< 3 unique users today)"}
+        
+    avg_cns = sum(log.scale_cns for log in logs if log.scale_cns is not None) / len(logs)
+    avg_energy = sum(log.scale_energy for log in logs if log.scale_energy is not None) / len(logs)
+    avg_mental = sum(log.scale_mental for log in logs if log.scale_mental is not None) / len(logs)
+    
+    return {
+        "status": "ok",
+        "company_id": company_id,
+        "unique_users_today": len(unique_users),
+        "vibe": {
+            "avg_cns_load": round(avg_cns, 1),
+            "avg_energy": round(avg_energy, 1),
+            "avg_mental": round(avg_mental, 1)
+        }
+    }
+
+
+class EMAFeedbackRequest(BaseModel):
+    log_id: str
+    effectiveness_score: int
+    taste_score: int
+    comment: Optional[str] = None
+
+@app.post("/api/v1/feedback/ema")
+def submit_ema_feedback(req: EMAFeedbackRequest, db: Session = Depends(database.get_db), tg_user: bool = Depends(get_current_user_tg)):
+    log = db.query(models.StateLog).filter(models.StateLog.log_id == req.log_id).first()
+    if not log:
+        raise HTTPException(status_code=404, detail="State log not found")
+        
+    feedback = models.FeedbackLog(
+        log_id=req.log_id,
+        effectiveness_score=req.effectiveness_score,
+        taste_score=req.taste_score,
+        comment=req.comment
+    )
+    db.add(feedback)
+    db.commit()
+    
+    return {"status": "ok", "message": "Feedback saved for Contextual Bandit model"}

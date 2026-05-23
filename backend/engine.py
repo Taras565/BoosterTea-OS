@@ -79,7 +79,7 @@ def get_base_name(base_type: str, lang: str) -> str:
     }
     return bases.get(base_type, bases["GABA"]).get(lang, bases.get(base_type, bases["GABA"])["uk"])
 
-def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_caffeine: bool, specific_activity_id: str, drink_format: str, weather_temp: int, user, language: str = "uk"):
+def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_caffeine: bool, specific_activity_id: str, drink_format: str, weather_temp: int, user, language: str = "uk", menstrual_cycle_day: int = None):
     k_ns = get_k_ns(user.hd_type)
     weight = user.weight or 70
     if user.gender == "female": k_ns *= 0.9
@@ -120,8 +120,22 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     if k_ns >= 0.7: k_ns_modifier = 1.05
     elif k_ns <= 0.5: k_ns_modifier = 0.95
     else: k_ns_modifier = 1.0
+    
+    # Endocrinology: Female menstrual cycle adjustments (Block 2)
+    endocrine_modifier = 1.0
+    supplement_rec = None
+    if menstrual_cycle_day is not None and "GABA" in specific_activity_id or target_state in ["RELAX", "FOCUS"]:
+        if 15 <= menstrual_cycle_day <= 23:
+            # Mid-luteal phase: high ALLO, high endogenous inhibition
+            # Reduce GABA dose to prevent over-sedation
+            endocrine_modifier = 0.8
+        elif 24 <= menstrual_cycle_day <= 28:
+            # Late luteal phase (PMDD risk): ALLO withdrawal, GABA receptor resistance
+            # Increase GABA dose to compensate and recommend Serotonergic precursor
+            endocrine_modifier = 1.3
+            supplement_rec = "5-HTP"
 
-    v_tea = base_volume * weight_factor * k_ns_modifier * state_modifier
+    v_tea = base_volume * weight_factor * k_ns_modifier * state_modifier * endocrine_modifier
 
     if had_caffeine:
         if getattr(user, "caffeine_sensitivity", "normal") == "high":
@@ -143,7 +157,8 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
         "breathwork_protocol": "square",
         "weight_factor": weight_factor,
         "k_ns_modifier": k_ns_modifier,
-        "state_modifier": state_modifier
+        "state_modifier": state_modifier,
+        "supplement": supplement_rec
     }
 
     # Strict Molecule (Base) Mapping
@@ -169,6 +184,10 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
             recipe["base_key"] = "GABA + DHP" if scale_mental < 3 else "GABA"
         elif target_state == "COMMUNICATION":
             recipe["base_key"] = "DHP"
+            
+    # Late Luteal phase (PMDD) -> enforce Pure GABA for resistance
+    if menstrual_cycle_day is not None and 24 <= menstrual_cycle_day <= 28 and "GABA" in recipe["base_key"]:
+        recipe["base_key"] = "Pure GABA"
     
     if scale_cns >= 8:
         recipe["breathwork_protocol"] = "square"

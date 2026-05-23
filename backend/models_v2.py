@@ -27,6 +27,15 @@ class User(Base):
     taste_sweet_pref = Column(Integer, default=5)
     caffeine_sensitivity = Column(String(50), default="normal")
 
+    # B2B & Flywheel Retention (Block 1)
+    company_id = Column(String(50), nullable=True)
+    current_streak_cycle = Column(Integer, default=0)
+    last_checkin_date = Column(Date, nullable=True)
+    grace_periods = Column(Integer, default=1)
+
+    # Biometrics & Endocrinology (Block 2)
+    last_period_date = Column(Date, nullable=True) # for calculating ALLO drop in luteal phase
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     state_logs = relationship("StateLog", back_populates="user")
@@ -58,6 +67,12 @@ class StateLog(Base):
     assigned_avatar_id = Column(String(50), nullable=True)
     recommended_herb_id = Column(String(50), ForeignKey("herbs.herb_id"), nullable=True)
     
+    # B2B Analytics
+    company_id = Column(String(50), nullable=True)
+
+    # EMA & Biometrics context
+    menstrual_cycle_day = Column(Integer, nullable=True) # Computed at checkin time
+
     recommended_recipe_id = Column(String(50), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
