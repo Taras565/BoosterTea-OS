@@ -240,6 +240,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
   const [lat, setLat] = useState<number | null>(null);
   const [lon, setLon] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showScience, setShowScience] = useState(false);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -313,7 +314,12 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
   return (
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel p-6 flex flex-col h-full overflow-y-auto max-h-[90vh]">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-white">Стан на сьогодні</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-white">{t('todayState')}</h2>
+          <button onClick={() => { triggerHaptic(); setShowScience(true); }} className="text-primary bg-primary/10 border border-primary/30 p-1.5 rounded-full hover:bg-primary/20 transition-colors shadow-[0_0_10px_rgba(0,255,204,0.2)]">
+            <FlaskConical size={16} />
+          </button>
+        </div>
         <button onClick={() => { 
           triggerHaptic(); 
           if (window.confirm("Ви впевнені, що хочете скинути біометричний профіль?")) {
@@ -321,8 +327,37 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
             localStorage.removeItem('has_read_manifest'); 
             onReset(); 
           }
-        }} className="text-xs text-red-400 border border-red-900/50 bg-red-900/20 px-2 py-1 rounded hover:bg-red-900/40 transition-colors">Скинути</button>
+        }} className="text-xs text-red-400 border border-red-900/50 bg-red-900/20 px-2 py-1 rounded hover:bg-red-900/40 transition-colors">{t('reset')}</button>
       </div>
+
+      <AnimatePresence>
+        {showScience && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="absolute inset-0 z-50 glass-panel p-6 flex flex-col h-full bg-black/95">
+            <div className="flex justify-between items-center mb-6 border-b border-primary/20 pb-4">
+              <h2 className="text-xl font-bold text-white uppercase tracking-wider">{t('sciTitle' as any) || 'Як працює Liquid OS?'}</h2>
+              <button onClick={() => { triggerHaptic(); setShowScience(false); }} className="text-gray-400 hover:text-white p-2 bg-black/50 rounded-full">✕</button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto space-y-6 pb-6">
+              <div className="bg-black/40 p-4 rounded-xl border border-gray-800">
+                <h3 className="text-sm font-bold text-primary mb-2 flex items-center gap-2"><Target size={16}/> {t('sci1Title' as any) || '1. Аналіз Ситуації'}</h3>
+                <p className="text-xs text-gray-300 leading-relaxed">{t('sci1Desc' as any) || 'Ми не питаємо, що ти хочеш випити. Ми питаємо, яка в тебе мета (фокус, енергія чи рекавері) та який рівень напруги ЦНС. Ці дані формують матрицю твого стану.'}</p>
+              </div>
+              <div className="bg-black/40 p-4 rounded-xl border border-gray-800">
+                <h3 className="text-sm font-bold text-primary mb-2 flex items-center gap-2"><Activity size={16}/> {t('sci2Title' as any) || '2. Медичний Алгоритм'}</h3>
+                <p className="text-xs text-gray-300 leading-relaxed">{t('sci2Desc' as any) || 'Система підбирає нейроактивну базу (GABA, Пуер, Да Хун Пао) і розраховує мілілітри з урахуванням твоєї ваги, статі та наявності кофеїну в крові.'}</p>
+              </div>
+              <div className="bg-black/40 p-4 rounded-xl border border-gray-800">
+                <h3 className="text-sm font-bold text-primary mb-2 flex items-center gap-2"><Wind size={16}/> {t('sci3Title' as any) || '3. Кліматична Адаптація'}</h3>
+                <p className="text-xs text-gray-300 leading-relaxed">{t('sci3Desc' as any) || 'Система зчитує погоду через GPS. Якщо жарко — напій подається з льодом і кислим активатором для швидкого тонусу. Якщо холодно — у теплому форматі.'}</p>
+              </div>
+            </div>
+            
+            <button onClick={() => { triggerHaptic(); setShowScience(false); }} className="w-full premium-btn font-bold py-4 rounded-xl uppercase tracking-wider text-sm mt-auto">Зрозуміло</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       
       <div className="mb-6 bg-black/40 p-4 rounded-xl border border-primary/20">
         <label className="text-sm font-bold text-white mb-3 block flex items-center gap-2">

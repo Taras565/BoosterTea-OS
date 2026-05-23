@@ -159,7 +159,16 @@ export const translations = {
     copyBtn: "Скопіювати",
     copiedBtn: "Скопійовано!",
     sharePromo: "Поділитися в Stories (+50 ⭐️)",
-    trustFund: "13% з кожного замовлення за твоїм кодом йде у Довірчий Фонд на підтримку волонтерських ініціатив."
+    trustFund: "13% з кожного замовлення за твоїм кодом йде у Довірчий Фонд на підтримку волонтерських ініціатив.",
+
+    // Science Modal
+    sciTitle: "Як працює Liquid OS?",
+    sci1Title: "1. Аналіз Ситуації",
+    sci1Desc: "Ми не питаємо, що ти хочеш випити. Ми питаємо, яка в тебе мета (фокус, енергія чи рекавері) та який рівень напруги ЦНС. Ці дані формують матрицю твого стану.",
+    sci2Title: "2. Медичний Алгоритм",
+    sci2Desc: "Система підбирає нейроактивну базу (GABA, Пуер, Да Хун Пао) і розраховує мілілітри з урахуванням твоєї ваги, статі та наявності кофеїну в крові.",
+    sci3Title: "3. Кліматична Адаптація",
+    sci3Desc: "Система зчитує погоду через GPS. Якщо жарко — напій подається з льодом і кислим активатором для швидкого тонусу. Якщо холодно — у теплому форматі."
   },
   en: {
     wm1Title: "Liquid Operating System",
@@ -308,7 +317,16 @@ export const translations = {
     copyBtn: "Copy",
     copiedBtn: "Copied!",
     sharePromo: "Share to Stories (+50 ⭐️)",
-    trustFund: "13% of every order using your code goes to the Trust Fund to support charity initiatives."
+    trustFund: "13% of every order using your code goes to the Trust Fund to support charity initiatives.",
+
+    // Science Modal
+    sciTitle: "How Liquid OS Works?",
+    sci1Title: "1. Situation Analysis",
+    sci1Desc: "We don't ask what you want to drink. We ask about your goal (focus, energy, or recovery) and CNS tension level. This data forms your state matrix.",
+    sci2Title: "2. Medical Algorithm",
+    sci2Desc: "The system selects a neuroactive base (GABA, Puer, Da Hong Pao) and calculates milliliters based on your weight, gender, and caffeine in your blood.",
+    sci3Title: "3. Climate Adaptation",
+    sci3Desc: "The system reads weather via GPS. If it's hot, the drink is served with ice and a sour activator for quick tone. If it's cold, in a warm format."
   },
   ru: {
     wm1Title: "Жидкая Операционная Система",
@@ -457,7 +475,16 @@ export const translations = {
     copyBtn: "Скопировать",
     copiedBtn: "Скопировано!",
     sharePromo: "Поделиться в Stories (+50 ⭐️)",
-    trustFund: "13% с каждого заказа по твоему коду идет в Доверительный Фонд на поддержку волонтерских инициатив."
+    trustFund: "13% с каждого заказа по твоему коду идет в Доверительный Фонд на поддержку волонтерских инициатив.",
+
+    // Science Modal
+    sciTitle: "Как работает Liquid OS?",
+    sci1Title: "1. Анализ Ситуации",
+    sci1Desc: "Мы не спрашиваем, что ты хочешь выпить. Мы спрашиваем, какая у тебя цель (фокус, энергия или рекавери) и какой уровень напряжения ЦНС. Эти данные формируют матрицу твоего состояния.",
+    sci2Title: "2. Медицинский Алгоритм",
+    sci2Desc: "Система подбирает нейроактивную базу (GABA, Пуэр, Да Хун Пао) и рассчитывает миллилитры с учетом твоего веса, пола и наличия кофеина в крови.",
+    sci3Title: "3. Климатическая Адаптация",
+    sci3Desc: "Система считывает погоду через GPS. Если жарко — напиток подается со льдом и кислым активатором для быстрого тонуса. Если холодно — в теплом формате."
   },
   es: {
     wm1Title: "Sistema Operativo Líquido",
@@ -606,7 +633,16 @@ export const translations = {
     copyBtn: "Copiar",
     copiedBtn: "¡Copiado!",
     sharePromo: "Compartir en Stories (+50 ⭐️)",
-    trustFund: "El 13% de cada pedido con tu código va al Fondo Fiduciario para apoyar iniciativas benéficas."
+    trustFund: "El 13% de cada pedido con tu código va al Fondo Fiduciario para apoyar iniciativas benéficas.",
+
+    // Science Modal
+    sciTitle: "¿Cómo funciona Liquid OS?",
+    sci1Title: "1. Análisis de Situación",
+    sci1Desc: "No te preguntamos qué quieres beber. Preguntamos tu objetivo (enfoque, energía o recuperación) y tu nivel de tensión del SNC. Estos datos forman tu matriz de estado.",
+    sci2Title: "2. Algoritmo Médico",
+    sci2Desc: "El sistema selecciona una base neuroactiva (GABA, Puer, Da Hong Pao) y calcula mililitros en función de tu peso, sexo y cafeína en tu sangre.",
+    sci3Title: "3. Adaptación Climática",
+    sci3Desc: "El sistema lee el clima a través de GPS. Si hace calor, la bebida se sirve con hielo y un activador ácido para un tono rápido. Si hace frío, en un formato cálido."
   }
 };
 
