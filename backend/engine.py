@@ -145,7 +145,7 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
 
     # Strict Molecule (Base) Mapping
     if specific_activity_id == "sport":
-        recipe["base_key"] = "Puer" if not had_caffeine else "GABA (Decaf)"
+        recipe["base_key"] = "Puer"
     elif specific_activity_id == "business":
         recipe["base_key"] = "DHP"
     elif specific_activity_id == "coding":
@@ -161,7 +161,7 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
         if target_state == "RELAX":
             recipe["base_key"] = "Pure GABA" if scale_cns >= 9 else "Soft GABA"
         elif target_state == "ENERGY":
-            recipe["base_key"] = "Puer" if not had_caffeine else "GABA (Decaf)"
+            recipe["base_key"] = "Puer"
         elif target_state == "FOCUS":
             recipe["base_key"] = "GABA + DHP" if scale_mental < 3 else "GABA"
         elif target_state == "COMMUNICATION":

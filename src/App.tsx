@@ -584,7 +584,9 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
           } else {
             window.open(url, "_blank");
           }
-        }} className="bg-gradient-to-r from-emerald-400 to-teal-500 text-black font-extrabold py-3 rounded-xl text-sm uppercase tracking-wider flex items-center justify-center gap-2 mt-2 shadow-[0_0_15px_rgba(52,211,153,0.5)] hover:scale-[1.02] transition-transform">{t('btnBuy') as string}</button>
+        }} className="w-full py-3 rounded-xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-2 uppercase text-sm tracking-widest hover:bg-emerald-500/20 transition-colors mt-2">
+          <ShoppingCart size={18} /> {t('btnBuy') as string}
+        </button>
       </div>
     </motion.div>
   );
@@ -775,7 +777,7 @@ function AppContent() {
       <div className="bg-orb-1" />
       <div className="bg-orb-2" />
       <div className="z-10 relative flex-1 w-full flex flex-col justify-center h-full max-w-md mx-auto pt-10">
-        <LanguageSwitcher currentLang={lang} onSelect={handleLangChange} />
+        {!showBreathwork && !recipeResult && <LanguageSwitcher currentLang={lang} onSelect={handleLangChange} />}
         <AnimatePresence mode="wait">
           {showProfile && profile ? (
             <ProfileScreen key="profile" lang={lang} profile={profile} onClose={() => setShowProfile(false)} />
