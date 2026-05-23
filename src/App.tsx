@@ -21,6 +21,7 @@ type UserProfile = {
   taste_acid: number;
   taste_bitter: number;
   taste_sweet: number;
+  caffeine_sensitivity: 'normal' | 'high';
 };
 
 type Recipe = {
@@ -78,7 +79,8 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
     sub_profession: '', 
     taste_acid: 5, 
     taste_bitter: 5, 
-    taste_sweet: 5 
+    taste_sweet: 5,
+    caffeine_sensitivity: 'normal' as 'normal' | 'high'
   });
 
   const handleNext = async () => {
@@ -107,7 +109,8 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
             profession_type: data.profession,
             taste_acid_pref: data.taste_acid,
             taste_bitter_pref: data.taste_bitter,
-            taste_sweet_pref: data.taste_sweet
+            taste_sweet_pref: data.taste_sweet,
+            caffeine_sensitivity: data.caffeine_sensitivity
           })
         });
         
@@ -158,6 +161,14 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
           </div>
           <div><label className="block text-gray-400 text-sm mb-1">{t('birthDate')}</label>
             <input type="date" value={data.birthDate} onChange={e => setData({...data, birthDate: e.target.value})} className="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white" />
+          </div>
+          
+          <div className="mb-4 mt-2">
+            <label className="block text-gray-400 text-sm mb-1">{t('cafSensTitle' as any) || 'Чутливість до кави'}</label>
+            <div className="grid grid-cols-1 gap-2">
+              <button onClick={() => { setData({...data, caffeine_sensitivity: 'normal'}); triggerHaptic(); }} className={`p-3 rounded-lg border text-sm transition-all text-left ${data.caffeine_sensitivity === 'normal' ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/30 text-gray-400'}`}>⚡ {t('cafSensNormal' as any) || 'Нормальна'}</button>
+              <button onClick={() => { setData({...data, caffeine_sensitivity: 'high'}); triggerHaptic(); }} className={`p-3 rounded-lg border text-sm transition-all text-left ${data.caffeine_sensitivity === 'high' ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/30 text-gray-400'}`}>🐢 {t('cafSensHigh' as any) || 'Повільний метаболізм (сильно діє)'}</button>
+            </div>
           </div>
         </motion.div>
       )}

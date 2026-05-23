@@ -98,7 +98,8 @@ def get_me(db: Session = Depends(database.get_db), tg_user: bool = Depends(get_c
                     "profession": user.profession_type,
                     "taste_acid": user.taste_acid_pref,
                     "taste_bitter": user.taste_bitter_pref,
-                    "taste_sweet": user.taste_sweet_pref
+                    "taste_sweet": user.taste_sweet_pref,
+                    "caffeine_sensitivity": user.caffeine_sensitivity
                 }
             }
     except Exception as e:
@@ -118,6 +119,7 @@ class RegistrationRequest(BaseModel):
     profession_type: Optional[str] = "COGNITIVE"
     birth_time: Optional[str] = "12:00"
     birth_place: Optional[str] = None
+    caffeine_sensitivity: str = "normal"
 
 class StateRequest(BaseModel):
     telegram_id: int
@@ -162,7 +164,8 @@ def register_user(req: RegistrationRequest, db: Session = Depends(database.get_d
             profession_type=req.profession_type,
             taste_acid_pref=req.taste_acid_pref,
             taste_bitter_pref=req.taste_bitter_pref,
-            taste_sweet_pref=req.taste_sweet_pref
+            taste_sweet_pref=req.taste_sweet_pref,
+            caffeine_sensitivity=req.caffeine_sensitivity
         )
         db.add(user)
         db.commit()

@@ -72,7 +72,7 @@ def get_base_name(base_type: str, lang: str) -> str:
         "Soft GABA": {"uk": "М'яка GABA", "en": "Soft GABA", "ru": "Мягкая GABA", "es": "GABA Suave"},
         "GABA + DHP": {"uk": "GABA + Да Хун Пао", "en": "GABA + Da Hong Pao", "ru": "GABA + Да Хун Пао", "es": "GABA + Da Hong Pao"},
         "DHP": {"uk": "Да Хун Пао", "en": "Da Hong Pao", "ru": "Да Хун Пао", "es": "Da Hong Pao"},
-        "Puer": {"uk": "Шу Пуер", "en": "Shu Puer", "ru": "Шу Пуэр", "es": "Shu Puer"},
+        "Puer": {"uk": "Шу Пуер (var. kucha)", "en": "Shu Puer (var. kucha)", "ru": "Шу Пуэр (var. kucha)", "es": "Shu Puer (var. kucha)"},
         "Pure GABA": {"uk": "Чиста Преміум GABA", "en": "Pure Premium GABA", "ru": "Чистая Премиум GABA", "es": "GABA Premium Pura"},
         "GABA (Stress)": {"uk": "GABA (Стрес-компенсація)", "en": "GABA (Stress Compensation)", "ru": "GABA (Стресс-компенсация)", "es": "GABA (Compensación de Estrés)"},
         "GABA (Decaf)": {"uk": "GABA (Захист від кофеїну)", "en": "GABA (Caffeine Protection)", "ru": "GABA (Защита от кофеина)", "es": "GABA (Protección contra cafeína)"}
@@ -124,7 +124,10 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
     v_tea = base_volume * weight_factor * k_ns_modifier * state_modifier
 
     if had_caffeine:
-        v_tea = v_tea * 0.85 
+        if getattr(user, "caffeine_sensitivity", "normal") == "high":
+            v_tea = v_tea * 0.65  # 35% reduction for slow metabolizers
+        else:
+            v_tea = v_tea * 0.85  # 15% reduction for normal metabolizers
         
     v_tea = round(v_tea, 1)
 
@@ -185,7 +188,8 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
         "Spicy Ginger": {"uk": "Пряний імбирний шот з куркумою", "en": "Spicy Ginger Turmeric Shot", "ru": "Пряный имбирный шот с куркумой", "es": "Shot de Jengibre Picante con Cúrcuma"},
         "Classic Apple": {"uk": "Класичний яблучний фреш", "en": "Classic Apple Fresh", "ru": "Классический яблочный фреш", "es": "Jugo Fresco de Manzana Clásico"},
         "Apple-Ginger": {"uk": "Яблучно-імбирний фреш", "en": "Apple-Ginger Fresh", "ru": "Яблочно-имбирный фреш", "es": "Jugo Fresco de Manzana y Jengibre"},
-        "Lemon Fresh": {"uk": "Лимонний фреш", "en": "Lemon Fresh", "ru": "Лимонный фреш", "es": "Jugo Fresco de Limón"}
+        "Lemon Fresh": {"uk": "Лимонний фреш", "en": "Lemon Fresh", "ru": "Лимонный фреш", "es": "Jugo Fresco de Limón"},
+        "Orange Fresh": {"uk": "Апельсиновий фреш", "en": "Orange Fresh", "ru": "Апельсиновый фреш", "es": "Jugo Fresco de Naranja"}
     }
     
     garnishes = {
@@ -242,10 +246,10 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
             status_key = "Ice"
             glass_key = "Highball"
             recipe["ice_cubes"] = max(1, round(weather_temp / 4))
-            if t_acid >= 7 and t_sweet < 7: act_key = "Ruby Grapefruit"; garnish_key = "Rosemary"
-            elif t_sweet >= 7 and t_acid < 7: act_key = "Blackberry Lavender"; garnish_key = "Blueberries"
-            elif t_bitter >= 7: act_key = "Tonic"; garnish_key = "Lemon Zest"
-            else: act_key = "Lime Lemonade"; garnish_key = "Mint Lime"
+            # Vitamin C + Sucrose synergy for hot weather EGCG absorption
+            if t_sweet >= 7: act_key = "Lime Lemonade"; garnish_key = "Mint Lime"
+            elif t_acid >= 7: act_key = "Ruby Grapefruit"; garnish_key = "Rosemary"
+            else: act_key = "Orange Fresh"; garnish_key = "Orange"
         else:
             status_key = "Hot"
             glass_key = "Highball"

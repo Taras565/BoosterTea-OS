@@ -25,6 +25,7 @@ class User(Base):
     taste_acid_pref = Column(Integer, default=5)
     taste_bitter_pref = Column(Integer, default=5)
     taste_sweet_pref = Column(Integer, default=5)
+    caffeine_sensitivity = Column(String(50), default="normal")
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
