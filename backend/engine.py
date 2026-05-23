@@ -260,6 +260,11 @@ def determine_recipe(scale_cns: int, scale_energy: int, scale_mental: int, had_c
             else: act_key = "Classic Apple"; garnish_key = "Apple"
 
     recipe["base"] = get_base_name(recipe["base_key"], language)
+    if recipe["base_key"] == "GABA + DHP":
+        half = round(recipe["tea_ml"] / 2.0, 1)
+        if language == "uk": recipe["base"] = f"GABA ({half} мл) + Да Хун Пао ({half} мл)"
+        elif language == "ru": recipe["base"] = f"GABA ({half} мл) + Да Хун Пао ({half} мл)"
+        else: recipe["base"] = f"GABA ({half} ml) + Da Hong Pao ({half} ml)"
     
     if drink_format == "tea":
         tea_activator = {"uk": "Чиста Вода", "en": "Pure Water", "ru": "Чистая Вода", "es": "Agua Pura"}

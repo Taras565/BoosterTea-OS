@@ -645,7 +645,7 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
           } else {
             window.open(url, "_blank");
           }
-        }} className="w-full py-3 rounded-xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-2 uppercase text-sm tracking-widest hover:bg-emerald-500/20 transition-colors mt-2">
+        }} className="col-span-2 w-full py-3 rounded-xl border border-primary/50 bg-primary/10 text-primary font-bold flex items-center justify-center gap-2 uppercase text-sm tracking-widest hover:bg-primary/20 transition-colors mt-2">
           <ShoppingCart size={18} /> {t('btnBuy') as string}
         </button>
       </div>
