@@ -105,11 +105,12 @@ export default function BreathworkTimer({ recipe, lang, activityType, onDone }: 
     } else if (protocol === 'fire') {
       const runFire = () => {
         let secondsPassed = 0;
-        setPhase(t('bFireExhale'));
+        setPhase(t('bExhale'));
         
         cleanup = setInterval(() => {
           secondsPassed++;
           if (secondsPassed < 60) {
+            setPhase(prev => prev === t('bExhale') ? t('bInhale') : t('bExhale'));
             setScale(prev => prev === 1 ? 1.3 : 1);
             triggerHaptic();
           } else if (secondsPassed === 60) {
@@ -335,8 +336,8 @@ export default function BreathworkTimer({ recipe, lang, activityType, onDone }: 
         <h2 className="relative z-10 text-2xl font-bold text-white uppercase tracking-widest drop-shadow-md text-center">{phase}</h2>
       </div>
       
-      <div className="text-center px-8 mb-4 h-24">
-        <p className="text-gray-300 text-sm leading-relaxed mb-3">
+      <div className="text-center px-6 mb-8 min-h-[8rem]">
+        <p className="text-gray-300 text-sm leading-relaxed mb-3 whitespace-pre-line text-left bg-gray-900/50 p-4 rounded-xl border border-gray-800">
           {protocol === 'square' ? t('instSquare') : t('instFire')}
         </p>
         <p className="text-[10px] text-gray-500 font-medium tracking-widest uppercase">

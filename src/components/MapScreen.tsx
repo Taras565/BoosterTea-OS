@@ -16,6 +16,14 @@ L.Icon.Default.mergeOptions({
   shadowUrl,
 });
 
+const customBpIcon = L.divIcon({
+  className: 'custom-bp-marker',
+  html: '<div style="background-color: #00ffcc; color: black; font-weight: bold; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,255,204,0.6); font-size: 12px; border: 2px solid white;">BP</div>',
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+  popupAnchor: [0, -15]
+});
+
 const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname.includes('localhost') ? 'http://localhost:8000/api' : 'https://boostertea-os-backend.onrender.com/api');
 
 interface Location {
@@ -183,7 +191,7 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
               {locations.map(loc => {
                 const isClosed = loc.status === "CLOSED" || loc.status === "TEMPORARY_CLOSED";
                 return (
-                  <Marker key={loc.id} position={[loc.lat, loc.lon]} opacity={isClosed ? 0.5 : 1}>
+                  <Marker key={loc.id} position={[loc.lat, loc.lon]} icon={customBpIcon} opacity={isClosed ? 0.5 : 1}>
                     <Popup className="booster-popup">
                       <div className="font-bold text-sm text-black mb-1 flex items-center justify-between">
                         {loc.name}
@@ -202,7 +210,17 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
       {!loading && !isOutOfRange && locations.length > 0 && (
         <div className="p-4 bg-black border-t border-gray-800 z-[60] flex flex-col gap-3">
           <p className="text-xs text-gray-400 text-center mb-1">Знайдено партнерських закладів: {locations.length}</p>
-          <button className="w-full premium-btn font-bold py-3 rounded-xl uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+          <button 
+            onClick={() => {
+              triggerHaptic();
+              const loc = locations[0]; // For now, route to the first available location
+              if (loc) {
+                const url = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lon}`;
+                window.open(url, '_blank');
+              }
+            }}
+            className="w-full premium-btn font-bold py-3 rounded-xl uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+          >
             Прокласти маршрут
           </button>
           

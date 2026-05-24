@@ -428,7 +428,19 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
 
 @app.get("/api/locations")
 def get_locations(db: Session = Depends(database.get_db)):
-    points = db.query(models.BoosterPoint).filter(models.BoosterPoint.is_active == True).all()
+    # Auto-seed Lviv location per user request
+    lviv_exists = db.query(models.BoosterPoint).filter(models.BoosterPoint.name == "BoosterTea Lviv").first()
+    if not lviv_exists:
+        lviv_point = models.BoosterPoint(
+            name="BoosterTea Lviv", 
+            address="м. Львів, вул. Богдана Хмельницького, 66а", 
+            lat=49.8507, 
+            lon=24.0435
+        )
+        db.add(lviv_point)
+        db.commit()
+
+    points = db.query(models.BoosterPoint).filter(models.BoosterPoint.is_active == True).order_by(models.BoosterPoint.id.desc()).all()
     return {
         "status": "ok",
         "locations": [
