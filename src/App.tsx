@@ -144,9 +144,9 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
       } catch (err) {
         console.error(err);
         if ((window as any).Telegram?.WebApp?.showAlert) {
-          (window as any).Telegram.WebApp.showAlert("Помилка підключення до сервера (Можливо, невірний підпис Telegram). Спробуйте перезапустити додаток.");
+          (window as any).Telegram.WebApp.showAlert(t('errReg' as any) || "Помилка підключення до сервера (Можливо, невірний підпис Telegram). Спробуйте перезапустити додаток.");
         } else {
-          alert("Помилка реєстрації. Спробуйте пізніше.");
+          alert(t('errReg' as any) || "Помилка реєстрації. Спробуйте пізніше.");
         }
       } finally {
         setLoading(false);
@@ -389,7 +389,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
       onResult(data.recipe, data.weather.temp, data.weather.condition, drinkFormat, data.challenge_day);
     } catch (err) {
       console.error(err);
-      setErrorMsg("Втрачено зв'язок із сервером. Перевірте інтернет.");
+      setErrorMsg(t('errConn' as any) || "Втрачено зв'язок із сервером. Перевірте інтернет.");
     } finally {
       setLoading(false);
     }
@@ -815,7 +815,7 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
                       try {
                         const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
                         const tgId = initData?.user?.id || 123456789;
-                        await fetch(`${API_URL}/order/pay`, {
+                        const payRes = await fetch(`${API_URL}/order/pay`, {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -824,6 +824,7 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
                             total_amount: 125.00
                           })
                         });
+                        if (!payRes.ok) throw new Error("Payment failed");
                         setPaymentStatus('success');
                         setTimeout(() => onDone(), 2000);
                       } catch(e) {

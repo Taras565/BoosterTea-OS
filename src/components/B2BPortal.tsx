@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShieldCheck, CheckSquare, QrCode, BookOpen, AlertTriangle } from 'lucide-react';
+import { X, ShieldCheck, CheckSquare, QrCode, BookOpen, AlertTriangle, Star } from 'lucide-react';
 import { getTranslation, Language } from '../i18n';
 
 const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname.includes('localhost') ? 'http://localhost:8000/api' : 'https://boostertea-os-backend.onrender.com/api');
