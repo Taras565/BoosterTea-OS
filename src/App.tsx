@@ -30,6 +30,8 @@ type UserProfile = {
   smoker?: boolean;
   oral_contraceptives?: boolean;
   target_bedtime?: string;
+  avatar_id?: string;
+  booster_star_active_until?: string;
 };
 
 type Recipe = {
@@ -795,6 +797,31 @@ function ProfileScreen({ profile, lang, onClose }: { profile: UserProfile, lang:
     }
   };
 
+  const handleSimulateReferral = async () => {
+    triggerHaptic();
+    try {
+      const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
+      const tgId = initData?.user?.id || 123456789;
+      
+      const res = await fetch(`${API_URL}/referral/claim`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          referrer_id: tgId,
+          referral_id: 999999999 // mock friend
+        })
+      });
+      if (res.ok) {
+        alert("Booster Star активовано на 48 годин! Отримано унікальний аватар!");
+        // В реальному житті ми б оновили стейт профілю, але для демо достатньо алерта і перезавантаження
+      }
+    } catch(e) {
+      console.error(e);
+    }
+  };
+
+  const isBoosterActive = profile.booster_star_active_until && new Date(profile.booster_star_active_until) > new Date();
+
   return (
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-panel p-6 flex flex-col h-full overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
@@ -810,7 +837,7 @@ function ProfileScreen({ profile, lang, onClose }: { profile: UserProfile, lang:
         </div>
         <div className="relative z-10">
           <h3 className="text-gray-400 text-xs uppercase tracking-wider mb-1">{t('boosterStars')}</h3>
-          <div className="flex justify-between items-end mb-2">
+          <div className="flex justify-between items-end mb-4">
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-black text-primary drop-shadow-[0_0_8px_rgba(0,255,204,0.4)]">50</span>
               <Star className="text-primary" size={24} fill="currentColor" />
@@ -822,8 +849,27 @@ function ProfileScreen({ profile, lang, onClose }: { profile: UserProfile, lang:
                </div>
             )}
           </div>
-          <p className="text-sm font-bold text-white mb-1">{profile.name}</p>
-          <p className="text-xs text-emerald-400">{t('ambassadorStatus')}</p>
+          
+          <div className="flex items-center gap-4 mb-2">
+            <div className="w-16 h-16 rounded-full bg-gray-800 border-2 border-primary/50 overflow-hidden flex items-center justify-center relative">
+              {profile.avatar_id === 'golden_cup' ? (
+                <Trophy className="text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]" size={32} />
+              ) : (
+                <User className="text-gray-400" size={32} />
+              )}
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">{profile.name}</p>
+              <p className="text-xs text-emerald-400 mb-1">{t('ambassadorStatus')}</p>
+              {isBoosterActive ? (
+                <span className="text-[10px] bg-primary/20 text-primary border border-primary/50 px-2 py-1 rounded font-bold uppercase tracking-wider">
+                  Booster Star Активний (2x бали)
+                </span>
+              ) : (
+                <span className="text-[10px] bg-gray-800 text-gray-400 px-2 py-1 rounded">Звичайний множник (1x)</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -842,8 +888,12 @@ function ProfileScreen({ profile, lang, onClose }: { profile: UserProfile, lang:
         </div>
       </div>
 
-      <button onClick={handleShare} className="w-full premium-btn font-bold py-4 rounded-xl flex justify-center items-center gap-2 uppercase tracking-wider text-sm mb-6">
+      <button onClick={handleShare} className="w-full premium-btn font-bold py-4 rounded-xl flex justify-center items-center gap-2 uppercase tracking-wider text-sm mb-4">
         {t('sharePromo')}
+      </button>
+
+      <button onClick={handleSimulateReferral} className="w-full bg-gray-800 border border-primary/50 text-primary font-bold py-3 rounded-xl flex justify-center items-center gap-2 uppercase tracking-wider text-xs mb-6 hover:bg-gray-700 transition-colors">
+        <Star size={16} /> Імітувати Залучення Друга (Отримати Booster)
       </button>
 
       <div className="mt-auto bg-blue-900/10 p-4 rounded-xl border border-blue-500/20 flex gap-3 items-start mb-4">

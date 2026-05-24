@@ -170,6 +170,16 @@ class StatusUpdateRequest(BaseModel):
     point_id: str
     status: str
 
+class EMAReviewRequest(BaseModel):
+    telegram_id: int
+    point_id: str
+    rating: int # 1-5
+    tags: Optional[dict] = None
+
+class ReferralClaimRequest(BaseModel):
+    referrer_id: int
+    referral_id: int
+
 # Mock HD generator
 def mock_hd_type(birth_date: date) -> str:
     types = ["Generator", "Projector", "Manifestor", "Reflector", "Manifesting Generator"]
@@ -404,7 +414,8 @@ def get_locations(db: Session = Depends(database.get_db)):
                 "lon": p.lon,
                 "status": p.status,
                 "regular_hours": p.regular_hours,
-                "special_hours": p.special_hours
+                "special_hours": p.special_hours,
+                "rating_ema": p.rating_ema
             } for p in points
         ]
     }
@@ -424,6 +435,63 @@ def seed_locations(db: Session = Depends(database.get_db)):
     db.add_all(points)
     db.commit()
     return {"status": "ok", "seeded": len(points)}
+
+@app.post("/api/feedback/ema")
+def submit_ema_review(req: EMAReviewRequest, db: Session = Depends(database.get_db)):
+    user = db.query(models.User).filter(models.User.telegram_id == req.telegram_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    point = db.query(models.BoosterPoint).filter(models.BoosterPoint.id == req.point_id).first()
+    if not point:
+        raise HTTPException(status_code=404, detail="Point not found")
+        
+    # Save the review
+    review = models.Review(
+        telegram_id=req.telegram_id,
+        point_id=req.point_id,
+        rating=req.rating,
+        tags=req.tags
+    )
+    db.add(review)
+    
+    # Calculate new EMA rating
+    # N = 50 for sensitivity
+    N = 50
+    K = 2 / (N + 1)
+    
+    # EMA_new = (Rating_new * K) + (EMA_prev * (1 - K))
+    new_ema = (req.rating * K) + (point.rating_ema * (1 - K))
+    point.rating_ema = round(new_ema, 2)
+    point.total_reviews += 1
+    
+    db.commit()
+    return {"status": "ok", "new_rating_ema": point.rating_ema}
+
+@app.post("/api/referral/claim")
+def claim_referral(req: ReferralClaimRequest, db: Session = Depends(database.get_db)):
+    referrer = db.query(models.User).filter(models.User.telegram_id == req.referrer_id).first()
+    referral = db.query(models.User).filter(models.User.telegram_id == req.referral_id).first()
+    
+    if not referrer or not referral:
+        raise HTTPException(status_code=404, detail="Користувача не знайдено")
+        
+    # Set referral link
+    referral.referred_by_id = req.referrer_id
+    
+    # Grant Booster Star (48 hours) to Referrer
+    from datetime import datetime, timedelta
+    referrer.booster_star_active_until = datetime.utcnow() + timedelta(hours=48)
+    
+    # Grant Avatar item
+    referrer.avatar_id = "golden_cup" # mock exclusive avatar item
+    
+    db.commit()
+    return {
+        "status": "ok", 
+        "booster_star_active_until": referrer.booster_star_active_until.isoformat(),
+        "avatar_id": referrer.avatar_id
+    }
 
 @app.post("/api/b2b/status")
 def update_point_status(req: StatusUpdateRequest, db: Session = Depends(database.get_db)):

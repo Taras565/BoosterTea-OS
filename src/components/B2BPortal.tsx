@@ -208,6 +208,20 @@ export default function B2BPortal({ onClose, lang }: { onClose: () => void, lang
               <h3 className="font-bold text-lg mb-2 text-white">Операційний Статус</h3>
               <p className="text-xs text-gray-400 mb-6">Оновіть статус вашої точки. Зміни миттєво синхронізуються на картах клієнтів (SSOT).</p>
               
+              <div className="bg-gray-900/50 p-4 rounded-xl border border-gray-700 mb-6 flex flex-col items-center">
+                <span className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Поточний EMA Рейтинг</span>
+                <div className="text-3xl font-black text-orange-400 mb-2 drop-shadow-[0_0_10px_rgba(251,146,60,0.5)]">
+                  4.2 <Star size={20} className="inline mb-1" fill="currentColor"/>
+                </div>
+                <div className="w-full bg-red-900/30 border border-red-500/50 p-3 rounded-lg flex items-start gap-3">
+                  <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
+                  <p className="text-[10px] text-red-200">
+                    <strong className="block mb-1">Увага! Критичне падіння EMA-рейтингу.</strong>
+                    Останні відгуки сигналізують про проблему "Довго чекав". Якщо рейтинг впаде нижче 4.0, ваш заклад буде знижено в ранжуванні.
+                  </p>
+                </div>
+              </div>
+
               <div className="space-y-3">
                 <button onClick={() => handleStatusUpdate('OPEN')} className="w-full py-3 bg-green-900/30 text-green-400 border border-green-500/50 rounded-xl font-bold uppercase tracking-wider hover:bg-green-900/50 transition-colors">
                   Відчинено

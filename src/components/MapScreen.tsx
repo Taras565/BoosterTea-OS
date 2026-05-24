@@ -46,6 +46,9 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
   const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null);
   const [isOutOfRange, setIsOutOfRange] = useState(false);
   const [showLocationPrompt, setShowLocationPrompt] = useState(true);
+  const [showEMAModal, setShowEMAModal] = useState(false);
+  const [emaRating, setEmaRating] = useState(0);
+  const [emaTags, setEmaTags] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -94,6 +97,43 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
     } else {
       setShowLocationPrompt(false);
     }
+  };
+
+  const handleEMASubmit = async () => {
+    triggerHaptic();
+    try {
+      const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
+      const tgId = initData?.user?.id || 123456789;
+      
+      const res = await fetch(`${API_URL}/feedback/ema`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegram_id: tgId,
+          point_id: locations[0]?.id || 'test-point-1',
+          rating: emaRating,
+          tags: { selected: emaTags }
+        })
+      });
+      if (res.ok) {
+        alert("Дякуємо! Ваш відгук враховано. Ви отримали +5 балів!");
+        setShowEMAModal(false);
+      }
+    } catch(e) {
+      console.error(e);
+      setShowEMAModal(false);
+    }
+  };
+
+  const EMA_TAGS = ["Дуже смачно", "Швидко", "Привітний персонал", "Довго чекав", "Брудно", "Гучна музика"];
+
+  const toggleEmaTag = (tag: string) => {
+    if (emaTags.includes(tag)) {
+      setEmaTags(emaTags.filter(t => t !== tag));
+    } else {
+      setEmaTags([...emaTags, tag]);
+    }
+    triggerHaptic();
   };
 
   return (
@@ -160,11 +200,54 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
       </div>
       
       {!loading && !isOutOfRange && locations.length > 0 && (
-        <div className="p-4 bg-black border-t border-gray-800 z-[60]">
-          <p className="text-xs text-gray-400 text-center mb-2">Знайдено партнерських закладів: {locations.length}</p>
+        <div className="p-4 bg-black border-t border-gray-800 z-[60] flex flex-col gap-3">
+          <p className="text-xs text-gray-400 text-center mb-1">Знайдено партнерських закладів: {locations.length}</p>
           <button className="w-full premium-btn font-bold py-3 rounded-xl uppercase tracking-wider text-sm flex items-center justify-center gap-2">
             Прокласти маршрут
           </button>
+          
+          <button onClick={() => setShowEMAModal(true)} className="w-full bg-gray-800 border border-primary/50 text-primary font-bold py-3 rounded-xl uppercase tracking-wider text-xs hover:bg-gray-700 transition-colors">
+            Імітувати вихід з геозони (EMA)
+          </button>
+        </div>
+      )}
+
+      {showEMAModal && (
+        <div className="absolute inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-gray-900 to-black p-6 rounded-2xl border border-primary/30 w-full max-w-sm text-center">
+            <h3 className="text-xl font-bold text-white mb-2">Як вам візит?</h3>
+            <p className="text-xs text-gray-400 mb-6">Оцініть заклад, щоб ми стали кращими. Отримайте мікро-нагороду!</p>
+            
+            <div className="flex justify-center gap-2 mb-6">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button key={star} onClick={() => { setEmaRating(star); triggerHaptic(); }} className="text-4xl transition-transform hover:scale-110">
+                  <span className={star <= emaRating ? 'text-yellow-400' : 'text-gray-600'}>★</span>
+                </button>
+              ))}
+            </div>
+
+            {emaRating > 0 && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6">
+                <p className="text-xs text-gray-400 mb-3 uppercase tracking-wider">Що саме сподобалось / не сподобалось?</p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {EMA_TAGS.map(tag => (
+                    <button 
+                      key={tag}
+                      onClick={() => toggleEmaTag(tag)}
+                      className={`text-[10px] px-3 py-1.5 rounded-full border transition-colors ${emaTags.includes(tag) ? 'bg-primary/20 border-primary text-primary' : 'bg-transparent border-gray-700 text-gray-400'}`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            <div className="flex gap-3 mt-4">
+              <button onClick={() => setShowEMAModal(false)} className="flex-1 py-3 bg-gray-800 rounded-xl text-xs font-bold text-gray-400 uppercase">Закрити</button>
+              <button onClick={handleEMASubmit} disabled={emaRating === 0} className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-all ${emaRating > 0 ? 'bg-primary text-black' : 'bg-gray-800 text-gray-600'}`}>Надіслати</button>
+            </div>
+          </div>
         </div>
       )}
     </motion.div>

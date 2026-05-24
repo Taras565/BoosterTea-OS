@@ -39,6 +39,11 @@ class User(Base):
 
     # Biometrics & Endocrinology (Block 2)
     last_period_date = Column(Date, nullable=True) # for calculating ALLO drop in luteal phase
+    
+    # Gamification & Referrals (Block 3)
+    booster_star_active_until = Column(DateTime(timezone=True), nullable=True)
+    avatar_id = Column(String(100), nullable=True, default="default")
+    referred_by_id = Column(BigInteger, ForeignKey("users.telegram_id"), nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -110,6 +115,8 @@ class BoosterPoint(Base):
     status = Column(String(50), default="OPEN") # "OPEN", "CLOSED", "TEMPORARY_CLOSED"
     regular_hours = Column(JSON, nullable=True) # e.g. {"monday": "09:00-21:00"}
     special_hours = Column(JSON, nullable=True) # e.g. {"2026-01-01": "closed"}
+    rating_ema = Column(Float, default=5.0)
+    total_reviews = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class BaristaCertificate(Base):
@@ -169,3 +176,16 @@ class UserRole(Base):
     user = relationship("User")
     role = relationship("Role")
     tenant = relationship("BoosterPoint")
+
+# --- EMA Rating (Ecological Momentary Assessment) ---
+class Review(Base):
+    __tablename__ = "reviews"
+    review_id = Column(String(36), primary_key=True, default=generate_uuid)
+    telegram_id = Column(BigInteger, ForeignKey("users.telegram_id"))
+    point_id = Column(String(36), ForeignKey("booster_points.id"))
+    rating = Column(Integer, nullable=False) # 1-5
+    tags = Column(JSON, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")
+    point = relationship("BoosterPoint")
