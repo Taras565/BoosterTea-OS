@@ -45,7 +45,7 @@ export default function LanguageSwitcher({ currentLang, onSelect }: { currentLan
   };
 
   return (
-    <div className="absolute top-4 left-4 z-50" ref={ref}>
+    <div className="fixed top-4 left-4 z-[100]" ref={ref}>
       <button 
         onClick={() => { triggerHaptic(); setIsOpen(!isOpen); }}
         className="w-10 h-10 rounded-full bg-black/60 border border-gray-700 backdrop-blur-md flex items-center justify-center text-xl shadow-lg hover:border-primary/50 transition-colors"

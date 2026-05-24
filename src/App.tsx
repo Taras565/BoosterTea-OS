@@ -479,9 +479,9 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
             <label className="text-sm font-bold text-white">{t('cnsLoad')}</label>
             <button onClick={() => { setScaleCns(5); triggerHaptic(); }} className="text-[10px] text-gray-500 hover:text-white underline">{t('unsure' as any) || 'Не певен'}</button>
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {STRESS_LEVELS.map(lvl => (
-              <button key={lvl.label} onClick={() => { setScaleCns(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold uppercase rounded-lg border transition-all duration-300 ${scaleCns === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
+              <button key={lvl.label} onClick={() => { setScaleCns(lvl.value); triggerHaptic(); }} className={`py-3 px-2 text-[11px] sm:text-xs font-bold uppercase rounded-lg border transition-all duration-300 leading-tight flex items-center justify-center text-center shadow-sm ${scaleCns === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
             ))}
           </div>
         </div>
@@ -491,9 +491,9 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
             <label className="text-sm font-bold text-white">{t('energyLvl')}</label>
             <button onClick={() => { setScaleEnergy(5); triggerHaptic(); }} className="text-[10px] text-gray-500 hover:text-white underline">{t('unsure' as any) || 'Не певен'}</button>
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {ENERGY_LEVELS.map(lvl => (
-              <button key={lvl.label} onClick={() => { setScaleEnergy(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold uppercase rounded-lg border transition-all duration-300 ${scaleEnergy === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
+              <button key={lvl.label} onClick={() => { setScaleEnergy(lvl.value); triggerHaptic(); }} className={`py-3 px-2 text-[11px] sm:text-xs font-bold uppercase rounded-lg border transition-all duration-300 leading-tight flex items-center justify-center text-center shadow-sm ${scaleEnergy === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
             ))}
           </div>
         </div>
@@ -503,9 +503,9 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
             <label className="text-sm font-bold text-white">{t('mentalLvl')}</label>
             <button onClick={() => { setScaleMental(5); triggerHaptic(); }} className="text-[10px] text-gray-500 hover:text-white underline">{t('unsure' as any) || 'Не певен'}</button>
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {MENTAL_LEVELS.map(lvl => (
-              <button key={lvl.label} onClick={() => { setScaleMental(lvl.value); triggerHaptic(); }} className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold uppercase rounded-lg border transition-all duration-300 ${scaleMental === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
+              <button key={lvl.label} onClick={() => { setScaleMental(lvl.value); triggerHaptic(); }} className={`py-3 px-2 text-[11px] sm:text-xs font-bold uppercase rounded-lg border transition-all duration-300 leading-tight flex items-center justify-center text-center shadow-sm ${scaleMental === lvl.value ? lvl.active : lvl.idle}`}>{lvl.label}</button>
             ))}
           </div>
         </div>
@@ -515,12 +515,12 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
         <label className="text-sm font-bold text-white mb-3 block flex items-center gap-2">
           <Coffee size={18} className="text-primary"/> Спожитий кофеїн сьогодні
         </label>
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          <button onClick={() => { setCaffeineMg(0); triggerHaptic(); }} className={`p-2 rounded-lg border text-xs font-bold transition-all ${caffeineMg === 0 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Нічого (0 мг)</button>
-          <button onClick={() => { setCaffeineMg(60); triggerHaptic(); }} className={`p-2 rounded-lg border text-xs font-bold transition-all ${caffeineMg === 60 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Еспресо (60 мг)</button>
-          <button onClick={() => { setCaffeineMg(120); triggerHaptic(); }} className={`p-2 rounded-lg border text-xs font-bold transition-all ${caffeineMg === 120 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Фільтр (120 мг)</button>
-          <button onClick={() => { setCaffeineMg(150); triggerHaptic(); }} className={`p-2 rounded-lg border text-xs font-bold transition-all ${caffeineMg === 150 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Енергетик (150 мг)</button>
-          <button onClick={() => { setCaffeineMg(200); triggerHaptic(); }} className={`p-2 rounded-lg border text-xs font-bold transition-all ${caffeineMg === 200 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Багато (&gt;200 мг)</button>
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <button onClick={() => { setCaffeineMg(0); triggerHaptic(); }} className={`py-3 px-2 rounded-lg border text-xs font-bold transition-all shadow-sm ${caffeineMg === 0 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Нічого (0 мг)</button>
+          <button onClick={() => { setCaffeineMg(60); triggerHaptic(); }} className={`py-3 px-2 rounded-lg border text-xs font-bold transition-all shadow-sm ${caffeineMg === 60 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Еспресо (60 мг)</button>
+          <button onClick={() => { setCaffeineMg(120); triggerHaptic(); }} className={`py-3 px-2 rounded-lg border text-xs font-bold transition-all shadow-sm ${caffeineMg === 120 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Фільтр (120 мг)</button>
+          <button onClick={() => { setCaffeineMg(150); triggerHaptic(); }} className={`py-3 px-2 rounded-lg border text-xs font-bold transition-all shadow-sm ${caffeineMg === 150 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Енергетик (150 мг)</button>
+          <button onClick={() => { setCaffeineMg(200); triggerHaptic(); }} className={`col-span-2 py-3 px-2 rounded-lg border text-xs font-bold transition-all shadow-sm ${caffeineMg === 200 ? 'border-primary bg-primary/20 text-white' : 'border-gray-700 bg-black/50 text-gray-400'}`}>Багато (&gt;200 мг)</button>
         </div>
         
         {caffeineMg !== null && caffeineMg > 0 && (
@@ -1133,7 +1133,7 @@ function AppContent() {
       </AnimatePresence>
       <div className="bg-orb-1" />
       <div className="bg-orb-2" />
-      <div className="z-10 relative flex-1 w-full flex flex-col justify-center h-full max-w-md mx-auto pt-10">
+      <div className="z-10 relative flex-1 w-full flex flex-col justify-center h-full max-w-md mx-auto pt-20">
         {!showBreathwork && !recipeResult && <LanguageSwitcher currentLang={lang} onSelect={handleLangChange} />}
         <AnimatePresence mode="wait">
           {showProfile && profile ? (
