@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
+from sqlalchemy import cast, Date
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date, datetime, timedelta
@@ -353,7 +354,7 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
     thirty_days_ago = date.today() - timedelta(days=30)
     past_logs = db.query(models.StateLog).filter(
         models.StateLog.telegram_id == user.telegram_id,
-        func.date(models.StateLog.created_at) >= thirty_days_ago
+        cast(models.StateLog.created_at, Date) >= thirty_days_ago
     ).all()
 
     # Engine Logic
@@ -639,7 +640,7 @@ def get_b2b_pulse(company_id: str, db: Session = Depends(database.get_db)):
     today = date.today()
     logs = db.query(models.StateLog).filter(
         models.StateLog.company_id == company_id,
-        func.date(models.StateLog.created_at) == today
+        cast(models.StateLog.created_at, Date) == today
     ).all()
     
     unique_users = set(log.telegram_id for log in logs)
@@ -743,7 +744,7 @@ def webhook_poster(req: PosterWebhookRequest, db: Session = Depends(database.get
             today = date.today()
             existing = db.query(models.CheckInLog).filter(
                 models.CheckInLog.telegram_id == tg_id,
-                func.date(models.CheckInLog.timestamp) == today,
+                cast(models.CheckInLog.timestamp, Date) == today,
                 models.CheckInLog.status == "valid"
             ).first()
             
