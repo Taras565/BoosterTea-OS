@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ShieldCheck, Droplet, Sparkles, Activity, Brain, FlaskConical } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Fingerprint, Wind, MapPin, Star, MessageSquare, Activity, Sparkles } from 'lucide-react';
 import { Language, getTranslation } from '../i18n';
 
 const triggerHaptic = () => {
@@ -24,7 +24,7 @@ export default function WelcomeManifest({ lang, onComplete }: { lang: Language, 
       id: 1,
       title: t('wm1Title'),
       subtitle: t('wm1Sub'),
-      icon: <Droplet size={64} className="text-primary mb-6 mx-auto drop-shadow-[0_0_20px_rgba(0,255,204,0.6)]" />,
+      icon: <Fingerprint size={64} className="text-primary mb-6 mx-auto drop-shadow-[0_0_20px_rgba(0,255,204,0.6)]" />,
       content: (
         <div className="space-y-4 px-2 text-center">
           <p className="text-[15px] text-gray-300 leading-relaxed font-medium">{t('wm1Desc')}</p>
@@ -35,7 +35,7 @@ export default function WelcomeManifest({ lang, onComplete }: { lang: Language, 
       id: 2,
       title: t('wm2Title'),
       subtitle: t('wm2Sub'),
-      icon: <Brain size={64} className="text-blue-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]" />,
+      icon: <Wind size={64} className="text-blue-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]" />,
       content: (
         <div className="space-y-4 px-1">
           <p className="text-[14px] text-gray-300 leading-relaxed font-medium text-center">{t('wm2Desc')}</p>
@@ -50,7 +50,7 @@ export default function WelcomeManifest({ lang, onComplete }: { lang: Language, 
       id: 3,
       title: t('wm3Title'),
       subtitle: t('wm3Sub'),
-      icon: <FlaskConical size={64} className="text-purple-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(168,85,247,0.6)]" />,
+      icon: <MapPin size={64} className="text-purple-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(168,85,247,0.6)]" />,
       content: (
         <div className="space-y-4 px-1">
           <p className="text-[14px] text-gray-300 leading-relaxed font-medium text-center">{t('wm3Desc')}</p>
@@ -65,12 +65,12 @@ export default function WelcomeManifest({ lang, onComplete }: { lang: Language, 
       id: 4,
       title: t('wm4Title'),
       subtitle: t('wm4Sub'),
-      icon: <Activity size={64} className="text-red-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(239,68,68,0.6)]" />,
+      icon: <Star size={64} className="text-yellow-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(250,204,21,0.6)]" />,
       content: (
         <div className="space-y-4 px-1">
           <p className="text-[14px] text-gray-300 leading-relaxed font-medium text-center">{t('wm4Desc')}</p>
-          <div className="bg-black/40 border border-red-500/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(239,68,68,0.1)] flex items-start gap-3 text-left">
-            <ShieldCheck className="text-red-400 shrink-0 mt-0.5" size={18} />
+          <div className="bg-black/40 border border-yellow-500/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(250,204,21,0.1)] flex items-start gap-3 text-left">
+            <Activity className="text-yellow-400 shrink-0 mt-0.5" size={18} />
             <p className="text-xs text-gray-300 font-medium leading-snug">{t('wm4Fear')}</p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function WelcomeManifest({ lang, onComplete }: { lang: Language, 
       id: 5,
       title: t('wm5Title'),
       subtitle: t('wm5Sub'),
-      icon: <Activity size={64} className="text-yellow-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(250,204,21,0.6)]" />,
+      icon: <MessageSquare size={64} className="text-orange-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]" />,
       content: (
         <div className="space-y-4 px-1">
           <div className="bg-black/40 border border-primary/20 p-5 rounded-xl space-y-5 text-left relative overflow-hidden">
