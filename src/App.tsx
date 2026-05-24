@@ -550,8 +550,9 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
   );
 }
 
-function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, activityType, challengeDay, onDone }: { recipe: Recipe, lang: Language, weatherTemp: number, weatherCond: string, drinkFormat: string, activityType: string, challengeDay?: number, onDone: () => void }) {
+function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, activityType, challengeDay, onDone, onOpenMap }: { recipe: Recipe, lang: Language, weatherTemp: number, weatherCond: string, drinkFormat: string, activityType: string, challengeDay?: number, onDone: () => void, onOpenMap: () => void }) {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
+  const [pickupMode, setPickupMode] = useState<'home' | 'venue' | null>(null);
   
   const normalizeFormat = (f: string) => {
     if (f === 'long') return 'Cocktail';
@@ -709,7 +710,77 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
           </div>
         )}
       </div>
-      <div className="p-4 grid grid-cols-2 gap-3 mt-auto">
+      <div className="p-4 flex flex-col gap-3 mt-auto">
+        <h3 className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Оберіть спосіб отримання</h3>
+        
+        {!pickupMode ? (
+          <div className="grid grid-cols-2 gap-3">
+            <button onClick={() => { triggerHaptic(); setPickupMode('home'); }} className="w-full bg-gray-800 border border-primary/50 text-primary font-bold py-4 rounded-xl uppercase tracking-wider text-xs hover:bg-gray-700 transition-colors flex flex-col items-center justify-center gap-2">
+              <span className="text-2xl">🏠</span>
+              Зробити вдома
+            </button>
+            <button onClick={() => { triggerHaptic(); setPickupMode('venue'); onOpenMap(); }} className="w-full premium-btn font-bold py-4 rounded-xl uppercase tracking-wider text-xs flex flex-col items-center justify-center gap-2">
+              <span className="text-2xl">📍</span>
+              Відвідати заклад
+            </button>
+          </div>
+        ) : pickupMode === 'home' ? (
+          <div className="flex flex-col gap-3 animate-in fade-in zoom-in duration-300">
+            <button onClick={() => { triggerHaptic(); onDone(); }} className="w-full premium-btn font-bold py-4 rounded-xl text-sm uppercase tracking-wider shadow-[0_0_15px_rgba(0,255,204,0.3)]">
+              ✅ Заварив! (Почати дихання)
+            </button>
+            <button onClick={() => setPickupMode(null)} className="text-xs text-gray-500 underline text-center py-2">Змінити спосіб</button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3 animate-in fade-in zoom-in duration-300">
+            <div className="bg-gray-900/50 p-4 rounded-xl border border-gray-800">
+              <h3 className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Ваше замовлення в Booster Point</h3>
+              
+              <div className="flex justify-center items-center gap-4 mb-4">
+                <div className="bg-white p-2 rounded-xl inline-block shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                  <div className="w-24 h-24 bg-black flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg">
+                     <div className="text-center text-primary text-[10px] font-mono leading-tight">
+                        █████████<br/>
+                        █ ▄▄▄▄▄ █<br/>
+                        █ █   █ █<br/>
+                        █ █▄▄▄█ █<br/>
+                        █▄▄▄▄▄▄▄█
+                     </div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Промокод (ID)</span>
+                  <span className="text-xl font-black text-primary bg-primary/10 px-3 py-1 rounded-lg border border-primary/20 tracking-widest">{shortCode || '...'}</span>
+                </div>
+              </div>
+              
+              <p className="text-[10px] text-gray-400 text-center mb-4 leading-relaxed">
+                Покажи QR-код або назви промокод баристі для швидкого замовлення на касі.
+              </p>
+
+              <div className="grid grid-cols-1 gap-2 mb-3">
+                <button 
+                  onClick={() => { triggerHaptic(); setShowPayment(true); }}
+                  className="w-full py-3 rounded-xl bg-primary text-black font-bold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,255,204,0.3)] hover:scale-[1.02] transition-transform uppercase tracking-wider text-sm"
+                >
+                   💳 Оплатити (Click & Collect)
+                </button>
+                <button 
+                  onClick={() => { triggerHaptic(); onDone(); }}
+                  className="w-full py-3 rounded-xl border border-gray-700 text-gray-400 font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors uppercase tracking-wider text-xs"
+                >
+                   ☕ Оплатити на касі
+                </button>
+              </div>
+
+              <button onClick={() => onOpenMap()} className="w-full mt-2 bg-gray-800 border border-blue-500/50 text-blue-400 font-bold py-3 rounded-xl uppercase tracking-wider text-xs hover:bg-gray-700 transition-colors">
+                🗺 Відкрити карту та маршрут
+              </button>
+            </div>
+            <button onClick={() => setPickupMode(null)} className="text-xs text-gray-500 underline text-center py-2">Змінити спосіб</button>
+          </div>
+        )}
+
         <button onClick={() => { 
           triggerHaptic(); 
           const webApp = (window as any).Telegram?.WebApp;
@@ -748,50 +819,10 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
             if (webApp && webApp.showAlert) webApp.showAlert(t('errNoStory'));
             else alert(t('errNoStory'));
           }
-        }} className="py-3 rounded-xl border border-primary/50 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors uppercase tracking-wider">{t('btnShare')}</button>
-        <button onClick={() => { triggerHaptic(); onDone(); }} className="premium-btn font-bold py-3 rounded-xl text-sm uppercase tracking-wider">{t('btnBrewed')}</button>
-        <div className="col-span-2 mt-4 bg-gray-900/50 p-4 rounded-xl border border-gray-800">
-          <h3 className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Отримати в Booster Point</h3>
-          
-          <div className="flex justify-center items-center gap-4 mb-4">
-            <div className="bg-white p-2 rounded-xl inline-block shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-              <div className="w-24 h-24 bg-black flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg">
-                 <div className="text-center text-primary text-[10px] font-mono leading-tight">
-                    █████████<br/>
-                    █ ▄▄▄▄▄ █<br/>
-                    █ █   █ █<br/>
-                    █ █▄▄▄█ █<br/>
-                    █▄▄▄▄▄▄▄█
-                 </div>
-              </div>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Промокод (ID)</span>
-              <span className="text-xl font-black text-primary bg-primary/10 px-3 py-1 rounded-lg border border-primary/20 tracking-widest">{shortCode || '...'}</span>
-            </div>
-          </div>
-          
-          <p className="text-[10px] text-gray-400 text-center mb-4 leading-relaxed">
-            Покажи QR-код або назви промокод баристі для швидкого замовлення на касі.
-          </p>
+        }} className="mt-2 py-3 rounded-xl border border-primary/50 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors uppercase tracking-wider w-full">{t('btnShare')}</button>
+      </div>
 
-          <div className="grid grid-cols-1 gap-2">
-            <button 
-              onClick={() => { triggerHaptic(); setShowPayment(true); }}
-              className="w-full py-3 rounded-xl bg-primary text-black font-bold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,255,204,0.3)] hover:scale-[1.02] transition-transform uppercase tracking-wider text-sm"
-            >
-               💳 Оплатити зараз (Click & Collect)
-            </button>
-            <button 
-              onClick={() => { triggerHaptic(); onDone(); }}
-              className="w-full py-3 rounded-xl border border-gray-700 text-gray-400 font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors uppercase tracking-wider text-xs"
-            >
-               ☕ Оплатити на касі
-            </button>
-          </div>
-        </div>
-
-        {/* Payment Modal */}
+      {/* Payment Modal */}
         {showPayment && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
             <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl">
@@ -852,7 +883,6 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
             </div>
           </div>
         )}
-      </div>
     </motion.div>
   );
 }
@@ -1138,7 +1168,7 @@ function AppContent() {
               {!hasReadManifest && <WelcomeManifest key="manifest" lang={lang} onComplete={() => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); }} />}
               {hasReadManifest && !profile && <Onboarding key="onboarding" lang={lang} onComplete={setProfile} />}
               {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t_val,c, f, cd) => setRecipeResult({recipe: r, temp: t_val, cond: c, format: f, challengeDay: cd})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
-              {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} drinkFormat={recipeResult.format} activityType={profile.profession} challengeDay={recipeResult.challengeDay} onDone={() => setShowBreathwork(true)} />}
+              {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} drinkFormat={recipeResult.format} activityType={profile.profession} challengeDay={recipeResult.challengeDay} onDone={() => setShowBreathwork(true)} onOpenMap={() => setShowMap(true)} />}
               {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" lang={lang} recipe={recipeResult.recipe} activityType={profile.profession} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
             </>
           )}
