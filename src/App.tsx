@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, Droplet, Thermometer, Wind, CheckCircle2, ChevronRight, FlaskConical, Target, Zap, Coffee, MessageCircle, Leaf, ShoppingCart, User, Star, Shield, Copy } from 'lucide-react'
+import { Activity, Droplet, Thermometer, Wind, CheckCircle2, ChevronRight, FlaskConical, Target, Zap, Coffee, MessageCircle, Leaf, ShoppingCart, User, Star, Shield, Copy, Trophy, MapPin } from 'lucide-react'
 
 import BreathworkTimer from './components/BreathworkTimer'
 import WelcomeManifest from './components/WelcomeManifest'
 import LanguageSwitcher from './components/LanguageSwitcher'
+import MapScreen from './components/MapScreen'
+import B2BPortal from './components/B2BPortal'
 import { Language, getTranslation } from './i18n'
 import './App.css'
 
@@ -281,7 +283,7 @@ function Onboarding({ onComplete, lang }: { onComplete: (profile: UserProfile) =
 
 // We will move these inside DailyCheckIn to use the local `t` function
 
-function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfile, lang: Language, onResult: (r: Recipe, t: number, c: string, f: string) => void, onReset: () => void }) {
+function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfile, lang: Language, onResult: (r: Recipe, t: number, c: string, f: string, challengeDay?: number) => void, onReset: () => void }) {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
 
@@ -382,7 +384,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
       if (!res.ok) throw new Error("Calculation failed");
       const data = await res.json();
       
-      onResult(data.recipe, data.weather.temp, data.weather.condition, drinkFormat);
+      onResult(data.recipe, data.weather.temp, data.weather.condition, drinkFormat, data.challenge_day);
     } catch (err) {
       console.error(err);
       setErrorMsg("Втрачено зв'язок із сервером. Перевірте інтернет.");
@@ -545,7 +547,7 @@ function DailyCheckIn({ profile, lang, onResult, onReset }: { profile: UserProfi
   );
 }
 
-function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, activityType, onDone }: { recipe: Recipe, lang: Language, weatherTemp: number, weatherCond: string, drinkFormat: string, activityType: string, onDone: () => void }) {
+function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, activityType, challengeDay, onDone }: { recipe: Recipe, lang: Language, weatherTemp: number, weatherCond: string, drinkFormat: string, activityType: string, challengeDay?: number, onDone: () => void }) {
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
   
   const normalizeFormat = (f: string) => {
@@ -589,6 +591,13 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
         <div className="text-center"><p className="text-xs text-gray-500 mb-1">{t('energy')}</p><div className="h-1.5 bg-gray-800 rounded-full"><div className="h-full bg-yellow-500 rounded-full" style={{width: `${recipe.stats.energy}%`}}></div></div><p className="text-xs font-bold mt-1">+{recipe.stats.energy}%</p></div>
         <div className="text-center"><p className="text-xs text-gray-500 mb-1">{t('calm')}</p><div className="h-1.5 bg-gray-800 rounded-full"><div className="h-full bg-primary rounded-full" style={{width: `${recipe.stats.calm}%`}}></div></div><p className="text-xs font-bold mt-1">+{recipe.stats.calm}%</p></div>
       </div>
+
+      {challengeDay && (
+        <div className="bg-gradient-to-r from-emerald-900/40 to-blue-900/40 border border-emerald-500/30 p-3 mx-4 mt-4 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(52,211,153,0.1)]">
+          <Trophy size={16} className="text-emerald-400" />
+          <span className="text-emerald-400 font-bold text-xs uppercase tracking-widest">Neuro-Hacking Challenge: День {challengeDay}/21</span>
+        </div>
+      )}
 
       <div className="p-6 space-y-6 flex-1">
         
@@ -707,9 +716,13 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
             };
             const templateKey = getActivityTemplateKey(activityType);
             const rawText = t(templateKey as any);
-            const finalText = rawText
+            let finalText = rawText
               .replace('{STATE}', recipe.avatar_name)
               .replace('{BASE}', recipe.base);
+              
+            if (challengeDay) {
+              finalText = `🏆 Neuro-Hacking Challenge: День ${challengeDay}/21\n\n` + finalText;
+            }
 
             webApp.shareToStory(mediaUrl, {
               text: finalText,
@@ -736,6 +749,16 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
         }} className="col-span-2 w-full py-3 rounded-xl border border-primary/50 bg-primary/10 text-primary font-bold flex items-center justify-center gap-2 uppercase text-sm tracking-widest hover:bg-primary/20 transition-colors mt-2">
           <ShoppingCart size={18} /> {t('btnBuy') as string}
         </button>
+        <div className="col-span-2 text-center mt-4">
+          <p className="text-xs text-gray-500 mb-2">Хочеш отримати напій офлайн?</p>
+          <div className="bg-white p-3 rounded-xl inline-block">
+            {/* Mock QR Code representation */}
+            <div className="w-24 h-24 bg-black flex items-center justify-center text-primary font-bold text-[10px] text-center p-2">
+              QR: {initData?.user?.id || 123}<br/>DAY {challengeDay || 1}
+            </div>
+          </div>
+          <p className="text-[10px] text-gray-400 mt-2">Покажи цей QR-код баристі в Booster Point</p>
+        </div>
       </div>
     </motion.div>
   );
@@ -823,11 +846,24 @@ function ProfileScreen({ profile, lang, onClose }: { profile: UserProfile, lang:
         {t('sharePromo')}
       </button>
 
-      <div className="mt-auto bg-blue-900/10 p-4 rounded-xl border border-blue-500/20 flex gap-3 items-start">
+      <div className="mt-auto bg-blue-900/10 p-4 rounded-xl border border-blue-500/20 flex gap-3 items-start mb-4">
         <Shield className="text-blue-400 shrink-0 mt-1" size={20} />
         <p className="text-xs text-blue-200/80 leading-relaxed font-medium">
           {t('trustFund')}
         </p>
+      </div>
+
+      <div className="p-4 bg-gray-900/50 rounded-xl border border-gray-800">
+        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">BoosterTea PRO</h3>
+        <p className="text-xs text-gray-500 mb-4">Авторизація для барист та власників партнерських закладів (Booster Points).</p>
+        <button onClick={() => {
+          if ((window as any).showB2BModal) {
+            (window as any).showB2BModal();
+            onClose();
+          }
+        }} className="w-full py-3 rounded-xl border border-gray-700 bg-black text-white font-bold flex items-center justify-center gap-2 hover:bg-gray-900 transition-colors uppercase tracking-wider text-xs">
+          <Shield size={16} /> B2B Portal (HACCP)
+        </button>
       </div>
     </motion.div>
   );
@@ -837,7 +873,9 @@ function AppContent() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [hasReadManifest, setHasReadManifest] = useState<boolean | null>(null);
   const [showProfile, setShowProfile] = useState(false);
-  const [recipeResult, setRecipeResult] = useState<{ recipe: Recipe, temp: number, cond: string, format: string } | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  const [showB2B, setShowB2B] = useState(false);
+  const [recipeResult, setRecipeResult] = useState<{ recipe: Recipe, temp: number, cond: string, format: string, challengeDay?: number } | null>(null);
   const [showBreathwork, setShowBreathwork] = useState(false);
   const [lang, setLang] = useState<Language>(() => {
     return (localStorage.getItem('app_lang') as Language) || 'uk';
@@ -927,6 +965,12 @@ function AppContent() {
             <User size={20} />
           </button>
           <button 
+            onClick={() => { triggerHaptic(); setShowMap(true); }}
+            className="w-12 h-12 bg-black/80 backdrop-blur-md border border-blue-500/50 rounded-full flex items-center justify-center text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:scale-110 transition-transform"
+          >
+            <MapPin size={20} />
+          </button>
+          <button 
             onClick={() => {
               triggerHaptic();
               const url = "https://www.boostertea.com.ua/";
@@ -943,6 +987,10 @@ function AppContent() {
           </button>
         </div>
       )}
+      <AnimatePresence>
+        {showMap && <MapScreen onClose={() => setShowMap(false)} />}
+        {showB2B && <B2BPortal lang={lang} onClose={() => setShowB2B(false)} />}
+      </AnimatePresence>
       <div className="bg-orb-1" />
       <div className="bg-orb-2" />
       <div className="z-10 relative flex-1 w-full flex flex-col justify-center h-full max-w-md mx-auto pt-10">
@@ -954,8 +1002,8 @@ function AppContent() {
             <>
               {!hasReadManifest && <WelcomeManifest key="manifest" lang={lang} onComplete={() => { localStorage.setItem('has_read_manifest', 'true'); setHasReadManifest(true); }} />}
               {hasReadManifest && !profile && <Onboarding key="onboarding" lang={lang} onComplete={setProfile} />}
-              {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t_val,c, f) => setRecipeResult({recipe: r, temp: t_val, cond: c, format: f})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
-              {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} drinkFormat={recipeResult.format} activityType={profile.profession} onDone={() => setShowBreathwork(true)} />}
+              {hasReadManifest && profile && !recipeResult && <DailyCheckIn key="checkin" lang={lang} profile={profile} onResult={(r,t_val,c, f, cd) => setRecipeResult({recipe: r, temp: t_val, cond: c, format: f, challengeDay: cd})} onReset={() => { setProfile(null); setHasReadManifest(false); }} />}
+              {hasReadManifest && profile && recipeResult && !showBreathwork && <ResultScreen key="result" lang={lang} recipe={recipeResult.recipe} weatherTemp={recipeResult.temp} weatherCond={recipeResult.cond} drinkFormat={recipeResult.format} activityType={profile.profession} challengeDay={recipeResult.challengeDay} onDone={() => setShowBreathwork(true)} />}
               {showBreathwork && recipeResult && <BreathworkTimer key="breathwork" lang={lang} recipe={recipeResult.recipe} activityType={profile.profession} onDone={() => { setShowBreathwork(false); setRecipeResult(null); }} />}
             </>
           )}

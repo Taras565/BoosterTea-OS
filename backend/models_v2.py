@@ -31,6 +31,7 @@ class User(Base):
     target_bedtime = Column(String(10), nullable=True) # зберігатимемо як "23:00"
 
     # B2B & Flywheel Retention (Block 1)
+    role = Column(String(50), default="client") # "client", "barista", "admin"
     company_id = Column(String(50), nullable=True)
     current_streak_cycle = Column(Integer, default=0)
     last_checkin_date = Column(Date, nullable=True)
@@ -96,3 +97,43 @@ class FeedbackLog(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     state_log = relationship("StateLog", back_populates="feedbacks")
+
+class BoosterPoint(Base):
+    __tablename__ = "booster_points"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    name = Column(String(100), nullable=False)
+    address = Column(String(200), nullable=False)
+    lat = Column(Float, nullable=False)
+    lon = Column(Float, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class BaristaCertificate(Base):
+    __tablename__ = "barista_certificates"
+
+    cert_id = Column(String(36), primary_key=True, default=generate_uuid)
+    telegram_id = Column(BigInteger, ForeignKey("users.telegram_id"))
+    point_id = Column(String(36), ForeignKey("booster_points.id"))
+    score = Column(Integer, nullable=False)
+    passed = Column(Boolean, nullable=False)
+    issued_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")
+    point = relationship("BoosterPoint")
+
+class HACCPLog(Base):
+    __tablename__ = "haccp_logs"
+
+    log_id = Column(String(36), primary_key=True, default=generate_uuid)
+    point_id = Column(String(36), ForeignKey("booster_points.id"))
+    telegram_id = Column(BigInteger, ForeignKey("users.telegram_id")) # Barista who filled it
+    shift_type = Column(String(20)) # "OPENING", "CLOSING"
+    fridge_temp_ok = Column(Boolean, nullable=False)
+    pumps_washed = Column(Boolean, nullable=False)
+    expiry_checked = Column(Boolean, nullable=False)
+    notes = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    point = relationship("BoosterPoint")
+    barista = relationship("User")

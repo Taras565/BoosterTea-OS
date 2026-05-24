@@ -103,3 +103,17 @@ input[type="range"] {
 input[type="range"]:active {
   transform: scale(0.98);
 }
+
+/* Leaflet Overrides */
+.leaflet-container {
+  background: #000;
+  font-family: var(--font-sans);
+}
+.booster-popup .leaflet-popup-content-wrapper {
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  color: #000;
+}
+.booster-popup .leaflet-popup-tip {
+  background: rgba(255,255,255,0.95);
+}

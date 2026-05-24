@@ -1,30 +1,60 @@
-# React + TypeScript + Vite
+# 🧬 BoosterTea Liquid OS
+**The First Bio-Adaptive Neuro-Management System for Telegram**
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+BoosterTea Liquid OS — це не просто застосунок для замовлення чаю. Це повноцінна **Closed-Loop mHealth платформа**, що функціонує в Telegram Mini Apps. Вона перетворює споживання ноотропних та адаптогенних комплексів на керований, персоналізований та гейміфікований процес.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🧠 Core Architecture (Стек Технологій)
 
-## Expanding the ESLint configuration
+Система побудована з акцентом на швидкість, безпеку та крос-платформність:
+- **Frontend (Mini App):** React 18, TypeScript, Vite, TailwindCSS. Використовує Apple-style "Liquid Glass" дизайн з Framer Motion для плавних мікро-анімацій.
+- **Backend (Neuro-Engine):** FastAPI (Python 3.10+), SQLAlchemy. Забезпечує високу швидкість обробки математичних моделей та інтеграцію з Telegram Bot API.
+- **Database:** PostgreSQL. Зберігає профілі користувачів, логування станів та зворотний зв'язок для машинного навчання.
+- **Infrastructure:** Деплой на Render.com з автоматичним CI/CD.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+---
 
-- Configure the top-level `parserOptions` property like this:
+## 💊 Pharmacokinetics & Bio-Adaptivity
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+Liquid OS використовує математичне моделювання для передбачення ефективності напоїв. 
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+### 1. CYP1A2 Metabolic Modeling
+Швидкість метаболізму кофеїну (період напіврозпаду $t_{1/2}$) у кожної людини різна. Наш рушій враховує фактори, що впливають на ензим CYP1A2:
+- **Куріння:** Індукує CYP1A2 (пришвидшує розпад кави в 1.5-2 рази).
+- **Оральні контрацептиви:** Інгібують CYP1A2 (уповільнюють розпад, продовжуючи ефект до 10 годин).
+- **Базова чутливість:** Суб'єктивна оцінка метаболізму користувачем під час реєстрації.
+
+### 2. Chronobiological Curfew (Комендантська година)
+Захист архітектури сну (Deep Sleep). Якщо користувач запитує буст близько до свого `target_bedtime`, алгоритм автоматично:
+- Блокує видачу кофеїновмісних стимуляторів.
+- Перемикає рекомендації на рекреаційні ноотропи (ГАМК, L-Теанін, Bacopa Monnieri), щоб підготувати ЦНС до сну.
+
+### 3. Receptor Cycling (Ротація Ноотропів)
+Запобігання толерантності рецепторів (Down-regulation). Алгоритм аналізує 30-денну історію чекінів користувача. Якщо фіксується перенасичення певним інгредієнтом (наприклад, ГАМК більше 5 разів за 7 днів), система примусово призначає "відпочинок" та перемикає фокус на альтернативні нейромодулятори (наприклад, L-Теанін).
+
+---
+
+## 🔄 Closed-Loop Feedback & Contextual Bandit
+
+Система еволюціонує разом із користувачем через механізм **Ecological Momentary Assessment (EMA)**.
+
+1. **Check-in:** Користувач вказує свій поточний стан, погоду (автоматично через Open-Meteo) та бажаний формат (Шот, Коктейль, Чай).
+2. **Prescription:** Рушій видає рецепт (напр., BoosterTea Focus + 30ml Pineapple Juice).
+3. **Action:** Користувач випиває напій.
+4. **Push-Feedback:** Через 2 години бекенд автоматично надсилає користувачу в Telegram повідомлення з **Inline Keyboard (1-10)** для оцінки ефективності бусту.
+5. **Webhook:** Telegram надсилає оцінку на наш Webhook. Дані потрапляють у базу, навчаючи алгоритм (Contextual Bandit) для покращення майбутніх рецептів.
+
+---
+
+## 🏆 21-Day Neuro-Hacking Challenge (Flywheel)
+
+Для сталого утримання (Retention) та вірусного росту (Acquisition) впроваджено гейміфіковану систему челенджів.
+- Кожен щоденний чекін збільшує показник `current_streak_cycle`.
+- Мета: Протриматися 21 день для повної нейро-адаптації.
+- На екрані результатів користувач бачить свій прогрес (наприклад, `День 5/21`).
+- **Social Proof (Stories):** Нативна інтеграція `Telegram WebApp.shareToStory` дозволяє користувачу в один клік поділитися своїм прогресом у Telegram Stories, створюючи вірусний луп (Flywheel Effect).
+
+---
+
+> *"BoosterTea Liquid OS is where Neuroscience meets Gamification."*

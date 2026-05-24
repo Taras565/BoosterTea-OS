@@ -11,6 +11,7 @@ import os
 import hmac
 import hashlib
 from urllib.parse import parse_qsl
+from fastapi import Request
 
 import models_v2 as models
 import database
@@ -144,6 +145,26 @@ class StateRequest(BaseModel):
     longitude: Optional[float] = None
     language: str = "uk"
 
+class BaristaCertRequest(BaseModel):
+    telegram_id: int
+    point_id: str
+    score: int
+    passed: bool
+
+class HACCPRequest(BaseModel):
+    telegram_id: int
+    point_id: str
+    shift_type: str
+    fridge_temp_ok: bool
+    pumps_washed: bool
+    expiry_checked: bool
+    notes: Optional[str] = None
+
+class ScanQRRequest(BaseModel):
+    barista_id: int
+    client_id: int
+    point_id: str
+
 # Mock HD generator
 def mock_hd_type(birth_date: date) -> str:
     types = ["Generator", "Projector", "Manifestor", "Reflector", "Manifesting Generator"]
@@ -195,13 +216,72 @@ async def schedule_feedback(user_id: int, log_id: str):
     
     if bot_token:
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        
+        # Inline keyboard (1-10)
+        row1 = [{"text": str(i), "callback_data": f"fb:{i}:{log_id}"} for i in range(1, 6)]
+        row2 = [{"text": str(i), "callback_data": f"fb:{i}:{log_id}"} for i in range(6, 11)]
+        
+        payload = {
+            "chat_id": user_id, 
+            "text": message,
+            "reply_markup": {"inline_keyboard": [row1, row2]}
+        }
+        
         try:
             async with httpx.AsyncClient() as client:
-                await client.post(url, json={"chat_id": user_id, "text": message})
+                await client.post(url, json=payload)
         except Exception as e:
             print(f"TG Push Failed: {e}")
     else:
         print(f"[PUSH] Telegram ID {user_id}: {message}")
+
+@app.post("/api/webhook/telegram")
+async def telegram_webhook(req: Request, db: Session = Depends(database.get_db)):
+    data = await req.json()
+    if "callback_query" in data:
+        cb = data["callback_query"]
+        cb_id = cb["id"]
+        cb_data = cb.get("data", "")
+        chat_id = cb["message"]["chat"]["id"]
+        msg_id = cb["message"]["message_id"]
+        
+        if cb_data.startswith("fb:"):
+            parts = cb_data.split(":")
+            if len(parts) == 3:
+                score = int(parts[1])
+                log_id = parts[2]
+                
+                feedback = models.FeedbackLog(
+                    log_id=log_id,
+                    effectiveness_score=score,
+                    taste_score=0,
+                    comment=None
+                )
+                db.add(feedback)
+                db.commit()
+                
+                bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+                if bot_token:
+                    async with httpx.AsyncClient() as client:
+                        await client.post(f"https://api.telegram.org/bot{bot_token}/answerCallbackQuery", json={
+                            "callback_query_id": cb_id,
+                            "text": "Оцінка збережена! 🚀"
+                        })
+                        await client.post(f"https://api.telegram.org/bot{bot_token}/editMessageText", json={
+                            "chat_id": chat_id,
+                            "message_id": msg_id,
+                            "text": f"✅ Оцінка {score}/10 збережена. Твій профіль адаптовано!"
+                        })
+    return {"status": "ok"}
+
+@app.get("/api/set_webhook")
+async def set_webhook(url: str):
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+    if not bot_token:
+        return {"error": "No token"}
+    async with httpx.AsyncClient() as client:
+        res = await client.post(f"https://api.telegram.org/bot{bot_token}/setWebhook", json={"url": url})
+        return res.json()
 
 @app.post("/api/calculate")
 async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, db: Session = Depends(database.get_db), tg_user: bool = Depends(get_current_user_tg)):
@@ -287,8 +367,8 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
     else:
         user.current_streak_cycle = 1
         
-    if user.current_streak_cycle > 7:
-        user.current_streak_cycle = 1 # Capped streak logic
+    if user.current_streak_cycle > 21:
+        user.current_streak_cycle = 1 # Capped streak logic (21 Day Challenge)
         
     user.last_checkin_date = today
 
@@ -301,8 +381,106 @@ async def calculate_daily_recipe(req: StateRequest, bg_tasks: BackgroundTasks, d
         "status": "ok",
         "recipe": recipe,
         "weather": {"temp": weather_temp, "condition": weather_condition},
-        "log_id": log.log_id
+        "log_id": log.log_id,
+        "challenge_day": user.current_streak_cycle
     }
+
+@app.get("/api/locations")
+def get_locations(db: Session = Depends(database.get_db)):
+    points = db.query(models.BoosterPoint).filter(models.BoosterPoint.is_active == True).all()
+    return {
+        "status": "ok",
+        "locations": [
+            {
+                "id": p.id,
+                "name": p.name,
+                "address": p.address,
+                "lat": p.lat,
+                "lon": p.lon
+            } for p in points
+        ]
+    }
+
+@app.post("/api/seed_locations")
+def seed_locations(db: Session = Depends(database.get_db)):
+    count = db.query(models.BoosterPoint).count()
+    if count > 0:
+        return {"status": "already_seeded", "count": count}
+    
+    # Test locations in Kyiv
+    points = [
+        models.BoosterPoint(name="BoosterTea Khreshchatyk", address="вул. Хрещатик, 1", lat=50.4501, lon=30.5234),
+        models.BoosterPoint(name="BoosterTea Podil", address="вул. Сагайдачного, 10", lat=50.4607, lon=30.5186),
+        models.BoosterPoint(name="BoosterTea Gulliver", address="Спортивна площа, 1a", lat=50.4385, lon=30.5226)
+    ]
+    db.add_all(points)
+    db.commit()
+    return {"status": "ok", "seeded": len(points)}
+
+@app.post("/api/b2b/certify")
+def certify_barista(req: BaristaCertRequest, db: Session = Depends(database.get_db)):
+    cert = models.BaristaCertificate(
+        telegram_id=req.telegram_id,
+        point_id=req.point_id,
+        score=req.score,
+        passed=req.passed
+    )
+    db.add(cert)
+    
+    # Update user role to barista
+    user = db.query(models.User).filter(models.User.telegram_id == req.telegram_id).first()
+    if user:
+        user.role = "barista"
+        
+    db.commit()
+    return {"status": "ok", "cert_id": cert.cert_id}
+
+@app.post("/api/b2b/haccp")
+def log_haccp(req: HACCPRequest, db: Session = Depends(database.get_db)):
+    log = models.HACCPLog(
+        point_id=req.point_id,
+        telegram_id=req.telegram_id,
+        shift_type=req.shift_type,
+        fridge_temp_ok=req.fridge_temp_ok,
+        pumps_washed=req.pumps_washed,
+        expiry_checked=req.expiry_checked,
+        notes=req.notes
+    )
+    db.add(log)
+    db.commit()
+    return {"status": "ok", "log_id": log.log_id}
+
+@app.post("/api/b2b/scan_qr")
+def scan_qr(req: ScanQRRequest, db: Session = Depends(database.get_db)):
+    # Verify barista role (in a real app, verify properly)
+    client = db.query(models.User).filter(models.User.telegram_id == req.client_id).first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+        
+    # Increment streak manually here as a manual checkin override
+    # If they already checked in today via the app, maybe don't increment, 
+    # but for O2O we assume this is the checkin.
+    today = date.today()
+    if client.last_checkin_date != today:
+        if client.last_checkin_date:
+            days_missed = (today - client.last_checkin_date).days
+            if days_missed == 1:
+                client.current_streak_cycle += 1
+            elif days_missed == 2 and client.grace_periods > 0:
+                client.grace_periods -= 1
+                client.current_streak_cycle += 1
+            elif days_missed > 1:
+                client.current_streak_cycle = 1
+        else:
+            client.current_streak_cycle = 1
+            
+        if client.current_streak_cycle > 21:
+            client.current_streak_cycle = 1
+            
+        client.last_checkin_date = today
+        db.commit()
+        
+    return {"status": "ok", "challenge_day": client.current_streak_cycle, "client_name": client.username}
 
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(database.get_db)):
