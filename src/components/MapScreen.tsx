@@ -123,7 +123,10 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
   };
 
   const fetchRoute = async (mode: 'driving' | 'foot') => {
-    if (!userLocation || locations.length === 0) return;
+    if (!userLocation || locations.length === 0) {
+      alert("Немає вашої геолокації. Дозвольте доступ до місцезнаходження.");
+      return;
+    }
     setRoutingLoading(true);
     triggerHaptic();
     setRouteMode(mode);
@@ -132,7 +135,7 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
       const url = `https://router.project-osrm.org/route/v1/${mode}/${userLocation.lon},${userLocation.lat};${loc.lon},${loc.lat}?overview=full&geometries=geojson`;
       const res = await fetch(url);
       const data = await res.json();
-      if (data.code === 'Ok' && data.routes.length > 0) {
+      if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
         const route = data.routes[0];
         const coords = route.geometry.coordinates.map((c: any[]) => [c[1], c[0]]);
         setRouteData({
@@ -140,9 +143,12 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
           duration: Math.round(route.duration / 60), // to minutes
           distance: +(route.distance / 1000).toFixed(1) // to km
         });
+      } else {
+        alert("Маршрут не знайдено. Можливо, ви занадто далеко.");
       }
     } catch(err) {
       console.error(err);
+      alert("Сервіс маршрутів тимчасово недоступний.");
     } finally {
       setRoutingLoading(false);
     }
@@ -267,9 +273,15 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
           
           {!routeData ? (
             <button 
-              onClick={() => fetchRoute('driving')}
-              className="w-full premium-btn font-bold py-3 rounded-xl uppercase tracking-wider text-sm flex items-center justify-center gap-2"
-              disabled={routingLoading || !userLocation}
+              onClick={() => {
+                if (!userLocation) {
+                  alert("Для прокладання маршруту необхідна ваша геолокація. Оновіть сторінку та надайте доступ (або натисніть кнопку '📍 Використати моє місцезнаходження').");
+                  return;
+                }
+                fetchRoute('driving');
+              }}
+              className="w-full premium-btn font-bold py-3 rounded-xl uppercase tracking-wider text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={routingLoading}
             >
               {routingLoading ? 'Розрахунок...' : 'Прокласти маршрут'}
             </button>
