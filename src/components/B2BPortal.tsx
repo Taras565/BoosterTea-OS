@@ -6,7 +6,7 @@ import { getTranslation, Language } from '../i18n';
 const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname.includes('localhost') ? 'http://localhost:8000/api' : 'https://boostertea-os-backend.onrender.com/api');
 
 export default function B2BPortal({ onClose, lang }: { onClose: () => void, lang: Language }) {
-  const [activeTab, setActiveTab] = useState<'onboarding' | 'haccp' | 'scanner' | 'menu'>('onboarding');
+  const [activeTab, setActiveTab] = useState<'onboarding' | 'haccp' | 'scanner' | 'menu' | 'operations'>('onboarding');
   const [certified, setCertified] = useState(false);
   
   const triggerHaptic = () => {
@@ -91,6 +91,31 @@ export default function B2BPortal({ onClose, lang }: { onClose: () => void, lang
     }
   };
 
+  const handleStatusUpdate = async (status: string) => {
+    triggerHaptic();
+    try {
+      const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
+      const tgId = initData?.user?.id || 123456789;
+      const res = await fetch(`${API_URL}/b2b/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegram_id: tgId,
+          point_id: 'test-point-1', // Mock point ID
+          status: status
+        })
+      });
+      if (res.ok) {
+        alert(`Статус успішно змінено на ${status}`);
+      } else {
+        alert("Помилка зміни статусу (немає прав)");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Мережева помилка");
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="absolute inset-0 z-[100] bg-black flex flex-col p-4 overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
@@ -103,6 +128,7 @@ export default function B2BPortal({ onClose, lang }: { onClose: () => void, lang
         <button onClick={() => { if(certified) setActiveTab('haccp'); }} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'haccp' ? 'bg-primary text-black' : 'bg-gray-800 text-gray-400'} ${!certified && 'opacity-50'}`}>HACCP</button>
         <button onClick={() => { if(certified) setActiveTab('scanner'); }} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'scanner' ? 'bg-primary text-black' : 'bg-gray-800 text-gray-400'} ${!certified && 'opacity-50'}`}>O2O Сканер</button>
         <button onClick={() => { if(certified) setActiveTab('menu'); }} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'menu' ? 'bg-primary text-black' : 'bg-gray-800 text-gray-400'} ${!certified && 'opacity-50'}`}>Динамічне Меню</button>
+        <button onClick={() => { if(certified) setActiveTab('operations'); }} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'operations' ? 'bg-primary text-black' : 'bg-gray-800 text-gray-400'} ${!certified && 'opacity-50'}`}>Управління Точкою</button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -172,6 +198,27 @@ export default function B2BPortal({ onClose, lang }: { onClose: () => void, lang
               </div>
 
               <div className="text-xs text-gray-400 mt-6 pt-4 border-t text-center">Згенеровано BoosterTea Liquid OS відповідно до Закону № 2639-VIII</div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'operations' && (
+          <motion.div key="operations" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4">
+            <div className="glass-panel p-4">
+              <h3 className="font-bold text-lg mb-2 text-white">Операційний Статус</h3>
+              <p className="text-xs text-gray-400 mb-6">Оновіть статус вашої точки. Зміни миттєво синхронізуються на картах клієнтів (SSOT).</p>
+              
+              <div className="space-y-3">
+                <button onClick={() => handleStatusUpdate('OPEN')} className="w-full py-3 bg-green-900/30 text-green-400 border border-green-500/50 rounded-xl font-bold uppercase tracking-wider hover:bg-green-900/50 transition-colors">
+                  Відчинено
+                </button>
+                <button onClick={() => handleStatusUpdate('TEMPORARY_CLOSED')} className="w-full py-3 bg-orange-900/30 text-orange-400 border border-orange-500/50 rounded-xl font-bold uppercase tracking-wider hover:bg-orange-900/50 transition-colors">
+                  Тимчасово Зачинено (Форс-мажор)
+                </button>
+                <button onClick={() => handleStatusUpdate('CLOSED')} className="w-full py-3 bg-red-900/30 text-red-400 border border-red-500/50 rounded-xl font-bold uppercase tracking-wider hover:bg-red-900/50 transition-colors">
+                  Зачинено (Кінець зміни)
+                </button>
+              </div>
             </div>
           </motion.div>
         )}

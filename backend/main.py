@@ -165,6 +165,11 @@ class ScanQRRequest(BaseModel):
     client_id: int
     point_id: str
 
+class StatusUpdateRequest(BaseModel):
+    telegram_id: int
+    point_id: str
+    status: str
+
 # Mock HD generator
 def mock_hd_type(birth_date: date) -> str:
     types = ["Generator", "Projector", "Manifestor", "Reflector", "Manifesting Generator"]
@@ -396,7 +401,10 @@ def get_locations(db: Session = Depends(database.get_db)):
                 "name": p.name,
                 "address": p.address,
                 "lat": p.lat,
-                "lon": p.lon
+                "lon": p.lon,
+                "status": p.status,
+                "regular_hours": p.regular_hours,
+                "special_hours": p.special_hours
             } for p in points
         ]
     }
@@ -416,6 +424,21 @@ def seed_locations(db: Session = Depends(database.get_db)):
     db.add_all(points)
     db.commit()
     return {"status": "ok", "seeded": len(points)}
+
+@app.post("/api/b2b/status")
+def update_point_status(req: StatusUpdateRequest, db: Session = Depends(database.get_db)):
+    # Мульти-Тенантний RBAC (Mock перевірка для прототипу)
+    user = db.query(models.User).filter(models.User.telegram_id == req.telegram_id).first()
+    if not user or user.role not in ["barista", "admin"]:
+        raise HTTPException(status_code=403, detail="Доступ заборонено. Тільки для партнерів.")
+        
+    point = db.query(models.BoosterPoint).filter(models.BoosterPoint.id == req.point_id).first()
+    if not point:
+        raise HTTPException(status_code=404, detail="Booster Point не знайдено.")
+        
+    point.status = req.status
+    db.commit()
+    return {"status": "ok", "point_status": point.status}
 
 @app.post("/api/b2b/certify")
 def certify_barista(req: BaristaCertRequest, db: Session = Depends(database.get_db)):

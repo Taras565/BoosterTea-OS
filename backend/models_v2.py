@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, BigInteger, String, Float, Date, Time, ForeignKey, DateTime, Boolean
+from sqlalchemy import Column, Integer, BigInteger, String, Float, Date, Time, ForeignKey, DateTime, Boolean, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
@@ -107,6 +107,9 @@ class BoosterPoint(Base):
     lat = Column(Float, nullable=False)
     lon = Column(Float, nullable=False)
     is_active = Column(Boolean, default=True)
+    status = Column(String(50), default="OPEN") # "OPEN", "CLOSED", "TEMPORARY_CLOSED"
+    regular_hours = Column(JSON, nullable=True) # e.g. {"monday": "09:00-21:00"}
+    special_hours = Column(JSON, nullable=True) # e.g. {"2026-01-01": "closed"}
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class BaristaCertificate(Base):
@@ -137,3 +140,32 @@ class HACCPLog(Base):
 
     point = relationship("BoosterPoint")
     barista = relationship("User")
+
+# --- RBAC Multi-Tenant ---
+
+class Role(Base):
+    __tablename__ = "roles"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), unique=True, nullable=False) # e.g. "Point Manager"
+
+class Permission(Base):
+    __tablename__ = "permissions"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), unique=True, nullable=False) # e.g. "location:update_status"
+
+class RolePermission(Base):
+    __tablename__ = "role_permissions"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    role_id = Column(Integer, ForeignKey("roles.id"))
+    permission_id = Column(Integer, ForeignKey("permissions.id"))
+
+class UserRole(Base):
+    __tablename__ = "user_roles"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    telegram_id = Column(BigInteger, ForeignKey("users.telegram_id"))
+    role_id = Column(Integer, ForeignKey("roles.id"))
+    tenant_id = Column(String(36), ForeignKey("booster_points.id"), nullable=True) # None = Global SuperAdmin
+    
+    user = relationship("User")
+    role = relationship("Role")
+    tenant = relationship("BoosterPoint")
