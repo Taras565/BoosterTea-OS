@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { X, MapPin } from 'lucide-react';
@@ -49,6 +49,16 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
   return R * c;
 }
 
+const ChangeView = ({ coords }: { coords: [number, number][] }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (coords && coords.length > 0) {
+      map.fitBounds(coords, { padding: [50, 50] });
+    }
+  }, [coords, map]);
+  return null;
+};
+
 export default function MapScreen({ onClose }: { onClose: () => void }) {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,6 +68,10 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
   const [showEMAModal, setShowEMAModal] = useState(false);
   const [emaRating, setEmaRating] = useState(0);
   const [emaTags, setEmaTags] = useState<string[]>([]);
+  
+  const [routeMode, setRouteMode] = useState<'driving' | 'foot'>('driving');
+  const [routeData, setRouteData] = useState<{coords: [number, number][], duration: number, distance: number} | null>(null);
+  const [routingLoading, setRoutingLoading] = useState(false);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -105,6 +119,32 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
       );
     } else {
       setShowLocationPrompt(false);
+    }
+  };
+
+  const fetchRoute = async (mode: 'driving' | 'foot') => {
+    if (!userLocation || locations.length === 0) return;
+    setRoutingLoading(true);
+    triggerHaptic();
+    setRouteMode(mode);
+    const loc = locations[0]; // Route to the first available location
+    try {
+      const url = `https://router.project-osrm.org/route/v1/${mode}/${userLocation.lon},${userLocation.lat};${loc.lon},${loc.lat}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.code === 'Ok' && data.routes.length > 0) {
+        const route = data.routes[0];
+        const coords = route.geometry.coordinates.map((c: any[]) => [c[1], c[0]]);
+        setRouteData({
+          coords,
+          duration: Math.round(route.duration / 60), // to minutes
+          distance: +(route.distance / 1000).toFixed(1) // to km
+        });
+      }
+    } catch(err) {
+      console.error(err);
+    } finally {
+      setRoutingLoading(false);
     }
   };
 
@@ -189,6 +229,19 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               />
+              {userLocation && (
+                <Marker position={[userLocation.lat, userLocation.lon]}>
+                  <Popup className="booster-popup">
+                    <div className="font-bold text-sm text-black">Ви тут</div>
+                  </Popup>
+                </Marker>
+              )}
+              {routeData && (
+                <>
+                  <Polyline positions={routeData.coords} color="#00ffcc" weight={5} opacity={0.8} />
+                  <ChangeView coords={routeData.coords} />
+                </>
+              )}
               {locations.map(loc => {
                 const isClosed = loc.status === "CLOSED" || loc.status === "TEMPORARY_CLOSED";
                 return (
@@ -211,19 +264,37 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
       {!loading && !isOutOfRange && locations.length > 0 && (
         <div className="p-4 bg-black border-t border-gray-800 z-[60] flex flex-col gap-3">
           <p className="text-xs text-gray-400 text-center mb-1">Знайдено партнерських закладів: {locations.length}</p>
-          <button 
-            onClick={() => {
-              triggerHaptic();
-              const loc = locations[0]; // For now, route to the first available location
-              if (loc) {
-                const url = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lon}`;
-                openExternalLink(url);
-              }
-            }}
-            className="w-full premium-btn font-bold py-3 rounded-xl uppercase tracking-wider text-sm flex items-center justify-center gap-2"
-          >
-            Прокласти маршрут
-          </button>
+          
+          {!routeData ? (
+            <button 
+              onClick={() => fetchRoute('driving')}
+              className="w-full premium-btn font-bold py-3 rounded-xl uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+              disabled={routingLoading || !userLocation}
+            >
+              {routingLoading ? 'Розрахунок...' : 'Прокласти маршрут'}
+            </button>
+          ) : (
+            <div className="bg-gray-900/50 p-3 rounded-xl border border-primary/30 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300 text-sm font-bold">{routeData.distance} км</span>
+                <span className="text-primary font-bold">{routeData.duration} хв</span>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => fetchRoute('driving')}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-colors border ${routeMode === 'driving' ? 'bg-primary text-black border-primary' : 'bg-transparent text-gray-400 border-gray-700'}`}
+                >
+                  🚗 Авто
+                </button>
+                <button 
+                  onClick={() => fetchRoute('foot')}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-colors border ${routeMode === 'foot' ? 'bg-primary text-black border-primary' : 'bg-transparent text-gray-400 border-gray-700'}`}
+                >
+                  🚶 Пішки
+                </button>
+              </div>
+            </div>
+          )}
           
           <button onClick={() => setShowEMAModal(true)} className="w-full bg-gray-800 border border-primary/50 text-primary font-bold py-3 rounded-xl uppercase tracking-wider text-xs hover:bg-gray-700 transition-colors">
             Імітувати вихід з геозони (EMA)
