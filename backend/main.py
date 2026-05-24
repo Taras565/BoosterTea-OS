@@ -72,7 +72,13 @@ import json
 @app.get("/api/reset_db")
 def reset_db():
     try:
-        models.Base.metadata.drop_all(bind=database.engine)
+        from sqlalchemy import text
+        with database.engine.connect() as conn:
+            if "postgres" in database.SQLALCHEMY_DATABASE_URL:
+                conn.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
+                conn.commit()
+            else:
+                models.Base.metadata.drop_all(bind=database.engine)
         models.Base.metadata.create_all(bind=database.engine)
         return {"status": "Database successfully reset with new schema!"}
     except Exception as e:
