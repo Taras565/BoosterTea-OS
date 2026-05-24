@@ -559,6 +559,16 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
   };
   
   const [activeFormat, setActiveFormat] = useState(normalizeFormat(drinkFormat));
+  const [shortCode, setShortCode] = useState<string>('');
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success'>('idle');
+
+  useEffect(() => {
+    fetch(`${API_URL}/order/generate_code`)
+      .then(res => res.json())
+      .then(data => setShortCode(data.short_code))
+      .catch(() => setShortCode("ALPHA-00"));
+  }, []);
 
   const getPredictedTime = () => {
     if (activeFormat === 'Shot') return t('timeShot');
@@ -739,28 +749,107 @@ function ResultScreen({ recipe, lang, weatherTemp, weatherCond, drinkFormat, act
           }
         }} className="py-3 rounded-xl border border-primary/50 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors uppercase tracking-wider">{t('btnShare')}</button>
         <button onClick={() => { triggerHaptic(); onDone(); }} className="premium-btn font-bold py-3 rounded-xl text-sm uppercase tracking-wider">{t('btnBrewed')}</button>
-        <button onClick={() => {
-          triggerHaptic();
-          const url = "https://www.boostertea.com.ua/";
-          const webApp = (window as any).Telegram?.WebApp;
-          if (webApp && webApp.openLink) {
-            webApp.openLink(url);
-          } else {
-            window.open(url, "_blank");
-          }
-        }} className="col-span-2 w-full py-3 rounded-xl border border-primary/50 bg-primary/10 text-primary font-bold flex items-center justify-center gap-2 uppercase text-sm tracking-widest hover:bg-primary/20 transition-colors mt-2">
-          <ShoppingCart size={18} /> {t('btnBuy') as string}
-        </button>
-        <div className="col-span-2 text-center mt-4">
-          <p className="text-xs text-gray-500 mb-2">Хочеш отримати напій офлайн?</p>
-          <div className="bg-white p-3 rounded-xl inline-block">
-            {/* Mock QR Code representation */}
-            <div className="w-24 h-24 bg-black flex items-center justify-center text-primary font-bold text-[10px] text-center p-2">
-              QR: {initData?.user?.id || 123}<br/>DAY {challengeDay || 1}
+        <div className="col-span-2 mt-4 bg-gray-900/50 p-4 rounded-xl border border-gray-800">
+          <h3 className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Отримати в Booster Point</h3>
+          
+          <div className="flex justify-center items-center gap-4 mb-4">
+            <div className="bg-white p-2 rounded-xl inline-block shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+              <div className="w-24 h-24 bg-black flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg">
+                 <div className="text-center text-primary text-[10px] font-mono leading-tight">
+                    █████████<br/>
+                    █ ▄▄▄▄▄ █<br/>
+                    █ █   █ █<br/>
+                    █ █▄▄▄█ █<br/>
+                    █▄▄▄▄▄▄▄█
+                 </div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Промокод (ID)</span>
+              <span className="text-xl font-black text-primary bg-primary/10 px-3 py-1 rounded-lg border border-primary/20 tracking-widest">{shortCode || '...'}</span>
             </div>
           </div>
-          <p className="text-[10px] text-gray-400 mt-2">Покажи цей QR-код баристі в Booster Point</p>
+          
+          <p className="text-[10px] text-gray-400 text-center mb-4 leading-relaxed">
+            Покажи QR-код або назви промокод баристі для швидкого замовлення на касі.
+          </p>
+
+          <div className="grid grid-cols-1 gap-2">
+            <button 
+              onClick={() => { triggerHaptic(); setShowPayment(true); }}
+              className="w-full py-3 rounded-xl bg-primary text-black font-bold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,255,204,0.3)] hover:scale-[1.02] transition-transform uppercase tracking-wider text-sm"
+            >
+               💳 Оплатити зараз (Click & Collect)
+            </button>
+            <button 
+              onClick={() => { triggerHaptic(); onDone(); }}
+              className="w-full py-3 rounded-xl border border-gray-700 text-gray-400 font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors uppercase tracking-wider text-xs"
+            >
+               ☕ Оплатити на касі
+            </button>
+          </div>
         </div>
+
+        {/* Payment Modal */}
+        {showPayment && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl">
+              <div className="bg-black px-4 py-3 border-b border-gray-800 flex justify-between items-center">
+                <span className="font-mono text-white text-sm">Monobank Checkout</span>
+                <button onClick={() => setShowPayment(false)} className="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
+              </div>
+              <div className="p-6 flex flex-col items-center">
+                <div className="w-16 h-16 bg-black rounded-full mb-4 flex items-center justify-center border-2 border-gray-800">
+                  <span className="text-2xl">🐈</span>
+                </div>
+                <h2 className="text-xl font-bold text-white mb-1">Booster Point O2O</h2>
+                <p className="text-sm text-gray-400 mb-6">Замовлення #{shortCode}</p>
+                <div className="text-3xl font-black text-white mb-6">125.00 ₴</div>
+                
+                {paymentStatus === 'idle' && (
+                  <button 
+                    onClick={async () => {
+                      setPaymentStatus('processing');
+                      triggerHaptic();
+                      await new Promise(resolve => setTimeout(resolve, 1500));
+                      try {
+                        const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
+                        const tgId = initData?.user?.id || 123456789;
+                        await fetch(`${API_URL}/order/pay`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            telegram_id: tgId,
+                            point_id: "point_1",
+                            total_amount: 125.00
+                          })
+                        });
+                        setPaymentStatus('success');
+                        setTimeout(() => onDone(), 2000);
+                      } catch(e) {
+                         setPaymentStatus('idle');
+                         alert("Payment Failed");
+                      }
+                    }}
+                    className="w-full bg-white text-black font-bold py-3 rounded-xl mb-2 flex justify-center items-center gap-2"
+                  >
+                    Оплатити з Plata by Mono
+                  </button>
+                )}
+                {paymentStatus === 'processing' && (
+                  <div className="w-full bg-gray-800 text-gray-400 font-bold py-3 rounded-xl mb-2 flex justify-center items-center animate-pulse">
+                    Обробка...
+                  </div>
+                )}
+                {paymentStatus === 'success' && (
+                  <div className="w-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 font-bold py-3 rounded-xl mb-2 flex justify-center items-center gap-2">
+                    ✅ Оплачено успішно
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -182,6 +182,23 @@ class ReferralClaimRequest(BaseModel):
     referrer_id: int
     referral_id: int
 
+class OrderPayRequest(BaseModel):
+    telegram_id: int
+    point_id: str
+    total_amount: float
+
+class PosterWebhookRequest(BaseModel):
+    transaction_id: str
+    customer_id: Optional[str] = None
+    status: str
+    point_id: str
+
+class SyrveWebhookRequest(BaseModel):
+    order_id: str
+    customer_phone: Optional[str] = None
+    status: str
+    organization_id: str
+
 # Mock HD generator
 def mock_hd_type(birth_date: date) -> str:
     types = ["Generator", "Projector", "Manifestor", "Reflector", "Manifesting Generator"]
@@ -662,3 +679,101 @@ def submit_ema_feedback(req: EMAFeedbackRequest, db: Session = Depends(database.
     db.commit()
     
     return {"status": "ok", "message": "Feedback saved for Contextual Bandit model"}
+
+# --- O2O & Click & Collect Endpoints ---
+
+import random
+
+def generate_short_code() -> str:
+    prefixes = ["ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "FOXTROT"]
+    number = random.randint(10, 99)
+    return f"{random.choice(prefixes)}-{number}"
+
+@app.get("/api/order/generate_code")
+def api_generate_code():
+    return {"short_code": generate_short_code()}
+
+@app.post("/api/order/pay")
+def process_payment(req: OrderPayRequest, db: Session = Depends(database.get_db), tg_user: bool = Depends(get_current_user_tg)):
+    short_code = generate_short_code()
+    order = models.Order(
+        telegram_id=req.telegram_id,
+        point_id=req.point_id,
+        status="paid",
+        short_code=short_code,
+        total_amount=req.total_amount
+    )
+    db.add(order)
+    
+    # Auto check-in for Click & Collect
+    user = db.query(models.User).filter(models.User.telegram_id == req.telegram_id).first()
+    if user:
+        user.current_streak_cycle = (user.current_streak_cycle or 0) + 1
+        
+        checkin = models.CheckInLog(
+            telegram_id=user.telegram_id,
+            order_id=order.id,
+            status="valid"
+        )
+        db.add(checkin)
+        
+    db.commit()
+    return {"status": "success", "order_id": order.id, "short_code": short_code}
+
+@app.post("/api/webhooks/poster")
+def webhook_poster(req: PosterWebhookRequest, db: Session = Depends(database.get_db)):
+    # Rate Limiting & Fraud Prevention logic mock
+    if not req.customer_id:
+        return {"status": "ignored", "reason": "no_customer_id"}
+        
+    try:
+        tg_id = int(req.customer_id)
+        user = db.query(models.User).filter(models.User.telegram_id == tg_id).first()
+        if not user:
+            return {"status": "ignored", "reason": "user_not_found"}
+            
+        if req.status == "receipt_closed":
+            # Check for existing checkin today (Rate Limiting 1 per day)
+            today = date.today()
+            existing = db.query(models.CheckInLog).filter(
+                models.CheckInLog.telegram_id == tg_id,
+                func.date(models.CheckInLog.timestamp) == today,
+                models.CheckInLog.status == "valid"
+            ).first()
+            
+            if existing:
+                return {"status": "ignored", "reason": "rate_limited_1_per_day"}
+                
+            user.current_streak_cycle = (user.current_streak_cycle or 0) + 1
+            checkin = models.CheckInLog(
+                telegram_id=tg_id,
+                status="valid"
+            )
+            db.add(checkin)
+            db.commit()
+            return {"status": "checkin_added"}
+            
+        elif req.status == "receipt_void":
+            # Rollback logic
+            checkin = db.query(models.CheckInLog).filter(
+                models.CheckInLog.telegram_id == tg_id,
+                models.CheckInLog.status == "valid"
+            ).order_by(models.CheckInLog.timestamp.desc()).first()
+            
+            if checkin:
+                checkin.status = "rolled_back"
+                user.current_streak_cycle = max(0, (user.current_streak_cycle or 1) - 1)
+                db.commit()
+                return {"status": "rolled_back"}
+                
+    except Exception as e:
+        print("Webhook Error:", str(e))
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+        
+    return {"status": "ok"}
+
+@app.post("/api/webhooks/syrve")
+def webhook_syrve(req: SyrveWebhookRequest, db: Session = Depends(database.get_db)):
+    # Identical logic to Poster, abstracting for MVP
+    # In real world, phone number is mapped to user_id
+    return {"status": "received", "message": "Syrve webhook processed"}

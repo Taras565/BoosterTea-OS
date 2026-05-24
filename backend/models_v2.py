@@ -189,3 +189,27 @@ class Review(Base):
 
     user = relationship("User")
     point = relationship("BoosterPoint")
+
+# --- O2O & Click & Collect ---
+class Order(Base):
+    __tablename__ = "orders"
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    telegram_id = Column(BigInteger, ForeignKey("users.telegram_id"))
+    point_id = Column(String(36), ForeignKey("booster_points.id"))
+    status = Column(String(20), default="pending") # pending, paid, completed, refunded
+    short_code = Column(String(10), nullable=False) # e.g. BRAVO-27
+    total_amount = Column(Float, nullable=False, default=0.0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")
+    point = relationship("BoosterPoint")
+
+class CheckInLog(Base):
+    __tablename__ = "checkin_logs"
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    telegram_id = Column(BigInteger, ForeignKey("users.telegram_id"))
+    order_id = Column(String(36), ForeignKey("orders.id"), nullable=True)
+    status = Column(String(20), default="valid") # valid, rolled_back
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")
