@@ -8,6 +8,7 @@ import LanguageSwitcher from './components/LanguageSwitcher'
 import MapScreen from './components/MapScreen'
 import B2BPortal from './components/B2BPortal'
 import { Language, getTranslation } from './i18n'
+import { openExternalLink } from './utils'
 import './App.css'
 
 const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname.includes('localhost') ? 'http://localhost:8000/api' : 'https://boostertea-os-backend.onrender.com/api');
@@ -1113,13 +1114,7 @@ function AppContent() {
           <button 
             onClick={() => {
               triggerHaptic();
-              const url = "https://www.boostertea.com.ua/";
-              const webApp = (window as any).Telegram?.WebApp;
-              if (webApp && webApp.openLink) {
-                webApp.openLink(url);
-              } else {
-                window.open(url, "_blank");
-              }
+              openExternalLink("https://www.boostertea.com.ua/");
             }}
             className="w-12 h-12 bg-black/80 backdrop-blur-md border border-primary/50 rounded-full flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,255,204,0.3)] hover:scale-110 transition-transform"
           >

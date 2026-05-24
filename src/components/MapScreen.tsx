@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { X, MapPin } from 'lucide-react';
+import { openExternalLink } from '../utils';
 
 // Fix Leaflet icons issue in Vite
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
@@ -168,7 +169,7 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
             </div>
             <h3 className="text-xl font-bold text-white mb-3">Поза Зоною Покриття</h3>
             <p className="text-sm text-gray-400 mb-8 max-w-xs">На жаль, у вашому регіоні (в радіусі 50 км) ще немає активних Booster Points. Проте ви можете замовити концентрат з доставкою додому.</p>
-            <button onClick={() => window.open('https://www.boostertea.com.ua/', '_blank')} className="w-full premium-btn font-bold py-4 rounded-xl uppercase tracking-wider shadow-[0_0_15px_rgba(0,255,204,0.3)]">
+            <button onClick={() => openExternalLink('https://www.boostertea.com.ua/')} className="w-full premium-btn font-bold py-4 rounded-xl uppercase tracking-wider shadow-[0_0_15px_rgba(0,255,204,0.3)]">
               Замовити поштою
             </button>
             <button onClick={() => setIsOutOfRange(false)} className="mt-4 text-xs text-gray-500 underline">Все одно показати карту</button>
@@ -216,7 +217,7 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
               const loc = locations[0]; // For now, route to the first available location
               if (loc) {
                 const url = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lon}`;
-                window.open(url, '_blank');
+                openExternalLink(url);
               }
             }}
             className="w-full premium-btn font-bold py-3 rounded-xl uppercase tracking-wider text-sm flex items-center justify-center gap-2"

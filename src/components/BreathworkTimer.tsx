@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Target, ShoppingCart, Share, Volume2, VolumeX, AlertTriangle } from 'lucide-react';
 import { Language, getTranslation } from '../i18n';
+import { openExternalLink } from '../utils';
 
 // Local copy of Recipe type for prop validation
 type Recipe = {
@@ -273,13 +274,7 @@ export default function BreathworkTimer({ recipe, lang, activityType, onDone }: 
           
           <button onClick={() => {
             triggerHaptic();
-            const url = "https://www.boostertea.com.ua/";
-            const webApp = (window as any).Telegram?.WebApp;
-            if (webApp && webApp.openLink) {
-              webApp.openLink(url);
-            } else {
-              window.open(url, "_blank");
-            }
+            openExternalLink("https://www.boostertea.com.ua/");
           }} className="w-full py-4 rounded-xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-2 uppercase text-sm tracking-widest hover:bg-emerald-500/20 transition-colors">
             <ShoppingCart size={18} /> {t('btnBuy') as string || 'Замовити концентрат'}
           </button>
