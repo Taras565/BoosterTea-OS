@@ -122,8 +122,9 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const fetchRoute = async (mode: 'driving' | 'foot') => {
-    if (!userLocation || locations.length === 0) {
+  const fetchRoute = async (mode: 'driving' | 'foot', overrideLoc?: {lat: number, lon: number}) => {
+    const activeLoc = overrideLoc || userLocation;
+    if (!activeLoc || locations.length === 0) {
       alert("Немає вашої геолокації. Дозвольте доступ до місцезнаходження.");
       return;
     }
@@ -132,7 +133,7 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
     setRouteMode(mode);
     const loc = locations[0]; // Route to the first available location
     try {
-      const url = `https://router.project-osrm.org/route/v1/${mode}/${userLocation.lon},${userLocation.lat};${loc.lon},${loc.lat}?overview=full&geometries=geojson`;
+      const url = `https://router.project-osrm.org/route/v1/${mode}/${activeLoc.lon},${activeLoc.lat};${loc.lon},${loc.lat}?overview=full&geometries=geojson`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
@@ -281,7 +282,30 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
             <button 
               onClick={() => {
                 if (!userLocation) {
-                  alert("Для прокладання маршруту необхідна ваша геолокація. Натисніть кнопку прицілу (навігації) на карті праворуч, щоб надати доступ.");
+                  if (navigator.geolocation) {
+                    triggerHaptic();
+                    navigator.geolocation.getCurrentPosition(
+                      (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        setUserLocation({ lat, lon });
+                        setShowLocationPrompt(false);
+                        
+                        if (locations.length > 0) {
+                          const isNear = locations.some(loc => getDistanceFromLatLonInKm(lat, lon, loc.lat, loc.lon) <= 50);
+                          setIsOutOfRange(!isNear);
+                        }
+                        
+                        fetchRoute('driving', {lat, lon});
+                      },
+                      (error) => {
+                        console.error("Error getting location", error);
+                        alert("Не вдалося отримати геолокацію. Перевірте дозволи в налаштуваннях Telegram або вашого пристрою.");
+                      }
+                    );
+                  } else {
+                    alert("Геолокація не підтримується цим пристроєм.");
+                  }
                   return;
                 }
                 fetchRoute('driving');
