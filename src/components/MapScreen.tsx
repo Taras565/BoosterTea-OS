@@ -233,7 +233,7 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
               </div>
             )}
             
-            <button onClick={handleRequestLocation} className="absolute bottom-[200px] right-4 z-[55] w-12 h-12 bg-gray-900/90 backdrop-blur-md border border-primary/50 rounded-full flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,255,204,0.3)] hover:scale-110 transition-transform">
+            <button onClick={handleRequestLocation} className="absolute bottom-[200px] right-4 z-[1000] w-12 h-12 bg-gray-900/90 backdrop-blur-md border border-primary/50 rounded-full flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,255,204,0.3)] hover:scale-110 transition-transform">
               <Navigation size={22} />
             </button>
 
