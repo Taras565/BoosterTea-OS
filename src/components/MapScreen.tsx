@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { X, MapPin } from 'lucide-react';
+import { X, MapPin, Navigation } from 'lucide-react';
 import { openExternalLink } from '../utils';
 
 // Fix Leaflet icons issue in Vite
@@ -114,11 +114,11 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
         },
         (error) => {
           console.error("Error getting location", error);
-          setShowLocationPrompt(false);
+          alert("Не вдалося отримати геолокацію. Перевірте дозволи в налаштуваннях Telegram або вашого пристрою.");
         }
       );
     } else {
-      setShowLocationPrompt(false);
+      alert("Геолокація не підтримується цим пристроєм.");
     }
   };
 
@@ -224,12 +224,18 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
           <>
             {showLocationPrompt && (
               <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[55] w-[90%] max-w-sm">
-                <div className="bg-gray-900/90 backdrop-blur-md border border-primary/30 p-4 rounded-xl shadow-lg flex flex-col items-center text-center">
-                  <p className="text-xs text-gray-300 mb-3">Дозвольте доступ до геолокації для пошуку найближчих точок</p>
+                <div className="bg-gray-900/90 backdrop-blur-md border border-primary/30 p-4 rounded-xl shadow-lg flex flex-col items-center text-center relative">
+                  <button onClick={() => setShowLocationPrompt(false)} className="absolute top-2 right-2 text-gray-500 hover:text-white"><X size={16}/></button>
+                  <p className="text-xs text-gray-300 mb-3 mt-1">Дозвольте доступ до геолокації для пошуку найближчих точок</p>
                   <button onClick={handleRequestLocation} className="w-full py-2 bg-primary/20 text-primary border border-primary/50 rounded-lg text-sm font-bold uppercase hover:bg-primary/30 transition-colors">📍 Використати моє місцезнаходження</button>
                 </div>
               </div>
             )}
+            
+            <button onClick={handleRequestLocation} className="absolute bottom-[200px] right-4 z-[55] w-12 h-12 bg-gray-900/90 backdrop-blur-md border border-primary/50 rounded-full flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,255,204,0.3)] hover:scale-110 transition-transform">
+              <Navigation size={22} />
+            </button>
+
             <MapContainer center={[50.4501, 30.5234]} zoom={13} style={{ height: '100%', width: '100%' }} zoomControl={false}>
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -275,7 +281,7 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
             <button 
               onClick={() => {
                 if (!userLocation) {
-                  alert("Для прокладання маршруту необхідна ваша геолокація. Оновіть сторінку та надайте доступ (або натисніть кнопку '📍 Використати моє місцезнаходження').");
+                  alert("Для прокладання маршруту необхідна ваша геолокація. Натисніть кнопку прицілу (навігації) на карті праворуч, щоб надати доступ.");
                   return;
                 }
                 fetchRoute('driving');

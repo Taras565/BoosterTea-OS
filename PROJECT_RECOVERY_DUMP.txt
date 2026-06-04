@@ -1,0 +1,478 @@
+﻿# рџ§¬ BoosterTea Liquid OS
+**The First Bio-Adaptive Neuro-Management System for Telegram**
+
+BoosterTea Liquid OS вЂ” С†Рµ РЅРµ РїСЂРѕСЃС‚Рѕ Р·Р°СЃС‚РѕСЃСѓРЅРѕРє РґР»СЏ Р·Р°РјРѕРІР»РµРЅРЅСЏ С‡Р°СЋ. Р¦Рµ РїРѕРІРЅРѕС†С–РЅРЅР° **Closed-Loop mHealth РїР»Р°С‚С„РѕСЂРјР°**, С‰Рѕ С„СѓРЅРєС†С–РѕРЅСѓС” РІ Telegram Mini Apps. Р’РѕРЅР° РїРµСЂРµС‚РІРѕСЂСЋС” СЃРїРѕР¶РёРІР°РЅРЅСЏ РЅРѕРѕС‚СЂРѕРїРЅРёС… С‚Р° Р°РґР°РїС‚РѕРіРµРЅРЅРёС… РєРѕРјРїР»РµРєСЃС–РІ РЅР° РєРµСЂРѕРІР°РЅРёР№, РїРµСЂСЃРѕРЅР°Р»С–Р·РѕРІР°РЅРёР№ С‚Р° РіРµР№РјС–С„С–РєРѕРІР°РЅРёР№ РїСЂРѕС†РµСЃ.
+
+---
+
+## рџ§  Core Architecture (РЎС‚РµРє РўРµС…РЅРѕР»РѕРіС–Р№)
+
+РЎРёСЃС‚РµРјР° РїРѕР±СѓРґРѕРІР°РЅР° Р· Р°РєС†РµРЅС‚РѕРј РЅР° С€РІРёРґРєС–СЃС‚СЊ, Р±РµР·РїРµРєСѓ С‚Р° РєСЂРѕСЃ-РїР»Р°С‚С„РѕСЂРјРЅС–СЃС‚СЊ:
+- **Frontend (Mini App):** React 18, TypeScript, Vite, TailwindCSS. Р’РёРєРѕСЂРёСЃС‚РѕРІСѓС” Apple-style "Liquid Glass" РґРёР·Р°Р№РЅ Р· Framer Motion РґР»СЏ РїР»Р°РІРЅРёС… РјС–РєСЂРѕ-Р°РЅС–РјР°С†С–Р№.
+- **Backend (Neuro-Engine):** FastAPI (Python 3.10+), SQLAlchemy. Р—Р°Р±РµР·РїРµС‡СѓС” РІРёСЃРѕРєСѓ С€РІРёРґРєС–СЃС‚СЊ РѕР±СЂРѕР±РєРё РјР°С‚РµРјР°С‚РёС‡РЅРёС… РјРѕРґРµР»РµР№ С‚Р° С–РЅС‚РµРіСЂР°С†С–СЋ Р· Telegram Bot API.
+- **Database:** PostgreSQL. Р—Р±РµСЂС–РіР°С” РїСЂРѕС„С–Р»С– РєРѕСЂРёСЃС‚СѓРІР°С‡С–РІ, Р»РѕРіСѓРІР°РЅРЅСЏ СЃС‚Р°РЅС–РІ С‚Р° Р·РІРѕСЂРѕС‚РЅРёР№ Р·РІ'СЏР·РѕРє РґР»СЏ РјР°С€РёРЅРЅРѕРіРѕ РЅР°РІС‡Р°РЅРЅСЏ.
+- **Infrastructure:** Р”РµРїР»РѕР№ РЅР° Render.com Р· Р°РІС‚РѕРјР°С‚РёС‡РЅРёРј CI/CD.
+
+---
+
+## рџ’Љ Pharmacokinetics & Bio-Adaptivity
+
+Liquid OS РІРёРєРѕСЂРёСЃС‚РѕРІСѓС” РјР°С‚РµРјР°С‚РёС‡РЅРµ РјРѕРґРµР»СЋРІР°РЅРЅСЏ РґР»СЏ РїРµСЂРµРґР±Р°С‡РµРЅРЅСЏ РµС„РµРєС‚РёРІРЅРѕСЃС‚С– РЅР°РїРѕС—РІ. 
+
+### 1. CYP1A2 Metabolic Modeling
+РЁРІРёРґРєС–СЃС‚СЊ РјРµС‚Р°Р±РѕР»С–Р·РјСѓ РєРѕС„РµС—РЅСѓ (РїРµСЂС–РѕРґ РЅР°РїС–РІСЂРѕР·РїР°РґСѓ $t_{1/2}$) Сѓ РєРѕР¶РЅРѕС— Р»СЋРґРёРЅРё СЂС–Р·РЅР°. РќР°С€ СЂСѓС€С–Р№ РІСЂР°С…РѕРІСѓС” С„Р°РєС‚РѕСЂРё, С‰Рѕ РІРїР»РёРІР°СЋС‚СЊ РЅР° РµРЅР·РёРј CYP1A2:
+- **РљСѓСЂС–РЅРЅСЏ:** Р†РЅРґСѓРєСѓС” CYP1A2 (РїСЂРёС€РІРёРґС€СѓС” СЂРѕР·РїР°Рґ РєР°РІРё РІ 1.5-2 СЂР°Р·Рё).
+- **РћСЂР°Р»СЊРЅС– РєРѕРЅС‚СЂР°С†РµРїС‚РёРІРё:** Р†РЅРіС–Р±СѓСЋС‚СЊ CYP1A2 (СѓРїРѕРІС–Р»СЊРЅСЋСЋС‚СЊ СЂРѕР·РїР°Рґ, РїСЂРѕРґРѕРІР¶СѓСЋС‡Рё РµС„РµРєС‚ РґРѕ 10 РіРѕРґРёРЅ).
+- **Р‘Р°Р·РѕРІР° С‡СѓС‚Р»РёРІС–СЃС‚СЊ:** РЎСѓР±'С”РєС‚РёРІРЅР° РѕС†С–РЅРєР° РјРµС‚Р°Р±РѕР»С–Р·РјСѓ РєРѕСЂРёСЃС‚СѓРІР°С‡РµРј РїС–Рґ С‡Р°СЃ СЂРµС”СЃС‚СЂР°С†С–С—.
+
+### 2. Chronobiological Curfew (РљРѕРјРµРЅРґР°РЅС‚СЃСЊРєР° РіРѕРґРёРЅР°)
+Р—Р°С…РёСЃС‚ Р°СЂС…С–С‚РµРєС‚СѓСЂРё СЃРЅСѓ (Deep Sleep). РЇРєС‰Рѕ РєРѕСЂРёСЃС‚СѓРІР°С‡ Р·Р°РїРёС‚СѓС” Р±СѓСЃС‚ Р±Р»РёР·СЊРєРѕ РґРѕ СЃРІРѕРіРѕ `target_bedtime`, Р°Р»РіРѕСЂРёС‚Рј Р°РІС‚РѕРјР°С‚РёС‡РЅРѕ:
+- Р‘Р»РѕРєСѓС” РІРёРґР°С‡Сѓ РєРѕС„РµС—РЅРѕРІРјС–СЃРЅРёС… СЃС‚РёРјСѓР»СЏС‚РѕСЂС–РІ.
+- РџРµСЂРµРјРёРєР°С” СЂРµРєРѕРјРµРЅРґР°С†С–С— РЅР° СЂРµРєСЂРµР°С†С–Р№РЅС– РЅРѕРѕС‚СЂРѕРїРё (Р“РђРњРљ, L-РўРµР°РЅС–РЅ, Bacopa Monnieri), С‰РѕР± РїС–РґРіРѕС‚СѓРІР°С‚Рё Р¦РќРЎ РґРѕ СЃРЅСѓ.
+
+### 3. Receptor Cycling (Р РѕС‚Р°С†С–СЏ РќРѕРѕС‚СЂРѕРїС–РІ)
+Р—Р°РїРѕР±С–РіР°РЅРЅСЏ С‚РѕР»РµСЂР°РЅС‚РЅРѕСЃС‚С– СЂРµС†РµРїС‚РѕСЂС–РІ (Down-regulation). РђР»РіРѕСЂРёС‚Рј Р°РЅР°Р»С–Р·СѓС” 30-РґРµРЅРЅСѓ С–СЃС‚РѕСЂС–СЋ С‡РµРєС–РЅС–РІ РєРѕСЂРёСЃС‚СѓРІР°С‡Р°. РЇРєС‰Рѕ С„С–РєСЃСѓС”С‚СЊСЃСЏ РїРµСЂРµРЅР°СЃРёС‡РµРЅРЅСЏ РїРµРІРЅРёРј С–РЅРіСЂРµРґС–С”РЅС‚РѕРј (РЅР°РїСЂРёРєР»Р°Рґ, Р“РђРњРљ Р±С–Р»СЊС€Рµ 5 СЂР°Р·С–РІ Р·Р° 7 РґРЅС–РІ), СЃРёСЃС‚РµРјР° РїСЂРёРјСѓСЃРѕРІРѕ РїСЂРёР·РЅР°С‡Р°С” "РІС–РґРїРѕС‡РёРЅРѕРє" С‚Р° РїРµСЂРµРјРёРєР°С” С„РѕРєСѓСЃ РЅР° Р°Р»СЊС‚РµСЂРЅР°С‚РёРІРЅС– РЅРµР№СЂРѕРјРѕРґСѓР»СЏС‚РѕСЂРё (РЅР°РїСЂРёРєР»Р°Рґ, L-РўРµР°РЅС–РЅ).
+
+---
+
+## рџ”„ Closed-Loop Feedback & Contextual Bandit
+
+РЎРёСЃС‚РµРјР° РµРІРѕР»СЋС†С–РѕРЅСѓС” СЂР°Р·РѕРј С–Р· РєРѕСЂРёСЃС‚СѓРІР°С‡РµРј С‡РµСЂРµР· РјРµС…Р°РЅС–Р·Рј **Ecological Momentary Assessment (EMA)**.
+
+1. **Check-in:** РљРѕСЂРёСЃС‚СѓРІР°С‡ РІРєР°Р·СѓС” СЃРІС–Р№ РїРѕС‚РѕС‡РЅРёР№ СЃС‚Р°РЅ, РїРѕРіРѕРґСѓ (Р°РІС‚РѕРјР°С‚РёС‡РЅРѕ С‡РµСЂРµР· Open-Meteo) С‚Р° Р±Р°Р¶Р°РЅРёР№ С„РѕСЂРјР°С‚ (РЁРѕС‚, РљРѕРєС‚РµР№Р»СЊ, Р§Р°Р№).
+2. **Prescription:** Р СѓС€С–Р№ РІРёРґР°С” СЂРµС†РµРїС‚ (РЅР°РїСЂ., BoosterTea Focus + 30ml Pineapple Juice).
+3. **Action:** РљРѕСЂРёСЃС‚СѓРІР°С‡ РІРёРїРёРІР°С” РЅР°РїС–Р№.
+4. **Push-Feedback:** Р§РµСЂРµР· 2 РіРѕРґРёРЅРё Р±РµРєРµРЅРґ Р°РІС‚РѕРјР°С‚РёС‡РЅРѕ РЅР°РґСЃРёР»Р°С” РєРѕСЂРёСЃС‚СѓРІР°С‡Сѓ РІ Telegram РїРѕРІС–РґРѕРјР»РµРЅРЅСЏ Р· **Inline Keyboard (1-10)** РґР»СЏ РѕС†С–РЅРєРё РµС„РµРєС‚РёРІРЅРѕСЃС‚С– Р±СѓСЃС‚Сѓ.
+5. **Webhook:** Telegram РЅР°РґСЃРёР»Р°С” РѕС†С–РЅРєСѓ РЅР° РЅР°С€ Webhook. Р”Р°РЅС– РїРѕС‚СЂР°РїР»СЏСЋС‚СЊ Сѓ Р±Р°Р·Сѓ, РЅР°РІС‡Р°СЋС‡Рё Р°Р»РіРѕСЂРёС‚Рј (Contextual Bandit) РґР»СЏ РїРѕРєСЂР°С‰РµРЅРЅСЏ РјР°Р№Р±СѓС‚РЅС–С… СЂРµС†РµРїС‚С–РІ.
+
+---
+
+## рџЏ† 21-Day Neuro-Hacking Challenge (Flywheel)
+
+Р”Р»СЏ СЃС‚Р°Р»РѕРіРѕ СѓС‚СЂРёРјР°РЅРЅСЏ (Retention) С‚Р° РІС–СЂСѓСЃРЅРѕРіРѕ СЂРѕСЃС‚Сѓ (Acquisition) РІРїСЂРѕРІР°РґР¶РµРЅРѕ РіРµР№РјС–С„С–РєРѕРІР°РЅСѓ СЃРёСЃС‚РµРјСѓ С‡РµР»РµРЅРґР¶С–РІ.
+- РљРѕР¶РµРЅ С‰РѕРґРµРЅРЅРёР№ С‡РµРєС–РЅ Р·Р±С–Р»СЊС€СѓС” РїРѕРєР°Р·РЅРёРє `current_streak_cycle`.
+- РњРµС‚Р°: РџСЂРѕС‚СЂРёРјР°С‚РёСЃСЏ 21 РґРµРЅСЊ РґР»СЏ РїРѕРІРЅРѕС— РЅРµР№СЂРѕ-Р°РґР°РїС‚Р°С†С–С—.
+- РќР° РµРєСЂР°РЅС– СЂРµР·СѓР»СЊС‚Р°С‚С–РІ РєРѕСЂРёСЃС‚СѓРІР°С‡ Р±Р°С‡РёС‚СЊ СЃРІС–Р№ РїСЂРѕРіСЂРµСЃ (РЅР°РїСЂРёРєР»Р°Рґ, `Р”РµРЅСЊ 5/21`).
+- **Social Proof (Stories):** РќР°С‚РёРІРЅР° С–РЅС‚РµРіСЂР°С†С–СЏ `Telegram WebApp.shareToStory` РґРѕР·РІРѕР»СЏС” РєРѕСЂРёСЃС‚СѓРІР°С‡Сѓ РІ РѕРґРёРЅ РєР»С–Рє РїРѕРґС–Р»РёС‚РёСЃСЏ СЃРІРѕС—Рј РїСЂРѕРіСЂРµСЃРѕРј Сѓ Telegram Stories, СЃС‚РІРѕСЂСЋСЋС‡Рё РІС–СЂСѓСЃРЅРёР№ Р»СѓРї (Flywheel Effect).
+
+---
+
+> *"BoosterTea Liquid OS is where Neuroscience meets Gamification."*
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronRight, ShieldCheck, Fingerprint, Wind, MapPin, Star, MessageSquare, Activity, Sparkles } from 'lucide-react';
+import { Language, getTranslation } from '../i18n';
+
+const triggerHaptic = () => {
+  try {
+    if ((window as any).Telegram?.WebApp?.HapticFeedback?.impactOccurred) {
+      (window as any).Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
+  } catch (e) {}
+};
+
+// TargetIcon removed to fix unused warning
+
+export default function WelcomeManifest({ lang, onComplete }: { lang: Language, onComplete: () => void }) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(lang, key);
+
+  const slides = [
+    {
+      id: 1,
+      title: t('wm1Title'),
+      subtitle: t('wm1Sub'),
+      icon: <Fingerprint size={64} className="text-primary mb-6 mx-auto drop-shadow-[0_0_20px_rgba(0,255,204,0.6)]" />,
+      content: (
+        <div className="space-y-4 px-2 text-center">
+          <p className="text-[15px] text-gray-300 leading-relaxed font-medium">{t('wm1Desc')}</p>
+        </div>
+      )
+    },
+    {
+      id: 2,
+      title: t('wm2Title'),
+      subtitle: t('wm2Sub'),
+      icon: <Wind size={64} className="text-blue-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]" />,
+      content: (
+        <div className="space-y-4 px-1">
+          <p className="text-[14px] text-gray-300 leading-relaxed font-medium text-center">{t('wm2Desc')}</p>
+          <div className="bg-black/40 border border-green-500/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(34,197,94,0.1)] flex items-start gap-3 text-left">
+            <ShieldCheck className="text-green-400 shrink-0 mt-0.5" size={18} />
+            <p className="text-xs text-gray-300 font-medium leading-snug">{t('wm2Fear')}</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 3,
+      title: t('wm3Title'),
+      subtitle: t('wm3Sub'),
+      icon: <MapPin size={64} className="text-purple-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(168,85,247,0.6)]" />,
+      content: (
+        <div className="space-y-4 px-1">
+          <p className="text-[14px] text-gray-300 leading-relaxed font-medium text-center">{t('wm3Desc')}</p>
+          <div className="bg-black/40 border border-purple-500/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(168,85,247,0.1)] flex items-start gap-3 text-left">
+            <Sparkles className="text-purple-400 shrink-0 mt-0.5" size={18} />
+            <p className="text-xs text-gray-300 font-medium leading-snug">{t('wm3Fear')}</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 4,
+      title: t('wm4Title'),
+      subtitle: t('wm4Sub'),
+      icon: <Star size={64} className="text-yellow-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(250,204,21,0.6)]" />,
+      content: (
+        <div className="space-y-4 px-1">
+          <p className="text-[14px] text-gray-300 leading-relaxed font-medium text-center">{t('wm4Desc')}</p>
+          <div className="bg-black/40 border border-yellow-500/30 p-4 rounded-xl mt-6 shadow-[0_0_15px_rgba(250,204,21,0.1)] flex items-start gap-3 text-left">
+            <Activity className="text-yellow-400 shrink-0 mt-0.5" size={18} />
+            <p className="text-xs text-gray-300 font-medium leading-snug">{t('wm4Fear')}</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 5,
+      title: t('wm5Title'),
+      subtitle: t('wm5Sub'),
+      icon: <MessageSquare size={64} className="text-orange-400 mb-6 mx-auto drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]" />,
+      content: (
+        <div className="space-y-4 px-1">
+          <div className="bg-black/40 border border-primary/20 p-5 rounded-xl space-y-5 text-left relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2" />
+            
+            <div className="flex gap-4 items-center">
+              <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">1</div>
+              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white block mb-0.5">{t('wm5Step1')}</strong> {t('wm5Step1D')}</p>
+            </div>
+            <div className="flex gap-4 items-center">
+              <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">2</div>
+              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white block mb-0.5">{t('wm5Step2')}</strong> {t('wm5Step2D')}</p>
+            </div>
+            <div className="flex gap-4 items-center">
+              <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 text-primary font-black flex items-center justify-center shrink-0">3</div>
+              <p className="text-[13px] text-gray-300 font-medium leading-snug"><strong className="text-white block mb-0.5">{t('wm5Step3')}</strong> {t('wm5Step3D')}</p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  const nextSlide = () => {
+    if (isTransitioning) return;
+    triggerHaptic();
+    setIsTransitioning(true);
+    setTimeout(() => setIsTransitioning(false), 300);
+
+    if (currentSlide < slides.length - 1) {
+      setCurrentSlide(prev => prev + 1);
+    } else {
+      onComplete();
+    }
+  };
+
+  const slide = slides[currentSlide];
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }} 
+      animate={{ opacity: 1, scale: 1 }} 
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="glass-panel flex flex-col h-full max-h-[95vh] overflow-hidden p-0 border-primary/30 relative"
+    >
+      
+      {/* Progress Indicators */}
+      <div className="flex gap-2 p-6 pb-2 z-20 mt-4">
+        {slides.map((s, i) => (
+          <div key={s.id} className="h-1 flex-1 rounded-full bg-gray-800 overflow-hidden relative">
+            <motion.div 
+              className="absolute inset-y-0 left-0 bg-primary shadow-[0_0_8px_rgba(0,255,204,0.8)]"
+              initial={{ width: i < currentSlide ? "100%" : "0%" }}
+              animate={{ width: i <= currentSlide ? "100%" : "0%" }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="flex-1 relative overflow-hidden flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="w-full h-full p-6 flex flex-col justify-center text-center overflow-y-auto"
+          >
+            {slide.icon}
+            <h1 className="text-2xl font-black text-white uppercase tracking-widest mb-1 drop-shadow-md">{slide.title}</h1>
+            <h2 className="text-xs font-bold text-primary uppercase tracking-widest mb-8 opacity-80">{slide.subtitle}</h2>
+            
+            <div className="w-full max-w-sm mx-auto">
+              {slide.content}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="p-6 pt-4 z-20 border-t border-gray-800/50 bg-black/40 backdrop-blur-md">
+        <button 
+          onClick={nextSlide} 
+          className="premium-btn w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 uppercase tracking-widest text-sm"
+        >
+          {currentSlide === slides.length - 1 ? t('btnStart') : t('btnNext')}
+          <ChevronRight size={18} />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, ShieldCheck, CheckSquare, QrCode, BookOpen, AlertTriangle, Star } from 'lucide-react';
+import { getTranslation, Language } from '../i18n';
+
+const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname.includes('localhost') ? 'http://localhost:8000/api' : 'https://boostertea-os-backend.onrender.com/api');
+
+export default function B2BPortal({ onClose, lang }: { onClose: () => void, lang: Language }) {
+  const [activeTab, setActiveTab] = useState<'onboarding' | 'haccp' | 'scanner' | 'menu' | 'operations'>('onboarding');
+  const [certified, setCertified] = useState(false);
+  
+  const triggerHaptic = () => {
+    if ((window as any).Telegram?.WebApp?.HapticFeedback?.impactOccurred) {
+      (window as any).Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
+  };
+
+  const handleCertify = async () => {
+    triggerHaptic();
+    try {
+      const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
+      const tgId = initData?.user?.id || 123456789;
+      
+      const res = await fetch(`${API_URL}/b2b/certify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegram_id: tgId,
+          point_id: 'test-point-1',
+          score: 100,
+          passed: true
+        })
+      });
+      if (res.ok) setCertified(true);
+    } catch (e) {
+      console.error(e);
+      setCertified(true); // mock success
+    }
+  };
+
+  const handleHACCP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    triggerHaptic();
+    try {
+      const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
+      const tgId = initData?.user?.id || 123456789;
+      await fetch(`${API_URL}/b2b/haccp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegram_id: tgId,
+          point_id: 'test-point-1',
+          shift_type: 'OPENING',
+          fridge_temp_ok: true,
+          pumps_washed: true,
+          expiry_checked: true,
+          notes: ''
+        })
+      });
+      alert('HACCP Р»РѕРі Р·Р±РµСЂРµР¶РµРЅРѕ!');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleScan = async () => {
+    triggerHaptic();
+    const clientId = prompt("Р’РІРµРґС–С‚СЊ ID РєР»С–С”РЅС‚Р° (mock СЃРєР°РЅРµСЂР°):");
+    if (!clientId) return;
+    
+    try {
+      const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
+      const tgId = initData?.user?.id || 123456789;
+      const res = await fetch(`${API_URL}/b2b/scan_qr`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          barista_id: tgId,
+          client_id: parseInt(clientId),
+          point_id: 'test-point-1'
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(`РЈСЃРїС–С…! РљР»С–С”РЅС‚: ${data.client_name}, Р”РµРЅСЊ С‡РµР»РµРЅРґР¶Сѓ: ${data.challenge_day}`);
+      } else {
+        alert("РџРѕРјРёР»РєР°: РєР»С–С”РЅС‚Р° РЅРµ Р·РЅР°Р№РґРµРЅРѕ.");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleStatusUpdate = async (status: string) => {
+    triggerHaptic();
+    try {
+      const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
+      const tgId = initData?.user?.id || 123456789;
+      const res = await fetch(`${API_URL}/b2b/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegram_id: tgId,
+          point_id: 'test-point-1', // Mock point ID
+          status: status
+        })
+      });
+      if (res.ok) {
+        alert(`РЎС‚Р°С‚СѓСЃ СѓСЃРїС–С€РЅРѕ Р·РјС–РЅРµРЅРѕ РЅР° ${status}`);
+      } else {
+        alert("РџРѕРјРёР»РєР° Р·РјС–РЅРё СЃС‚Р°С‚СѓСЃСѓ (РЅРµРјР°С” РїСЂР°РІ)");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("РњРµСЂРµР¶РµРІР° РїРѕРјРёР»РєР°");
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="absolute inset-0 z-[100] bg-black flex flex-col p-4 overflow-y-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-primary flex items-center gap-2"><ShieldCheck /> B2B Portal</h2>
+        <button onClick={onClose} className="p-2 bg-gray-900 rounded-full text-gray-400 hover:text-white transition-colors"><X size={20} /></button>
+      </div>
+
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        <button onClick={() => setActiveTab('onboarding')} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'onboarding' ? 'bg-primary text-black' : 'bg-gray-800 text-gray-400'}`}>РЎРµСЂС‚РёС„С–РєР°С†С–СЏ</button>
+        <button onClick={() => { if(certified) setActiveTab('haccp'); }} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'haccp' ? 'bg-primary text-black' : 'bg-gray-800 text-gray-400'} ${!certified && 'opacity-50'}`}>HACCP</button>
+        <button onClick={() => { if(certified) setActiveTab('scanner'); }} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'scanner' ? 'bg-primary text-black' : 'bg-gray-800 text-gray-400'} ${!certified && 'opacity-50'}`}>O2O РЎРєР°РЅРµСЂ</button>
+        <button onClick={() => { if(certified) setActiveTab('menu'); }} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'menu' ? 'bg-primary text-black' : 'bg-gray-800 text-gray-400'} ${!certified && 'opacity-50'}`}>Р”РёРЅР°РјС–С‡РЅРµ РњРµРЅСЋ</button>
+        <button onClick={() => { if(certified) setActiveTab('operations'); }} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'operations' ? 'bg-primary text-black' : 'bg-gray-800 text-gray-400'} ${!certified && 'opacity-50'}`}>РЈРїСЂР°РІР»С–РЅРЅСЏ РўРѕС‡РєРѕСЋ</button>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {activeTab === 'onboarding' && (
+          <motion.div key="onboarding" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4">
+            <div className="glass-panel p-4">
+              <h3 className="font-bold text-lg mb-2">РќР°РІС‡Р°РЅРЅСЏ Р‘Р°СЂРёСЃС‚Рё</h3>
+              <div className="w-full h-48 bg-gray-900 rounded-lg flex items-center justify-center mb-4 border border-gray-800">
+                <span className="text-gray-500">Video Player (Mock)</span>
+              </div>
+              {!certified ? (
+                <button onClick={handleCertify} className="w-full premium-btn font-bold py-3 rounded-xl uppercase">РџСЂРѕР№С‚Рё РўРµСЃС‚ (РћС‚СЂРёРјР°С‚Рё РЎРµСЂС‚РёС„С–РєР°С‚)</button>
+              ) : (
+                <div className="w-full bg-green-900/30 border border-green-500/50 p-3 rounded-xl text-green-400 text-center font-bold">Р’Рё СЃРµСЂС‚РёС„С–РєРѕРІР°РЅС–! рџЋ‰</div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'haccp' && (
+          <motion.form key="haccp" onSubmit={handleHACCP} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4">
+            <div className="glass-panel p-4">
+              <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><CheckSquare className="text-primary"/> Р§РµРє-Р»РёСЃС‚ Р’С–РґРєСЂРёС‚С‚СЏ</h3>
+              <label className="flex items-center gap-3 mb-4 p-3 bg-black/40 rounded-lg border border-gray-700">
+                <input type="checkbox" required className="w-5 h-5 accent-primary" />
+                <span className="text-sm">РўРµРјРїРµСЂР°С‚СѓСЂР° РІ С…РѕР»РѕРґРёР»СЊРЅРёРєСѓ РІ РЅРѕСЂРјС– (2-6В°C)</span>
+              </label>
+              <label className="flex items-center gap-3 mb-4 p-3 bg-black/40 rounded-lg border border-gray-700">
+                <input type="checkbox" required className="w-5 h-5 accent-primary" />
+                <span className="text-sm">РџРѕРјРїРё-РґРѕР·Р°С‚РѕСЂРё РїСЂРѕРјРёС‚С– С‚Р° РїСЂРѕРґРµР·С–РЅС„С–РєРѕРІР°РЅС–</span>
+              </label>
+              <label className="flex items-center gap-3 mb-4 p-3 bg-black/40 rounded-lg border border-gray-700">
+                <input type="checkbox" required className="w-5 h-5 accent-primary" />
+                <span className="text-sm">РўРµСЂРјС–РЅРё РїСЂРёРґР°С‚РЅРѕСЃС‚С– РІС–РґРєСЂРёС‚РёС… Р±СѓСЃС‚С–РІ РїРµСЂРµРІС–СЂРµРЅС–</span>
+              </label>
+              <button type="submit" className="w-full premium-btn font-bold py-3 rounded-xl uppercase">Р—Р±РµСЂРµРіС‚Рё Р›РѕРі</button>
+            </div>
+          </motion.form>
+        )}
+
+        {activeTab === 'scanner' && (
+          <motion.div key="scanner" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4">
+            <div className="glass-panel p-6 flex flex-col items-center justify-center text-center">
+              <QrCode size={64} className="text-primary mb-4" />
+              <h3 className="font-bold text-lg mb-2">РЎРєР°РЅРµСЂ РљР»С–С”РЅС‚Р°</h3>
+              <p className="text-sm text-gray-400 mb-6">Р’С–РґСЃРєР°РЅСѓР№С‚Рµ QR-РєРѕРґ Р· РµРєСЂР°РЅСѓ РєР»С–С”РЅС‚Р°, С‰РѕР± Р·Р°СЂР°С…СѓРІР°С‚Рё Р№РѕРјСѓ РґРµРЅСЊ С‡РµР»РµРЅРґР¶Сѓ Р·Р° РїРѕРєСѓРїРєСѓ РІ РѕС„Р»Р°Р№РЅС–.</p>
+              <button onClick={handleScan} className="w-full premium-btn font-bold py-3 rounded-xl uppercase">РЎРёРјСѓР»СЋРІР°С‚Рё РЎРєР°РЅ</button>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'menu' && (
+          <motion.div key="menu" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4">
+            <div className="bg-white rounded-xl p-4 text-black">
+              <h3 className="font-bold text-xl mb-4 border-b pb-2">BoosterTea Menu</h3>
+              
+              <div className="mb-4">
+                <div className="font-bold text-lg">Focus Boost Cocktail</div>
+                <div className="text-sm text-gray-600 mb-1">Р•СЃРїСЂРµСЃРѕ, Р‘СѓСЃС‚ Р¤РѕРєСѓСЃ, Р’С–РІСЃСЏРЅРµ РјРѕР»РѕРєРѕ.</div>
+                <div className="text-xs font-bold text-red-600 bg-red-100 p-1 inline-block rounded"><AlertTriangle size={12} className="inline mr-1" /> РђР»РµСЂРіРµРЅРё: Р“Р›Р®РўР•Рќ (Р’Р†Р’РЎРЇРќР• РњРћР›РћРљРћ)</div>
+              </div>
+
+              <div className="mb-4">
+                <div className="font-bold text-lg">Relax Matcha</div>
+                <div className="text-sm text-gray-600 mb-1">РњР°С‚С‡Р°, Р‘СѓСЃС‚ Р РµР»Р°РєСЃ (Р“РђРњРљ), РњРёРіРґР°Р»СЊРЅРµ РјРѕР»РѕРєРѕ.</div>
+                <div className="text-xs font-bold text-red-600 bg-red-100 p-1 inline-block rounded"><AlertTriangle size={12} className="inline mr-1" /> РђР»РµСЂРіРµРЅРё: Р“РћР Р†РҐР (РњРР“Р”РђР›Р¬)</div>
+              </div>
+
+              <div className="text-xs text-gray-400 mt-6 pt-4 border-t text-center">Р—РіРµРЅРµСЂРѕРІР°РЅРѕ BoosterTea Liquid OS РІС–РґРїРѕРІС–РґРЅРѕ РґРѕ Р—Р°РєРѕРЅСѓ в„– 2639-VIII</div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'operations' && (
+          <motion.div key="operations" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4">
+            <div className="glass-panel p-4">
+              <h3 className="font-bold text-lg mb-2 text-white">РћРїРµСЂР°С†С–Р№РЅРёР№ РЎС‚Р°С‚СѓСЃ</h3>
+              <p className="text-xs text-gray-400 mb-6">РћРЅРѕРІС–С‚СЊ СЃС‚Р°С‚СѓСЃ РІР°С€РѕС— С‚РѕС‡РєРё. Р—РјС–РЅРё РјРёС‚С‚С”РІРѕ СЃРёРЅС…СЂРѕРЅС–Р·СѓСЋС‚СЊСЃСЏ РЅР° РєР°СЂС‚Р°С… РєР»С–С”РЅС‚С–РІ (SSOT).</p>
+              
+              <div className="bg-gray-900/50 p-4 rounded-xl border border-gray-700 mb-6 flex flex-col items-center">
+                <span className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">РџРѕС‚РѕС‡РЅРёР№ EMA Р РµР№С‚РёРЅРі</span>
+                <div className="text-3xl font-black text-orange-400 mb-2 drop-shadow-[0_0_10px_rgba(251,146,60,0.5)]">
+                  4.2 <Star size={20} className="inline mb-1" fill="currentColor"/>
+                </div>
+                <div className="w-full bg-red-900/30 border border-red-500/50 p-3 rounded-lg flex items-start gap-3">
+                  <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
+                  <p className="text-[10px] text-red-200">
+                    <strong className="block mb-1">РЈРІР°РіР°! РљСЂРёС‚РёС‡РЅРµ РїР°РґС–РЅРЅСЏ EMA-СЂРµР№С‚РёРЅРіСѓ.</strong>
+                    РћСЃС‚Р°РЅРЅС– РІС–РґРіСѓРєРё СЃРёРіРЅР°Р»С–Р·СѓСЋС‚СЊ РїСЂРѕ РїСЂРѕР±Р»РµРјСѓ "Р”РѕРІРіРѕ С‡РµРєР°РІ". РЇРєС‰Рѕ СЂРµР№С‚РёРЅРі РІРїР°РґРµ РЅРёР¶С‡Рµ 4.0, РІР°С€ Р·Р°РєР»Р°Рґ Р±СѓРґРµ Р·РЅРёР¶РµРЅРѕ РІ СЂР°РЅР¶СѓРІР°РЅРЅС–.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <button onClick={() => handleStatusUpdate('OPEN')} className="w-full py-3 bg-green-900/30 text-green-400 border border-green-500/50 rounded-xl font-bold uppercase tracking-wider hover:bg-green-900/50 transition-colors">
+                  Р’С–РґС‡РёРЅРµРЅРѕ
+                </button>
+                <button onClick={() => handleStatusUpdate('TEMPORARY_CLOSED')} className="w-full py-3 bg-orange-900/30 text-orange-400 border border-orange-500/50 rounded-xl font-bold uppercase tracking-wider hover:bg-orange-900/50 transition-colors">
+                  РўРёРјС‡Р°СЃРѕРІРѕ Р—Р°С‡РёРЅРµРЅРѕ (Р¤РѕСЂСЃ-РјР°Р¶РѕСЂ)
+                </button>
+                <button onClick={() => handleStatusUpdate('CLOSED')} className="w-full py-3 bg-red-900/30 text-red-400 border border-red-500/50 rounded-xl font-bold uppercase tracking-wider hover:bg-red-900/50 transition-colors">
+                  Р—Р°С‡РёРЅРµРЅРѕ (РљС–РЅРµС†СЊ Р·РјС–РЅРё)
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
