@@ -119,6 +119,23 @@ class BoosterPoint(Base):
     total_reviews = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    cocktails = relationship("Cocktail", back_populates="point")
+
+class Cocktail(Base):
+    __tablename__ = "cocktails"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    point_id = Column(String(36), ForeignKey("booster_points.id"))
+    name = Column(String(100), nullable=False)
+    base_state = Column(String(50), nullable=False) # "Energy", "Focus", "Relax"
+    price = Column(Float, nullable=False, default=0.0)
+    taste_description = Column(String(255), nullable=True)
+    image_url = Column(String(255), nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    point = relationship("BoosterPoint", back_populates="cocktails")
+
 class BaristaCertificate(Base):
     __tablename__ = "barista_certificates"
 

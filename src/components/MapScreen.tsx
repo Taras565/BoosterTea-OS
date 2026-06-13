@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { X, MapPin, Navigation } from 'lucide-react';
+import { X, MapPin, Navigation, ArrowRight } from 'lucide-react';
 import { openExternalLink } from '../utils';
+import VenueMenuScreen from './VenueMenuScreen';
 
 // Fix Leaflet icons issue in Vite
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
@@ -34,6 +35,7 @@ interface Location {
   lat: number;
   lon: number;
   status?: string;
+  available_states?: string[];
 }
 
 // Distance calculation using Haversine formula
@@ -59,7 +61,7 @@ const ChangeView = ({ coords }: { coords: [number, number][] }) => {
   return null;
 };
 
-export default function MapScreen({ onClose }: { onClose: () => void }) {
+export default function MapScreen({ onClose, onActivatePractice }: { onClose: () => void, onActivatePractice?: (cocktail: any) => void }) {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null);
@@ -72,6 +74,13 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
   const [routeMode, setRouteMode] = useState<'driving' | 'foot'>('driving');
   const [routeData, setRouteData] = useState<{coords: [number, number][], duration: number, distance: number} | null>(null);
   const [routingLoading, setRoutingLoading] = useState(false);
+  const [activeStateFilter, setActiveStateFilter] = useState<string | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<Location | null>(null);
+  const [showVenueMenu, setShowVenueMenu] = useState(false);
+
+  const filteredLocations = activeStateFilter 
+    ? locations.filter(loc => loc.available_states?.includes(activeStateFilter))
+    : locations;
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -204,6 +213,13 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
+      <div className="flex gap-2 p-3 bg-black overflow-x-auto scrollbar-hide border-b border-gray-800 z-[60] relative">
+        <button onClick={() => setActiveStateFilter(null)} className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${activeStateFilter === null ? 'bg-primary/20 text-primary border-primary' : 'bg-gray-900 text-gray-400 border-gray-800'}`}>Всі заклади</button>
+        <button onClick={() => setActiveStateFilter('Energy')} className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${activeStateFilter === 'Energy' ? 'bg-red-500/20 text-red-500 border-red-500' : 'bg-gray-900 text-gray-400 border-gray-800'}`}>🔥 Енергія</button>
+        <button onClick={() => setActiveStateFilter('Focus')} className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${activeStateFilter === 'Focus' ? 'bg-blue-500/20 text-blue-400 border-blue-500' : 'bg-gray-900 text-gray-400 border-gray-800'}`}>🧠 Фокус</button>
+        <button onClick={() => setActiveStateFilter('Relax')} className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${activeStateFilter === 'Relax' ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-gray-900 text-gray-400 border-gray-800'}`}>🧘 Релакс</button>
+      </div>
+
       <div className="flex-1 relative">
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-[55]">
@@ -255,28 +271,54 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
                   <ChangeView coords={routeData.coords} />
                 </>
               )}
-              {locations.map(loc => {
+              {filteredLocations.map(loc => {
                 const isClosed = loc.status === "CLOSED" || loc.status === "TEMPORARY_CLOSED";
                 return (
-                  <Marker key={loc.id} position={[loc.lat, loc.lon]} icon={customBpIcon} opacity={isClosed ? 0.5 : 1}>
-                    <Popup className="booster-popup">
-                      <div className="font-bold text-sm text-black mb-1 flex items-center justify-between">
-                        {loc.name}
-                        {isClosed && <span className="text-[9px] bg-red-100 text-red-600 px-1 py-0.5 rounded uppercase ml-2">Зачинено</span>}
-                      </div>
-                      <div className="text-xs text-gray-600">{loc.address}</div>
-                    </Popup>
+                  <Marker 
+                    key={loc.id} 
+                    position={[loc.lat, loc.lon]} 
+                    icon={customBpIcon} 
+                    opacity={isClosed ? 0.5 : 1}
+                    eventHandlers={{
+                      click: () => {
+                        triggerHaptic();
+                        setSelectedPoint(loc);
+                      }
+                    }}
+                  >
                   </Marker>
                 );
               })}
             </MapContainer>
+            
+            {/* Bottom Sheet for Selected Point */}
+            {selectedPoint && !showVenueMenu && (
+              <motion.div initial={{ y: 200 }} animate={{ y: 0 }} className="absolute bottom-0 left-0 right-0 bg-gray-900 rounded-t-3xl border-t border-primary/30 z-[1000] p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+                <button onClick={() => setSelectedPoint(null)} className="absolute top-4 right-4 text-gray-500 hover:text-white"><X size={20}/></button>
+                
+                <h3 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
+                  {selectedPoint.name}
+                  {(selectedPoint.status === "CLOSED" || selectedPoint.status === "TEMPORARY_CLOSED") && (
+                    <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase">Зачинено</span>
+                  )}
+                </h3>
+                <p className="text-sm text-gray-400 mb-6">{selectedPoint.address}</p>
+                
+                <button 
+                  onClick={() => { triggerHaptic(); setShowVenueMenu(true); }}
+                  className="w-full premium-btn font-bold py-4 rounded-xl uppercase tracking-wider flex items-center justify-center gap-2"
+                >
+                  Переглянути меню станів <ArrowRight size={18} />
+                </button>
+              </motion.div>
+            )}
           </>
         )}
       </div>
       
-      {!loading && !isOutOfRange && locations.length > 0 && (
+      {!loading && !isOutOfRange && filteredLocations.length > 0 && !selectedPoint && (
         <div className="p-4 bg-black border-t border-gray-800 z-[60] flex flex-col gap-3">
-          <p className="text-xs text-gray-400 text-center mb-1">Знайдено партнерських закладів: {locations.length}</p>
+          <p className="text-xs text-gray-400 text-center mb-1">Знайдено партнерських закладів: {filteredLocations.length}</p>
           
           {!routeData ? (
             <button 
@@ -381,6 +423,18 @@ export default function MapScreen({ onClose }: { onClose: () => void }) {
             </div>
           </div>
         </div>
+      )}
+
+      {showVenueMenu && selectedPoint && (
+        <VenueMenuScreen 
+          pointId={selectedPoint.id} 
+          pointName={selectedPoint.name} 
+          pointAddress={selectedPoint.address}
+          onClose={() => setShowVenueMenu(false)}
+          onActivatePractice={(cocktail) => {
+            if(onActivatePractice) onActivatePractice(cocktail);
+          }}
+        />
       )}
     </motion.div>
   );

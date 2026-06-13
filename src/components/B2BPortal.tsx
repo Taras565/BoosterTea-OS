@@ -8,6 +8,67 @@ const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname.includ
 export default function B2BPortal({ onClose, lang }: { onClose: () => void, lang: Language }) {
   const [activeTab, setActiveTab] = useState<'onboarding' | 'haccp' | 'scanner' | 'menu' | 'operations'>('onboarding');
   const [certified, setCertified] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [cocktailForm, setCocktailForm] = useState({
+    name: '',
+    base_state: 'Energy',
+    price: '',
+    taste_description: ''
+  });
+  
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleAddCocktail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!imageFile) {
+      alert("Будь ласка, зробіть або завантажте фото.");
+      return;
+    }
+    
+    setIsUploading(true);
+    triggerHaptic();
+    
+    try {
+      const initData = (window as any).Telegram?.WebApp?.initDataUnsafe;
+      const tgId = initData?.user?.id || 123456789;
+      
+      const formData = new FormData();
+      formData.append('name', cocktailForm.name);
+      formData.append('base_state', cocktailForm.base_state);
+      formData.append('price', cocktailForm.price);
+      formData.append('taste_description', cocktailForm.taste_description);
+      formData.append('point_id', 'test-point-1'); // Mock point for MVP
+      formData.append('telegram_id', tgId.toString());
+      formData.append('image', imageFile);
+
+      const res = await fetch(`${API_URL}/b2b/cocktails`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (res.ok) {
+        alert("Коктейль успішно додано до меню закладу!");
+        setCocktailForm({name: '', base_state: 'Energy', price: '', taste_description: ''});
+        setImageFile(null);
+        setImagePreview(null);
+      } else {
+        alert("Помилка публікації. Перевірте права доступу.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Мережева помилка при завантаженні.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
   
   const triggerHaptic = () => {
     if ((window as any).Telegram?.WebApp?.HapticFeedback?.impactOccurred) {
@@ -182,23 +243,45 @@ export default function B2BPortal({ onClose, lang }: { onClose: () => void, lang
 
         {activeTab === 'menu' && (
           <motion.div key="menu" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4">
-            <div className="bg-white rounded-xl p-4 text-black">
-              <h3 className="font-bold text-xl mb-4 border-b pb-2">BoosterTea Menu</h3>
+            <form onSubmit={handleAddCocktail} className="glass-panel p-4 flex flex-col gap-4">
+              <h3 className="font-bold text-lg text-primary mb-2">Додати Авторський Коктейль</h3>
               
-              <div className="mb-4">
-                <div className="font-bold text-lg">Focus Boost Cocktail</div>
-                <div className="text-sm text-gray-600 mb-1">Еспресо, Буст Фокус, Вівсяне молоко.</div>
-                <div className="text-xs font-bold text-red-600 bg-red-100 p-1 inline-block rounded"><AlertTriangle size={12} className="inline mr-1" /> Алергени: ГЛЮТЕН (ВІВСЯНЕ МОЛОКО)</div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Назва коктейлю</label>
+                <input type="text" required value={cocktailForm.name} onChange={e => setCocktailForm({...cocktailForm, name: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white text-sm focus:border-primary focus:outline-none" placeholder='напр. "Магічний Пуер"' />
               </div>
 
-              <div className="mb-4">
-                <div className="font-bold text-lg">Relax Matcha</div>
-                <div className="text-sm text-gray-600 mb-1">Матча, Буст Релакс (ГАМК), Мигдальне молоко.</div>
-                <div className="text-xs font-bold text-red-600 bg-red-100 p-1 inline-block rounded"><AlertTriangle size={12} className="inline mr-1" /> Алергени: ГОРІХИ (МИГДАЛЬ)</div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Базовий Стан (BoosterTea)</label>
+                <select value={cocktailForm.base_state} onChange={e => setCocktailForm({...cocktailForm, base_state: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white text-sm focus:border-primary focus:outline-none">
+                  <option value="Energy">🔥 Енергія</option>
+                  <option value="Focus">🧠 Фокус</option>
+                  <option value="Relax">🧘 Релакс</option>
+                </select>
               </div>
 
-              <div className="text-xs text-gray-400 mt-6 pt-4 border-t text-center">Згенеровано BoosterTea Liquid OS відповідно до Закону № 2639-VIII</div>
-            </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Опис смаку</label>
+                <textarea required value={cocktailForm.taste_description} onChange={e => setCocktailForm({...cocktailForm, taste_description: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white text-sm focus:border-primary focus:outline-none h-20" placeholder="Опишіть смак та інгредієнти..."></textarea>
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Ціна (₴)</label>
+                <input type="number" required value={cocktailForm.price} onChange={e => setCocktailForm({...cocktailForm, price: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white text-sm focus:border-primary focus:outline-none" placeholder="120" />
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Фото (Прямо з камери)</label>
+                <div className="w-full border-2 border-dashed border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center bg-gray-900/50">
+                  <input type="file" accept="image/*" capture="environment" onChange={handleImageChange} className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30" />
+                  {imagePreview && <img src={imagePreview} alt="Preview" className="mt-4 w-32 h-32 object-cover rounded-lg border border-primary/50" />}
+                </div>
+              </div>
+
+              <button type="submit" disabled={isUploading} className="w-full premium-btn font-bold py-3 rounded-xl uppercase tracking-wider mt-2 disabled:opacity-50">
+                {isUploading ? 'Завантаження...' : 'Опублікувати'}
+              </button>
+            </form>
           </motion.div>
         )}
 
